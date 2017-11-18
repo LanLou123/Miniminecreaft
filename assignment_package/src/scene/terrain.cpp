@@ -45,8 +45,14 @@ void Terrain::CreateTestScene()
         }
     }
     // Add "walls" for collision testing
+    for(int x= 15; x<23 ; x++)
+    {
+        for(int z = 45 ; z< 67 ; z++)
+        {m_blocks[x][129][z] = STONE;}
+    }
     for(int x = 0; x < 64; ++x)
     {
+
         m_blocks[x][129][0] = GRASS;
         m_blocks[x][130][0] = GRASS;
         m_blocks[x][129][63] = GRASS;
@@ -55,5 +61,6 @@ void Terrain::CreateTestScene()
     for(int y = 129; y < 140; ++y)
     {
         m_blocks[32][y][32] = GRASS;
+        m_blocks[25][y][14] = DIRT;
     }
 }

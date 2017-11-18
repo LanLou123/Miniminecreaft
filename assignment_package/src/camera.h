@@ -39,4 +39,6 @@ public:
     void TranslateAlongLook(float amt);
     void TranslateAlongRight(float amt);
     void TranslateAlongUp(float amt);
+    void TranslateAlongWorldY(float amt);
+    void Translate_X_Y(float amt);
 };
