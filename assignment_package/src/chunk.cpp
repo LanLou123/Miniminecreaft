@@ -3,6 +3,7 @@
 static const GLfloat dirtColor[4] = {0.475f, 0.333f, 0.227f, 1.0f};
 static const GLfloat grassColor[4] = {0.373f, 0.624f, 0.208f, 1.0f};
 static const GLfloat stoneColor[4] = {0.5f, 0.5f, 0.5f, 1.0f};
+static const GLfloat lavaColor[4] = {0.81f, 0.06f, 0.14f, 1.0f};
 
 static const GLfloat cubeRadius = 1.0f;
 
@@ -91,6 +92,15 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type)
             for (unsigned j = 0; j!=4; ++j)
             {
                 col.push_back(stoneColor[j]);
+            }
+        }
+        break;
+    case LAVA:
+        for (unsigned i = 0; i!=4; ++i)
+        {
+            for (unsigned j = 0; j!=4; ++j)
+            {
+                col.push_back(lavaColor[j]);
             }
         }
         break;

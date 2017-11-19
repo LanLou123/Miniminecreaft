@@ -447,13 +447,10 @@ void MyGL::mousePressEvent(QMouseEvent *me)
         int y = cubeToOperate[1];
         int z = cubeToOperate[2];
         std::cout<<x<<" "<<y<< " "<<z<<" "<<std::endl;
-        //int64_t chunkX = Chunk::getChunkOrigin(x);
 
-        //int64_t chunkZ = Chunk::getChunkOrigin(z);
-
-        //Chunk* chunk = mp_terrain->getChunkAt(chunkX, chunkZ);
-        //if(chunk != nullptr)
-        //{
+        Chunk* chunk = mp_terrain->getChunkAt(x, z);
+        if(chunk != nullptr)
+        {
             // if  exist a chunk, get the blockType at this position(world)
             BlockType bt = mp_terrain->getBlockAt(x,y,z);
 
@@ -470,7 +467,7 @@ void MyGL::mousePressEvent(QMouseEvent *me)
                 mp_terrain->setBlockAt(x,y,z,EMPTY);
                 update();
             }
-        //}
+        }
     }
     else if(me->button() == Qt::RightButton)
     {
@@ -492,13 +489,10 @@ void MyGL::mousePressEvent(QMouseEvent *me)
             // if now Empty, then set it into Empty
             if(bt == EMPTY)
             {
-
-//                for (std::pair<int64_t, Chunk*> pair : mp_terrain->ChunkTable)
-//                {
-//                    pair.second->destroy();
-//                    pair.second->create();
-//                }
+                chunk->destroy();
                 mp_terrain->setBlockAt(x,y,z,LAVA);
+                chunk->create();
+
                 update();
             }
         }
