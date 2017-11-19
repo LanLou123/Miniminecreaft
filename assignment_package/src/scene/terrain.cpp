@@ -150,7 +150,7 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
 
     for(int x = 0; x < 160; ++x)
     {
-        std::cout<<x<<std::endl;
+       // std::cout<<x<<std::endl;
         for(int z = 0; z < 160; ++z)
         {
             float scale = 48.f;
@@ -187,7 +187,7 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
     {
         pair.second->create();
     }
-    std::cout<<"setup";
+   // std::cout<<"setup";
 }
 
 void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)

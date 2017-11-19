@@ -363,5 +363,5 @@ void Chunk::create()
     context->glBindBuffer(GL_ARRAY_BUFFER, bufCol);
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * col.size(),
                              reinterpret_cast<void*>(col.data()), GL_STATIC_DRAW);
->>>>>>> BoWenYang-Chunk
+
 }
