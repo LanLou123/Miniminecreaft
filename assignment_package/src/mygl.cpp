@@ -372,5 +372,5 @@ void MyGL::mouseMoveEvent(QMouseEvent *e)
 void MyGL::wheelEvent(QWheelEvent *e)
 {}
 
-void MyGL::mousePressEvent(QMouseEvent *e)
+//void MyGL::mousePressEvent(QMouseEvent *e)
 //{for add and delete blocks}
