@@ -21,6 +21,7 @@ int64_t getChunkOrigin(int64_t val)
     int64_t valChunk = 0;
     if (val < 0)
     {
+        ++val;
         valChunk = -val / 16 + 1;
         valChunk *= -16;
     }
@@ -77,7 +78,7 @@ void Terrain::addChunkAt(OpenGLContext *parent, int x, int z)
 
 void Terrain::CreateTestScene()
 {
-    for (unsigned x = 0; x!=32; ++x)
+    for (unsigned x = -16; x!=16; ++x)
     {
         for (unsigned z = 0; z!=16; ++z)
         {
@@ -87,8 +88,8 @@ void Terrain::CreateTestScene()
             }
         }
     }
-    this->setBlockAt(15, 128, 0, STONE);
-    this->setBlockAt(15, 256, 0, GRASS);
+    this->setBlockAt(-1, 128, 0, STONE);
+    this->setBlockAt(0, 128, 0, GRASS);
     for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
     {
         pair.second->create();

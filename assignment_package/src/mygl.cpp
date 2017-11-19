@@ -85,8 +85,8 @@ void MyGL::initializeGL()
 //    vao.bind();
     glBindVertexArray(vao);
 
+    mp_terrain->addChunkAt(this, -16, 0);
     mp_terrain->addChunkAt(this, 0, 0);
-    mp_terrain->addChunkAt(this, 16, 0);
     mp_terrain->CreateTestScene();
 }
 
