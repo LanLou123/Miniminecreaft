@@ -6,6 +6,7 @@ static const GLfloat stoneColor[4] = {0.5f, 0.5f, 0.5f, 1.0f};
 static const GLfloat lavaColor[4] = {0.81f, 0.06f, 0.14f, 1.0f};
 
 static const GLfloat cubeRadius = 1.0f;
+static const GLfloat cubeHR = 0.5f;
 
 Chunk* Chunk::getLeftAdjacent()
 {
@@ -121,10 +122,10 @@ void Chunk::fillLeftFace(size_t x, size_t y, size_t z, BlockType type)
 {
     glm::vec4 square[4] =
     {
-        glm::vec4(x, y, z, 1.0f),
-        glm::vec4(x, y, z + cubeRadius, 1.0f),
-        glm::vec4(x, y + cubeRadius, z + cubeRadius, 1.0f),
-        glm::vec4(x, y + cubeRadius, z, 1.0f)
+        glm::vec4(x - cubeHR, y - cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x - cubeHR, y - cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x - cubeHR, y + cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
@@ -142,10 +143,10 @@ void Chunk::fillRightFace(size_t x, size_t y, size_t z, BlockType type)
 {
     glm::vec4 square[4] =
     {
-        glm::vec4(x + cubeRadius, y, z, 1.0f),
-        glm::vec4(x + cubeRadius, y + cubeRadius, z, 1.0f),
-        glm::vec4(x + cubeRadius, y + cubeRadius, z + cubeRadius, 1.0f),
-        glm::vec4(x + cubeRadius, y, z + cubeRadius, 1.0f)
+        glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y - cubeHR, z + cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
@@ -163,10 +164,10 @@ void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
 {
     glm::vec4 square[4] =
     {
-        glm::vec4(x, y + cubeRadius, z, 1.0f),
-        glm::vec4(x, y + cubeRadius, z + cubeRadius, 1.0f),
-        glm::vec4(x + cubeRadius, y + cubeRadius, z + cubeRadius, 1.0f),
-        glm::vec4(x + cubeRadius, y + cubeRadius, z, 1.0f)
+        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x - cubeHR, y + cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
@@ -184,10 +185,10 @@ void Chunk::fillDownFace(size_t x, size_t y, size_t z, BlockType type)
 {
     glm::vec4 square[4] =
     {
-        glm::vec4(x, y, z, 1.0f),
-        glm::vec4(x + cubeRadius, y, z, 1.0f),
-        glm::vec4(x + cubeRadius, y, z + cubeRadius, 1.0f),
-        glm::vec4(x, y, z + cubeRadius, 1.0f)
+        glm::vec4(x - cubeHR, y - cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y - cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x - cubeHR, y - cubeHR, z + cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
@@ -205,10 +206,10 @@ void Chunk::fillFrontFace(size_t x, size_t y, size_t z, BlockType type)
 {
     glm::vec4 square[4] =
     {
-        glm::vec4(x, y, z + cubeRadius, 1.0f),
-        glm::vec4(x + cubeRadius, y, z + cubeRadius, 1.0f),
-        glm::vec4(x + cubeRadius, y + cubeRadius, z + cubeRadius, 1.0f),
-        glm::vec4(x, y + cubeRadius, z + cubeRadius, 1.0f)
+        glm::vec4(x - cubeHR, y - cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y - cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x - cubeHR, y + cubeHR, z + cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
@@ -226,10 +227,10 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
 {
     glm::vec4 square[4] =
     {
-        glm::vec4(x, y, z, 1.0f),
-        glm::vec4(x, y + cubeRadius, z, 1.0f),
-        glm::vec4(x + cubeRadius, y + cubeRadius, z, 1.0f),
-        glm::vec4(x + cubeRadius, y, z, 1.0f)
+        glm::vec4(x - cubeHR, y - cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
