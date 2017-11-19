@@ -85,6 +85,8 @@ void MyGL::initializeGL()
 //    vao.bind();
     glBindVertexArray(vao);
 
+    mp_terrain->addChunkAt(this, 0, 0);
+    mp_terrain->addChunkAt(this, 16, 0);
     mp_terrain->CreateTestScene();
 }
 
@@ -133,7 +135,7 @@ void MyGL::paintGL()
 
 void MyGL::GLDrawScene()
 {
-    for(int x = 0; x < mp_terrain->dimensions.x; ++x)
+    /*for(int x = 0; x < mp_terrain->dimensions.x; ++x)
     {
         for(int y = 0; y < mp_terrain->dimensions.y; ++y)
         {
@@ -159,6 +161,11 @@ void MyGL::GLDrawScene()
                 }
             }
         }
+    }*/
+    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progLambert->draw(*pair.second);
     }
 }
 
