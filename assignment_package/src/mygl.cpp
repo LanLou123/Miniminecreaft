@@ -88,7 +88,11 @@ void MyGL::initializeGL()
     glBindVertexArray(vao);
 
     //mp_terrain->CreateTestScene();
-    mp_terrain->GenerateTerrainAt(0,0);
+
+
+    //mp_terrain->CreateTestScene();
+    //mp_terrain->GenerateTerrainAt(0,0,this);
+    mp_terrain->GenerateFirstTerrain(this);
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -139,32 +143,43 @@ void MyGL::paintGL()
 
 void MyGL::GLDrawScene()
 {
-    for(int x = 0; x < mp_terrain->dimensions.x; ++x)
+//    for(int x = 0; x < mp_terrain->dimensions.x; ++x)
+//    {
+//        for(int y = 0; y < mp_terrain->dimensions.y; ++y)
+//        {
+//            for(int z = 0; z < mp_terrain->dimensions.z; ++z)
+//            {
+//                BlockType t;
+//                if((t = mp_terrain->m_blocks[x][y][z]) != EMPTY)
+//                {
+//                    switch(t)
+//                    {
+//                    case DIRT:
+//                        mp_progLambert->setGeometryColor(glm::vec4(121.f, 85.f, 58.f, 255.f) / 255.f);
+//                        break;
+//                    case GRASS:
+//                        mp_progLambert->setGeometryColor(glm::vec4(95.f, 159.f, 53.f, 255.f) / 255.f);
+//                        break;
+//                    case STONE:
+//                        mp_progLambert->setGeometryColor(glm::vec4(0.5f));
+//                        break;
+//                    }
+//                    mp_progLambert->setModelMatrix(glm::translate(glm::mat4(), glm::vec3(x, y, z)));
+//                    mp_progLambert->draw(*mp_geomCube);
+//                }
+//            }
+//        }
+//    }
+
+
+    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
+
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+
     {
-        for(int y = 0; y < mp_terrain->dimensions.y; ++y)
-        {
-            for(int z = 0; z < mp_terrain->dimensions.z; ++z)
-            {
-                BlockType t;
-                if((t = mp_terrain->m_blocks[x][y][z]) != EMPTY)
-                {
-                    switch(t)
-                    {
-                    case DIRT:
-                        mp_progLambert->setGeometryColor(glm::vec4(121.f, 85.f, 58.f, 255.f) / 255.f);
-                        break;
-                    case GRASS:
-                        mp_progLambert->setGeometryColor(glm::vec4(95.f, 159.f, 53.f, 255.f) / 255.f);
-                        break;
-                    case STONE:
-                        mp_progLambert->setGeometryColor(glm::vec4(0.5f));
-                        break;
-                    }
-                    mp_progLambert->setModelMatrix(glm::translate(glm::mat4(), glm::vec3(x, y, z)));
-                    mp_progLambert->draw(*mp_geomCube);
-                }
-            }
-        }
+
+        mp_progLambert->draw(*pair.second);
+
     }
 }
 
@@ -318,70 +333,273 @@ void MyGL::RayCubeIntersection(glm::vec3 cubeCenter, float &tNear, float &tFar)
     }
 }
 
-void MyGL::mousePressEvent(QMouseEvent *me)
+glm::ivec3 MyGL::CubeToOperate()
 {
-    if(me->button == Qt::LeftButton)
+    // determine the current location
+    // iterate the surrounding cubes
+
+    // Here we assume that all cubes center at integer coords
+
+    // first find the grid location
+    glm::vec3 gridLoc = glm::floor(mp_camera->eye);
+    std::cout<<mp_camera->eye[0]<<" "<<mp_camera->eye[1]<< " "<<mp_camera->eye[2]<<" "<<std::endl;
+    std::cout<<gridLoc[0]<<" "<<gridLoc[1]<< " "<<gridLoc[2]<<" "<<std::endl;
+    // according to the distance between this point and its floor, divide into two situations
+    float distanceX = mp_camera->eye[0] - gridLoc[0];
+    float distanceZ = mp_camera->eye[2] - gridLoc[2];
+    glm::vec3 cubeToRemove = glm::vec3(0.f);
+    if(distanceX > -1e-5 || distanceZ > -1e-5) // not standing in center of some cube, situation 1
     {
-        // determine the current location
-        // iterate the surrounding cubes
+        std::cout<<"case 1"<<std::endl;
+        float tNear = std::numeric_limits<float>::max();
+        //float tFar = std::numeric_limits<float>::max() * (-1.f);
+        cubeToRemove = glm::vec3(0.f);
 
-        // Here we assume that all cubes center at integer coords
-
-        // first find the grid location
-        glm::vec3 gridLoc = glm::floor(mp_camera->eye);
-        // according to the distance between this point and its floor, divide into two situations
-        float distanceX = mp_camera->eye[0] - gridLoc[0];
-        float distanceZ = mp_camera->eye[0] - gridLoc[1];
-        if(distanceX > -1e-5 || distanceZ > -1e-5) // not standing in center of some cube, situation 1
+        // iterate the surrounding blocks
+        for(int i = -1; i < 3; i++)
         {
-
-            float tNear = std::numeric_limits<float>::max();
-            float tFar = std::numeric_limits<float>::min();
-            glm::vec3 cubeToRomove = glm::vec3(0.f);
-
-            // iterate the surrounding blocks
-            for(int i = -1; i < 3; i++)
+            for(int j = -1; j < 3; j++)
             {
-                for(int j = -1; j < 3; j++)
+                for(int k = -2; k < 2; k++)
                 {
-                    for(int k = -2; k < 2; k++)
+                    // center blocks, ignore
+//                        if(i > -1 && i < 2
+//                                && j > -1 && j < 2
+//                                && k > -2 && k < 1)
+//                        {
+//                            continue;
+//                        }
+                    float tempNear = std::numeric_limits<float>::max() * (-1.f);
+                    float tempFar = std::numeric_limits<float>::max();
+                    glm::vec3 cubeCenter = gridLoc + glm::vec3(i * 1.f, k * 1.f, j * 1.f);
+                    RayCubeIntersection(cubeCenter, tempNear, tempFar);
+                    // if tNear > tFar, we miss the cube
+                    if(tempNear > tempFar)
                     {
-                        // center blocks, ignore
-                        if(i > -1 && i < 2
-                                && j > -1 && j < 2
-                                && k > -2 && k < 1)
-                        {
-                            continue;
-                        }
-                        float tempNear = std::numeric_limits<float>::min();
-                        float tempFar = std::numeric_limits<float>::max();
-                        glm::cubeCenter = gridLoc + glm::vec3(i * 1.f, j * 1.f, k * 1.f);
-                        RayCubeIntersection(cubeCenter, tempNear, tempFar);
-                        // if tNear > tFar, we miss the cube
-                        if(tNear > tFar)
-                        {
-                            continue;
-                        }
-                        // else we hit the box, record its center coords and tNear.
-                        if(tempNear < tNear)
-                        {
-                            tNear = tempNear;
-                            cubeToRemove = cubeCenter;
-                        }
+                        continue;
+                    }
+                    // else we hit the box, if its nearer than the current hit one, record its center coords and tNear.
+                    if(tempNear < tNear && tempNear > -1e-5)
+                    {
+                        tNear = tempNear;
+                        cubeToRemove = cubeCenter;
                     }
                 }
             }
         }
-        // else we are now standing on exactly the center of some cube
-        // check for the
-        else
-        {
-
-        }
-
     }
-    else if(me->button == Qt::RightButton)
+    // else we are now standing on exactly the center of some cube
+    // check for all surrounding cubes
+    else
+    {
+        std::cout<<"case 2"<<std::endl;
+        float tNear = std::numeric_limits<float>::max();
+        //float tFar = std::numeric_limits<float>::max() * (-1.f);
+        cubeToRemove = glm::vec3(0.f);
+
+        // iterate the surrounding blocks
+        for(int i = -1; i < 2; i++)
+        {
+            for(int j = -1; j < 2; j++)
+            {
+                for(int k = -2; k < 2; k++)
+                {
+                    // center blocks, ignore
+//                        if(i > -1 && i < 2
+//                                && j > -1 && j < 2
+//                                && k > -2 && k < 1)
+//                        {
+//                            continue;
+//                        }
+                    float tempNear = std::numeric_limits<float>::max() * (-1.f);
+                    float tempFar = std::numeric_limits<float>::max();
+                    glm::vec3 cubeCenter = gridLoc + glm::vec3(i * 1.f, k * 1.f, j * 1.f);
+                    RayCubeIntersection(cubeCenter, tempNear, tempFar);
+                    // if tNear > tFar, we miss the cube
+                    if(tempNear > tempFar)
+                    {
+                        continue;
+                    }
+                    // else we hit the box, if its nearer than the current hit one, record its center coords and tNear.
+                    if(tempNear < tNear && tempNear > -1e-5)
+                    {
+                        tNear = tempNear;
+                        cubeToRemove = cubeCenter;
+                    }
+                }
+            }
+        }
+    }
+    int x = (int)(cubeToRemove[0]);
+    int y = (int)(cubeToRemove[1]);
+    int z = (int)(cubeToRemove[2]);
+    return glm::ivec3(x,y,z);
+}
+
+void MyGL::mousePressEvent(QMouseEvent *me)
+{
+    if(me->button() == Qt::LeftButton)
     {
 
+
+        // get the blockType at this point
+        // first get the chuck at
+
+        glm::ivec3 cubeToOperate = CubeToOperate();
+        int x = cubeToOperate[0];
+        int y = cubeToOperate[1];
+        int z = cubeToOperate[2];
+        std::cout<<x<<" "<<y<< " "<<z<<" "<<std::endl;
+        //int64_t chunkX = Chunk::getChunkOrigin(x);
+
+        //int64_t chunkZ = Chunk::getChunkOrigin(z);
+
+        //Chunk* chunk = mp_terrain->getChunkAt(chunkX, chunkZ);
+        //if(chunk != nullptr)
+        //{
+            // if  exist a chunk, get the blockType at this position(world)
+            BlockType bt = mp_terrain->getBlockAt(x,y,z);
+
+            std::cout<<bt<<std::endl;
+            // if now Empty, then set it into Empty
+            if(bt != EMPTY)
+            {
+
+//                for (std::pair<int64_t, Chunk*> pair : mp_terrain->ChunkTable)
+//                {
+//                    pair.second->destroy();
+//                    pair.second->create();
+//                }
+                mp_terrain->setBlockAt(x,y,z,EMPTY);
+                update();
+            }
+        //}
+    }
+    else if(me->button() == Qt::RightButton)
+    {
+        // get the blockType at this point
+        // first get the chuck at
+
+        glm::ivec3 cubeToOperate = CubeToOperate();
+        int x = cubeToOperate[0];
+        int y = cubeToOperate[1];
+        int z = cubeToOperate[2];
+        std::cout<<x<<" "<<y<< " "<<z<<" "<<std::endl;
+        //int64_t chunkX = Chunk::getChunkOrigin(x);
+
+        //int64_t chunkZ = Chunk::getChunkOrigin(z);
+
+        //Chunk* chunk = mp_terrain->getChunkAt(chunkX, chunkZ);
+        //if(chunk != nullptr)
+        //{
+            // if  exist a chunk, get the blockType at this position(world)
+            BlockType bt = mp_terrain->getBlockAt(x,y,z);
+
+            std::cout<<bt<<std::endl;
+            // if now Empty, then set it into Empty
+            if(bt == EMPTY)
+            {
+
+//                for (std::pair<int64_t, Chunk*> pair : mp_terrain->ChunkTable)
+//                {
+//                    pair.second->destroy();
+//                    pair.second->create();
+//                }
+                mp_terrain->setBlockAt(x,y,z,LAVA);
+                update();
+            }
+        //}
+    }
+}
+
+void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
+{
+    normalX = 0;
+    normalZ = 0;
+    if(x >= 0)
+    {
+        normalX = x / 64;
+        normalX *= 64;
+    }
+    else
+    {
+        normalX = (- x - 1) / 64 + 1;
+        normalX *= -64;
+    }
+    if(z >= 0)
+    {
+        normalZ = z / 64;
+        normalZ *= 64;
+    }
+    else
+    {
+        normalZ = (- z - 1) / 64 + 1;
+        normalZ *= -64;
+    }
+}
+
+void MyGL::CheckForBoundary()
+{
+    glm::vec3 gridLoc = glm::floor(mp_camera->eye);
+
+    // check if there exist a chunk at x direction and z direction
+    int x = gridLoc[0];
+    int z = gridLoc[2];
+
+// How to use getChunkAt
+    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5, z);
+    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5, z);
+    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5);
+    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
+    if(xDirChunk == nullptr && zDirChunk != nullptr)
+    {
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x + 5, z, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+    }
+    if(xDirChunk != nullptr && zDirChunk == nullptr)
+    {
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x, z + 5, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+    }
+    if(xDirChunk == nullptr && zDirChunk == nullptr)
+    {
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x, z + 5, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        NormalizeXZ(x + 5, z, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        NormalizeXZ(x + 5, z + 5, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+    }
+    // Minus situation
+    if(xMinusDirChunk == nullptr && zMinusDirChunk != nullptr)
+    {
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x - 5, z, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+    }
+    if(xMinusDirChunk != nullptr && zMinusDirChunk == nullptr)
+    {
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x, z - 5, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+    }
+    if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
+    {
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x - 5, z - 5, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        NormalizeXZ(x - 5, z - 5, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        NormalizeXZ(x - 5, z - 5, normalX, normalZ);
+        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
 }

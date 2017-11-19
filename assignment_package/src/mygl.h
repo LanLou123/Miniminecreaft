@@ -53,6 +53,10 @@ protected:
 
     void RayCubeIntersection(glm::vec3 cubeCenter, float& tNear, float& tFar);
 
+    glm::ivec3 CubeToOperate();
+
+    void CheckForBoundary();
+
 private slots:
     /// Slot that gets called ~60 times per second
     void timerUpdate();
