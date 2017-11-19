@@ -101,3 +101,20 @@ void Camera::TranslateAlongUp(float amt)
     eye += translation;
     ref += translation;
 }
+
+void Camera::TranslateAlongWorldY(float amt)
+{
+    glm::vec3 translation = world_up * amt;
+    eye += translation;
+    ref += translation;
+}
+
+void Camera::Translate_X_Y(float amt)
+{
+    glm::vec3 translation = look;
+    translation[1] = 0;
+    translation = glm::normalize(translation);
+    translation *= amt;
+    eye += translation;
+    ref += translation;
+}
