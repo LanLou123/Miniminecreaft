@@ -688,7 +688,7 @@ void MyGL::CheckForBoundary()
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
 }
-=======
+
 void MyGL::keyReleaseEvent(QKeyEvent *e)
 {
     if(e->key() == Qt::Key_Shift)
