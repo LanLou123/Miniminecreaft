@@ -57,7 +57,9 @@ void Terrain::setBlockAt(int x, int y, int z, BlockType t)
 
 Chunk* Terrain::getChunkAt(int64_t x, int64_t z) const
 {
-    int64_t position = Chunk::getXZCoordPacked(xzCoords(x, z));
+    int64_t chunkX = getChunkOrigin(x);
+    int64_t chunkZ = getChunkOrigin(z);
+    int64_t position = Chunk::getXZCoordPacked(xzCoords(chunkX, chunkZ));
     if (this->ChunkTable.find(position) != this->ChunkTable.end())
     {
         return this->ChunkTable.at(position);
