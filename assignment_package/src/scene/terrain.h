@@ -20,6 +20,8 @@ public:
                                                            // efficient system of storing terrain.
     void CreateTestScene();
 
+    void GenerateTerrainAt(int left, int bottom);        // Generate Terrain at a given point(the bottom-left of new terrain)
+
     glm::ivec3 dimensions;
 
     BlockType getBlockAt(int x, int y, int z) const;   // Given a world-space coordinate (which may have negative

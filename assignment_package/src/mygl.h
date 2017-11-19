@@ -49,6 +49,10 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *e);
 
+    void mousePressEvent(QMouseEvent *me);
+
+    void RayCubeIntersection(glm::vec3 cubeCenter, float& tNear, float& tFar);
+
 private slots:
     /// Slot that gets called ~60 times per second
     void timerUpdate();
