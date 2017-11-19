@@ -87,12 +87,14 @@ void MyGL::initializeGL()
 //    vao.bind();
     glBindVertexArray(vao);
 
+
     //mp_terrain->CreateTestScene();
 
 
     //mp_terrain->CreateTestScene();
     //mp_terrain->GenerateTerrainAt(0,0,this);
     mp_terrain->GenerateFirstTerrain(this);
+
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -143,43 +145,37 @@ void MyGL::paintGL()
 
 void MyGL::GLDrawScene()
 {
-//    for(int x = 0; x < mp_terrain->dimensions.x; ++x)
-//    {
-//        for(int y = 0; y < mp_terrain->dimensions.y; ++y)
-//        {
-//            for(int z = 0; z < mp_terrain->dimensions.z; ++z)
-//            {
-//                BlockType t;
-//                if((t = mp_terrain->m_blocks[x][y][z]) != EMPTY)
-//                {
-//                    switch(t)
-//                    {
-//                    case DIRT:
-//                        mp_progLambert->setGeometryColor(glm::vec4(121.f, 85.f, 58.f, 255.f) / 255.f);
-//                        break;
-//                    case GRASS:
-//                        mp_progLambert->setGeometryColor(glm::vec4(95.f, 159.f, 53.f, 255.f) / 255.f);
-//                        break;
-//                    case STONE:
-//                        mp_progLambert->setGeometryColor(glm::vec4(0.5f));
-//                        break;
-//                    }
-//                    mp_progLambert->setModelMatrix(glm::translate(glm::mat4(), glm::vec3(x, y, z)));
-//                    mp_progLambert->draw(*mp_geomCube);
-//                }
-//            }
-//        }
-//    }
-
-
-    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
-
-    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
-
+    /*for(int x = 0; x < mp_terrain->dimensions.x; ++x)
     {
-
+        for(int y = 0; y < mp_terrain->dimensions.y; ++y)
+        {
+            for(int z = 0; z < mp_terrain->dimensions.z; ++z)
+            {
+                BlockType t;
+                if((t = mp_terrain->m_blocks[x][y][z]) != EMPTY)
+                {
+                    switch(t)
+                    {
+                    case DIRT:
+                        mp_progLambert->setGeometryColor(glm::vec4(121.f, 85.f, 58.f, 255.f) / 255.f);
+                        break;
+                    case GRASS:
+                        mp_progLambert->setGeometryColor(glm::vec4(95.f, 159.f, 53.f, 255.f) / 255.f);
+                        break;
+                    case STONE:
+                        mp_progLambert->setGeometryColor(glm::vec4(0.5f));
+                        break;
+                    }
+                    mp_progLambert->setModelMatrix(glm::translate(glm::mat4(), glm::vec3(x, y, z)));
+                    mp_progLambert->draw(*mp_geomCube);
+                }
+            }
+        }
+    }*/
+    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
         mp_progLambert->draw(*pair.second);
-
     }
 }
 
