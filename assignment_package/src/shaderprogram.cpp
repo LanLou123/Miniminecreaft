@@ -249,3 +249,8 @@ void ShaderProgram::printLinkInfoLog(int prog)
         delete [] infoLog;
     }
 }
+void ShaderProgram::setTimeCount(int time)
+{
+//    useMe();
+//    if(unift)
+}
