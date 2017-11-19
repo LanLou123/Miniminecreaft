@@ -117,7 +117,7 @@ void Chunk::fillLeftFace(size_t x, size_t y, size_t z, BlockType type)
         glm::vec4(x, y + cubeRadius, z, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
-    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 1.0f);
+    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
 
     for (unsigned i = 0; i!=4; ++i)
     {
@@ -138,7 +138,7 @@ void Chunk::fillRightFace(size_t x, size_t y, size_t z, BlockType type)
         glm::vec4(x + cubeRadius, y, z + cubeRadius, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
-    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 1.0f);
+    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
 
     for (unsigned i = 0; i!=4; ++i)
     {
@@ -159,7 +159,7 @@ void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
         glm::vec4(x + cubeRadius, y + cubeRadius, z, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
-    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 1.0f);
+    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
 
     for (unsigned i = 0; i!=4; ++i)
     {
@@ -180,14 +180,14 @@ void Chunk::fillDownFace(size_t x, size_t y, size_t z, BlockType type)
         glm::vec4(x, y, z + cubeRadius, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
-    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 1.0f);
+    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
 
     for (unsigned i = 0; i!=4; ++i)
     {
         square[i] += offset;
     }
 
-    glm::vec4 normal = glm::vec4(0.0f, -1.0f, 0.0f, 1.0f);
+    glm::vec4 normal = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
     this->fillFace(square, normal, type);
 }
 
@@ -201,14 +201,14 @@ void Chunk::fillFrontFace(size_t x, size_t y, size_t z, BlockType type)
         glm::vec4(x, y + cubeRadius, z + cubeRadius, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
-    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 1.0f);
+    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
 
     for (unsigned i = 0; i!=4; ++i)
     {
         square[i] += offset;
     }
 
-    glm::vec4 normal = glm::vec4(0.0f, 0.0f, 1.0f, 1.0f);
+    glm::vec4 normal = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
     this->fillFace(square, normal, type);
 }
 
@@ -222,14 +222,14 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
         glm::vec4(x + cubeRadius, y, z, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
-    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 1.0f);
+    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
 
     for (unsigned i = 0; i!=4; ++i)
     {
         square[i] += offset;
     }
 
-    glm::vec4 normal = glm::vec4(0.0f, 0.0f, -1.0f, 1.0f);
+    glm::vec4 normal = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
     this->fillFace(square, normal, type);
 }
 

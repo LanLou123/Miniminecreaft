@@ -88,7 +88,7 @@ void Terrain::CreateTestScene()
         }
     }
     this->setBlockAt(15, 128, 0, STONE);
-    this->setBlockAt(16, 128, 0, GRASS);
+    this->setBlockAt(15, 256, 0, GRASS);
     for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
     {
         pair.second->create();
