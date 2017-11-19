@@ -16,7 +16,7 @@ SOURCES += \
     $$PWD/scene/terrain.cpp \
     $$PWD/scene/worldaxes.cpp \
 
-    $$PWD/chunk.cpp
+    $$PWD/chunk.cpp\
 
     $$PWD/player.cpp
 
