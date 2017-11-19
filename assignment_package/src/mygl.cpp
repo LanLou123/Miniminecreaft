@@ -87,7 +87,7 @@ void MyGL::initializeGL()
 //    vao.bind();
     glBindVertexArray(vao);
 
-<<<<<<< HEAD
+
 
     //mp_terrain->CreateTestScene();
 
@@ -96,11 +96,6 @@ void MyGL::initializeGL()
     //mp_terrain->GenerateTerrainAt(0,0,this);
     mp_terrain->GenerateFirstTerrain(this);
 
-=======
-    mp_terrain->addChunkAt(this, -16, 0);
-    mp_terrain->addChunkAt(this, 0, 0);
-    mp_terrain->CreateTestScene();
->>>>>>> BowenYang-Chunk
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -486,14 +481,10 @@ void MyGL::mousePressEvent(QMouseEvent *me)
         int x = cubeToOperate[0];
         int y = cubeToOperate[1];
         int z = cubeToOperate[2];
-        std::cout<<x<<" "<<y<< " "<<z<<" "<<std::endl;
-        //int64_t chunkX = Chunk::getChunkOrigin(x);
 
-        //int64_t chunkZ = Chunk::getChunkOrigin(z);
-
-        //Chunk* chunk = mp_terrain->getChunkAt(chunkX, chunkZ);
-        //if(chunk != nullptr)
-        //{
+        Chunk* chunk = mp_terrain->getChunkAt(x, z);
+        if(chunk != nullptr)
+        {
             // if  exist a chunk, get the blockType at this position(world)
             BlockType bt = mp_terrain->getBlockAt(x,y,z);
 
@@ -510,7 +501,7 @@ void MyGL::mousePressEvent(QMouseEvent *me)
                 mp_terrain->setBlockAt(x,y,z,LAVA);
                 update();
             }
-        //}
+        }
     }
 }
 
