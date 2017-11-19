@@ -235,6 +235,10 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
 
 void Chunk::create()
 {
+    this->pos.clear();
+    this->nor.clear();
+    this->col.clear();
+    this->ele.clear();
     for (size_t x = 0; x != 16; ++x)
     {
         for (size_t y = 0; y != 256; ++y)
