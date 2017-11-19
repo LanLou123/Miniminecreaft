@@ -143,62 +143,62 @@ float fbm (glm::vec2 st)
 
 void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
 {
-    this->addChunkAt(parent, 0, 0);
-    for(int x = 0; x < 16; x++)
-    {
-        for(int z = 0; z < 16; z++)
-        {
-
-            for(int y = 0; y < 256; y++)
-            {
-                this->setBlockAt(x,y,z,EMPTY);
-            }
-        }
-    }
-    this->setBlockAt(0,128,0,GRASS);
-//    for(int i = 0; i < 10; i++)
+//    this->addChunkAt(parent, 0, 0);
+//    for(int x = 0; x < 16; x++)
 //    {
-//        for(int j = 0; j < 10 ;j++)
+//        for(int z = 0; z < 16; z++)
 //        {
-//            this->addChunkAt(parent, i * 16, j * 16);
-//        }
-//    }
 
-//    for(int x = 0; x < 160; ++x)
-//    {
-//       // std::cout<<x<<std::endl;
-//        for(int z = 0; z < 160; ++z)
-//        {
-//            float scale = 48.f;
-//            glm::vec2 st = glm::vec2(x, z) / scale;
-//            float height = 0.2f * fbm(st);
-
-//            //std::cout <<" okay" << x <<" " << z<<std::endl;
-//            int heightInt = (int) (height * 128.f);
-
-
-//            for(int y = 0; y < 256; ++y)
+//            for(int y = 0; y < 256; y++)
 //            {
-//                if(y < 129)
-//                {
-//                    this->setBlockAt(x,y,z,STONE);
-//                }
-//                else if(y < 129 + heightInt - 1 && y >= 129)
-//                {
-//                    this->setBlockAt(x,y,z,DIRT);
-//                }
-//                else if(y == 129 + heightInt - 1 && y >= 129)
-//                {
-//                    this->setBlockAt(x,y,z,GRASS);
-//                }
-//                else
-//                {
-//                    this->setBlockAt(x,y,z,EMPTY);
-//                }
-
+//                this->setBlockAt(x,y,z,EMPTY);
 //            }
 //        }
 //    }
+//    this->setBlockAt(0,128,0,GRASS);
+    for(int i = -1 ; i < 2; i++)
+    {
+        for(int j = -1; j < 2 ;j++)
+        {
+            this->addChunkAt(parent, i * 16, j * 16);
+        }
+    }
+
+    for(int x = -16; x < 32; ++x)
+    {
+       // std::cout<<x<<std::endl;
+        for(int z = -16; z < 32; ++z)
+        {
+            float scale = 48.f;
+            glm::vec2 st = glm::vec2(x, z) / scale;
+            float height = 0.2f * fbm(st);
+
+            //std::cout <<" okay" << x <<" " << z<<std::endl;
+            int heightInt = (int) (height * 128.f);
+
+
+            for(int y = 0; y < 256; ++y)
+            {
+                if(y < 129)
+                {
+                    this->setBlockAt(x,y,z,STONE);
+                }
+                else if(y < 129 + heightInt - 1 && y >= 129)
+                {
+                    this->setBlockAt(x,y,z,DIRT);
+                }
+                else if(y == 129 + heightInt - 1 && y >= 129)
+                {
+                    this->setBlockAt(x,y,z,GRASS);
+                }
+                else
+                {
+                    this->setBlockAt(x,y,z,EMPTY);
+                }
+
+            }
+        }
+    }
     for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
     {
         pair.second->create();
