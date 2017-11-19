@@ -27,6 +27,7 @@ int64_t getChunkOrigin(int64_t val)
     int64_t valChunk = 0;
     if (val < 0)
     {
+        ++val;
         valChunk = -val / 16 + 1;
         valChunk *= -16;
     }
@@ -192,6 +193,7 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
 
 void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
 {
+<<<<<<< HEAD
 
     // normalize x and z coord
     int normalX = 0;
@@ -212,6 +214,9 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
         normalZ *= 16;
     }
     else
+=======
+    for (unsigned x = -16; x!=16; ++x)
+>>>>>>> BowenYang-Chunk
     {
         normalZ = (- bottom - 1) / 16 + 1;
         normalZ *= -16;
@@ -256,8 +261,13 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
             }
         }
     }
+<<<<<<< HEAD
 
 
+=======
+    this->setBlockAt(-1, 128, 0, STONE);
+    this->setBlockAt(0, 128, 0, GRASS);
+>>>>>>> BowenYang-Chunk
     for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
     {
         pair.second->create();

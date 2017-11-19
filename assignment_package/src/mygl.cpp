@@ -87,6 +87,7 @@ void MyGL::initializeGL()
 //    vao.bind();
     glBindVertexArray(vao);
 
+<<<<<<< HEAD
 
     //mp_terrain->CreateTestScene();
 
@@ -95,6 +96,11 @@ void MyGL::initializeGL()
     //mp_terrain->GenerateTerrainAt(0,0,this);
     mp_terrain->GenerateFirstTerrain(this);
 
+=======
+    mp_terrain->addChunkAt(this, -16, 0);
+    mp_terrain->addChunkAt(this, 0, 0);
+    mp_terrain->CreateTestScene();
+>>>>>>> BowenYang-Chunk
 }
 
 void MyGL::resizeGL(int w, int h)
