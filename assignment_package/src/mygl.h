@@ -8,7 +8,7 @@
 #include <scene/worldaxes.h>
 #include "camera.h"
 #include <scene/terrain.h>
-
+#include"player.h"
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 
@@ -21,16 +21,19 @@ private:
     WorldAxes* mp_worldAxes; // A wireframe representation of the world axes. It is hard-coded to sit centered at (32, 128, 32).
     ShaderProgram* mp_progLambert;// A shader program that uses lambertian reflection
     ShaderProgram* mp_progFlat;// A shader program that uses "flat" reflection (no shadowing at all)
-
+    int timecount;
     GLuint vao; // A handle for our vertex array object. This will store the VBOs created in our geometry classes.
                 // Don't worry too much about this. Just know it is necessary in order to render geometry.
 
     Camera* mp_camera;
     Terrain* mp_terrain;
-
+    player player1;
+    bool showmouse;
     /// Timer linked to timerUpdate(). Fires approx. 60 times per second
     QTimer timer;
-
+    int time_count;
+    float Time_elapsed;
+    int64_t msec;
     void MoveMouseToCenter(); // Forces the mouse position to the screen's center. You should call this
                               // from within a mouse move event after reading the mouse movement so that
                               // your mouse stays within the screen bounds and is always read.
@@ -49,6 +52,7 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *e);
 
+
     void mousePressEvent(QMouseEvent *me);
 
     void RayCubeIntersection(glm::vec3 cubeCenter, float& tNear, float& tFar);
@@ -56,6 +60,27 @@ protected:
     glm::ivec3 CubeToOperate();
 
     void CheckForBoundary();
+
+
+    bool flag_moving_forward;
+    bool flag_moving_backward;
+    bool flag_moving_right;
+    bool flag_moving_left;
+    bool flag_rotate_right;
+    bool flag_rotate_left;
+    bool flag_rotate_up;
+    bool flag_rotate_down;
+    bool flag_walking;
+    bool flag_moving_up;
+    bool flag_moving_down;
+    float speed;
+    void keyReleaseEvent(QKeyEvent *e);
+
+    void mouseMoveEvent(QMouseEvent *e);
+    void wheelEvent(QWheelEvent *e);
+    void walk_begin();
+    void walk_end();
+    void moving();
 
 private slots:
     /// Slot that gets called ~60 times per second
