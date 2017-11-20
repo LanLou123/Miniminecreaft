@@ -43,12 +43,12 @@ Chunk::Chunk(OpenGLContext *parent, Terrain *terrain, int64_t xz) : Drawable(par
 
 BlockType Chunk::getBlockType(size_t x, size_t y, size_t z) const
 {
-    return this->blocks[4096*z + 16*y + x];
+    return this->blocks[4096*x + 16*z + y];
 }
 
 BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
 {
-    return this->blocks[4096*z + 16*y + x];
+    return this->blocks[4096*x + 16*z + y];
 }
 
 void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type)
