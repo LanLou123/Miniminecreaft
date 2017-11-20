@@ -208,7 +208,7 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
     {
         pair.second->create();
     }
-   // std::cout<<"setup";
+   std::cout<<"setup";
 }
 
 void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
