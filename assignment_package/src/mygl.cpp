@@ -5,9 +5,6 @@
 #include <QApplication>
 #include <QKeyEvent>
 
-#include <iostream>
-
-
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
@@ -178,33 +175,6 @@ void MyGL::paintGL()
 
 void MyGL::GLDrawScene()
 {
-    /*for(int x = 0; x < mp_terrain->dimensions.x; ++x)
-    {
-        for(int y = 0; y < mp_terrain->dimensions.y; ++y)
-        {
-            for(int z = 0; z < mp_terrain->dimensions.z; ++z)
-            {
-                BlockType t;
-                if((t = mp_terrain->m_blocks[x][y][z]) != EMPTY)
-                {
-                    switch(t)
-                    {
-                    case DIRT:
-                        mp_progLambert->setGeometryColor(glm::vec4(121.f, 85.f, 58.f, 255.f) / 255.f);
-                        break;
-                    case GRASS:
-                        mp_progLambert->setGeometryColor(glm::vec4(95.f, 159.f, 53.f, 255.f) / 255.f);
-                        break;
-                    case STONE:
-                        mp_progLambert->setGeometryColor(glm::vec4(0.5f));
-                        break;
-                    }
-                    mp_progLambert->setModelMatrix(glm::translate(glm::mat4(), glm::vec3(x, y, z)));
-                    mp_progLambert->draw(*mp_geomCube);
-                }
-            }
-        }
-    }*/
     mp_progLambert->setModelMatrix(glm::mat4(1.0f));
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
@@ -440,8 +410,6 @@ glm::ivec3 MyGL::CubeToRemove(bool &valid)
 
     // first find the grid location
     glm::vec3 gridLoc = glm::floor(mp_camera->eye);
-    std::cout<<mp_camera->eye[0]<<" "<<mp_camera->eye[1]<< " "<<mp_camera->eye[2]<<" "<<std::endl;
-    std::cout<<gridLoc[0]<<" "<<gridLoc[1]<< " "<<gridLoc[2]<<" "<<std::endl;
     // according to the distance between this point and its floor, divide into two situations
     float distanceX = mp_camera->eye[0] - gridLoc[0];
     float distanceZ = mp_camera->eye[2] - gridLoc[2];
@@ -450,7 +418,6 @@ glm::ivec3 MyGL::CubeToRemove(bool &valid)
     bool flag_ValidCubes = false;
     if(distanceX > -1e-5 || distanceZ > -1e-5) // not standing in center of some cube, situation 1
     {
-        std::cout<<"case 1"<<std::endl;
         float tNear = std::numeric_limits<float>::max();
         //float tFar = std::numeric_limits<float>::max() * (-1.f);
         cubeToRemove = glm::vec3(0.f);
@@ -462,13 +429,6 @@ glm::ivec3 MyGL::CubeToRemove(bool &valid)
             {
                 for(int k = -2; k < 2; k++)
                 {
-                    // center blocks, ignore
-//                        if(i > -1 && i < 2
-//                                && j > -1 && j < 2
-//                                && k > -2 && k < 1)
-//                        {
-//                            continue;
-//                        }
                     float tempNear = std::numeric_limits<float>::max() * (-1.f);
                     float tempFar = std::numeric_limits<float>::max();
                     glm::vec3 cubeCenter = gridLoc + glm::vec3(i * 1.f, k * 1.f, j * 1.f);
@@ -507,7 +467,6 @@ glm::ivec3 MyGL::CubeToRemove(bool &valid)
     // check for all surrounding cubes
     else
     {
-        std::cout<<"case 2"<<std::endl;
         float tNear = std::numeric_limits<float>::max();
         //float tFar = std::numeric_limits<float>::max() * (-1.f);
         cubeToRemove = glm::vec3(0.f);
@@ -519,13 +478,6 @@ glm::ivec3 MyGL::CubeToRemove(bool &valid)
             {
                 for(int k = -2; k < 2; k++)
                 {
-                    // center blocks, ignore
-//                        if(i > -1 && i < 2
-//                                && j > -1 && j < 2
-//                                && k > -2 && k < 1)
-//                        {
-//                            continue;
-//                        }
                     float tempNear = std::numeric_limits<float>::max() * (-1.f);
                     float tempFar = std::numeric_limits<float>::max();
                     glm::vec3 cubeCenter = gridLoc  + glm::vec3(i * 1.f, k * 1.f, j * 1.f);
@@ -577,8 +529,6 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
 
     // first find the grid location
     glm::vec3 gridLoc = glm::floor(mp_camera->eye);
-    std::cout<<mp_camera->eye[0]<<" "<<mp_camera->eye[1]<< " "<<mp_camera->eye[2]<<" "<<std::endl;
-    std::cout<<gridLoc[0]<<" "<<gridLoc[1]<< " "<<gridLoc[2]<<" "<<std::endl;
     // according to the distance between this point and its floor, divide into two situations
     float distanceX = mp_camera->eye[0] - gridLoc[0];
     float distanceZ = mp_camera->eye[2] - gridLoc[2];
@@ -587,7 +537,7 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
     bool flag_ValidCubes = false;
     if(distanceX > -1e-5 || distanceZ > -1e-5) // not standing in center of some cube, situation 1
     {
-        std::cout<<"case 1"<<std::endl;
+
         float tNear = std::numeric_limits<float>::max();
         //float tFar = std::numeric_limits<float>::max() * (-1.f);
         cubeToAdd = glm::vec3(0.f);
@@ -639,12 +589,8 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         glm::vec3 intersection = r0 + tempNear * (rd - r0);
                         // Find which face its on
 
-                        std::cout<<intersection[0]<<" "<<intersection[1]<<" "<<intersection[2]<<" "<<std::endl;
-                        std::cout<<cubeCenter[0]<<" "<<cubeCenter[1]<<" "<<cubeCenter[2]<<" "<<std::endl;
-
                         if(glm::abs(glm::abs(intersection[0] - cubeCenter[0]) - 0.5f) < 1e-3)//intersect on some  x slab
                         {
-                            std::cout<<"x slab"<<std::endl;
                             if(intersection[0] < cubeCenter[0])
                             {
                                 cubeToAdd = cubeCenter - glm::vec3(1.f, 0.f, 0.f);
@@ -656,7 +602,6 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         }
                         else if(glm::abs(glm::abs(intersection[1] - cubeCenter[1]) - 0.5f) < 1e-3)//intersect on some  y slab
                         {
-                            std::cout<<"y slab"<<std::endl;
                             if(intersection[1] < cubeCenter[1])
                             {
                                 cubeToAdd = cubeCenter - glm::vec3(0.f, 1.f, 0.f);
@@ -668,7 +613,6 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         }
                         else //intersect on some  z slab
                         {
-                            std::cout<<"z slab"<<std::endl;
                             if(intersection[2] < cubeCenter[2])
                             {
                                 cubeToAdd = cubeCenter - glm::vec3(0.f, 0.f, 1.f);
@@ -695,10 +639,8 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         int z = (int)(cubeToAdd[2]);
                         if(mp_terrain->getBlockAt(x,y,z) != EMPTY)
                         {
-                            std::cout<<"in add block"<<std::endl;
                             continue;
                         }
-                        std::cout<<"in add block 2 "<<std::endl;
                         tNear = tempNear;
 
                         flag_ValidCubes = true;
@@ -711,7 +653,6 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
     // check for all surrounding cubes
     else
     {
-        std::cout<<"case 2"<<std::endl;
         float tNear = std::numeric_limits<float>::max();
         //float tFar = std::numeric_limits<float>::max() * (-1.f);
         cubeToAdd = glm::vec3(0.f);
@@ -807,7 +748,6 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         int z = (int)(cubeToAdd[2]);
                         if(mp_terrain->getBlockAt(x,y,z) != EMPTY)
                         {
-                            std::cout<<"in add block"<<std::endl;
                             continue;
                         }
                         tNear = tempNear;
@@ -837,33 +777,48 @@ void MyGL::mousePressEvent(QMouseEvent *me)
         // first get the chuck at
         bool valid = false;
         glm::ivec3 cubeToOperate = CubeToRemove(valid);
-        std::cout<<"valid:"<<valid<<std::endl;
         if(valid == true)
         {
             int x = cubeToOperate[0];
             int y = cubeToOperate[1];
             int z = cubeToOperate[2];
-            std::cout<<x<<" "<<y<< " "<<z<<" "<<std::endl;
 
             Chunk* chunk = mp_terrain->getChunkAt(x, z);
             if(chunk != nullptr)
             {
                 // if  exist a chunk, get the blockType at this position(world)
                 BlockType bt = mp_terrain->getBlockAt(x,y,z);
-
-                std::cout<<bt<<std::endl;
                 // if now Empty, then set it into Empty
                 if(bt != EMPTY)
                 {
 
-    //                for (std::pair<int64_t, Chunk*> pair : mp_terrain->ChunkTable)
-    //                {
-    //                    pair.second->destroy();
-    //                    pair.second->create();
-    //                }
                     chunk->destroy();
                     mp_terrain->setBlockAt(x,y,z,EMPTY);
                     chunk->create();
+                    if((x + 1)%16 == 0)
+                    {
+                        Chunk* chunk2 = mp_terrain->getChunkAt(x + 1, z);
+                        chunk2->destroy();
+                        chunk2->create();
+                    }
+                    if((x + 1)%16 == 1)
+                    {
+                        Chunk* chunk2 = mp_terrain->getChunkAt(x - 1, z);
+                        chunk2->destroy();
+                        chunk2->create();
+                    }
+                    if((z + 1)%16 == 0)
+                    {
+                        Chunk* chunk2 = mp_terrain->getChunkAt(x, z + 1);
+                        chunk2->destroy();
+                        chunk2->create();
+                    }
+                    if((z + 1)%16 == 1)
+                    {
+                        Chunk* chunk2 = mp_terrain->getChunkAt(x, z - 1);
+                        chunk2->destroy();
+                        chunk2->create();
+                    }
                     update();
                 }
             }
@@ -877,8 +832,6 @@ void MyGL::mousePressEvent(QMouseEvent *me)
         bool valid = false;
         glm::ivec3 cubeToOperate = CubeToAdd(valid);
 
-        std::cout<<"valid:"<<valid<<std::endl;
-
         if(valid == true)
         {
             int x = cubeToOperate[0];
@@ -891,11 +844,10 @@ void MyGL::mousePressEvent(QMouseEvent *me)
                 // if  exist a chunk, get the blockType at this position(world)
                 BlockType bt = mp_terrain->getBlockAt(x,y,z);
 
-                std::cout<<bt<<std::endl;
                 // if now Empty, then set it into Empty
                 if(bt == EMPTY)
                 {
-                    std::cout<<"ready to add "<<std::endl;
+
                     chunk->destroy();
                     mp_terrain->setBlockAt(x,y,z,LAVA);
                     chunk->create();

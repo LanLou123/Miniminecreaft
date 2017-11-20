@@ -170,14 +170,11 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
 
    for(int x = 0; x < 64; ++x)
    {
-      // std::cout<<x<<std::endl;
        for(int z = 0; z < 64; ++z)
        {
            float scale = 48.f;
            glm::vec2 st = glm::vec2(x, z) / scale;
            float height = 0.2f * fbm(st);
-
-           //std::cout <<" okay" << x <<" " << z<<std::endl;
            int heightInt = (int) (height * 128.f);
 
 
@@ -208,7 +205,6 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
     {
         pair.second->create();
     }
-   std::cout<<"setup";
 }
 
 void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
