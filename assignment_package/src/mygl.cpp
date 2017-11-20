@@ -25,7 +25,7 @@ MyGL::MyGL(QWidget *parent)
     c.setPos(mapToGlobal(QPoint(width()/2 , height() / 2)));
     setCursor(c); // Make the cursor invisible
     showmouse=true;
-    speed = 15.0 / 60.0;
+    speed = 8.0 / 60.0;
     flag_moving_forward = 0;
     flag_moving_backward = 0;
     flag_moving_right = 0;
