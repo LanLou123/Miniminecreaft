@@ -157,18 +157,18 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
 //         }
 //     }
 //     this->setBlockAt(0,128,0,GRASS);
-   for(int i = 0; i < 10; i++)
+   for(int i = 0; i < 4; i++)
    {
-       for(int j = 0; j < 10 ;j++)
+       for(int j = 0; j < 4 ;j++)
        {
            this->addChunkAt(parent, i * 16, j * 16);
        }
    }
 
-   for(int x = 0; x < 160; ++x)
+   for(int x = 0; x < 64; ++x)
    {
       // std::cout<<x<<std::endl;
-       for(int z = 0; z < 160; ++z)
+       for(int z = 0; z < 64; ++z)
        {
            float scale = 48.f;
            glm::vec2 st = glm::vec2(x, z) / scale;
@@ -278,12 +278,20 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
     }
 
 
-    for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
-    {
-        pair.second->create();
+//    for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
+//    {
+//        pair.second->create();
 
-    // Add "walls" for collision testing
+//    // Add "walls" for collision testing
   
 
+
+//    }
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 4 ;j++)
+        {
+            this->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
+        }
     }
 }

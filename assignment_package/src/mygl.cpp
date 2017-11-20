@@ -168,6 +168,8 @@ void MyGL::paintGL()
     mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
     mp_progLambert->setViewProjMatrix(mp_camera->getViewProj() );
 
+    CheckForBoundary();
+
     GLDrawScene();
 
     glDisable(GL_DEPTH_TEST);
@@ -320,6 +322,7 @@ void MyGL::walk_end()
 {
     if(flag_walking == 1)
         flag_walking = 0;
+
 }
 
 
@@ -603,7 +606,7 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                     {
                         continue;
                     }
-                    float tempNear = std::numeric_limiOJDts<float>::max() * (-1.f);
+                    float tempNear = std::numeric_limits<float>::max() * (-1.f);
                     float tempFar = std::numeric_limits<float>::max();
                     glm::vec3 cubeCenter = gridLoc - glm::vec3(0.5f, 0.5f, 0.5f) + glm::vec3(i * 1.f, k * 1.f, j * 1.f);
 
@@ -783,7 +786,7 @@ void MyGL::mousePressEvent(QMouseEvent *me)
                     chunk->destroy();
                     mp_terrain->setBlockAt(x,y,z,EMPTY);
                     chunk->create();
-                    update();''
+                    update();
                 }
             }
         }
@@ -870,15 +873,16 @@ void MyGL::CheckForBoundary()
         int normalZ = 0;
         NormalizeXZ(x + 5, z, normalX, normalZ);
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+
     }
-    if(xDirChunk != nullptr && zDirChunk == nullptr)
+    else if(xDirChunk != nullptr && zDirChunk == nullptr)
     {
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z + 5, normalX, normalZ);
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
-    if(xDirChunk == nullptr && zDirChunk == nullptr)
+    else if(xDirChunk == nullptr && zDirChunk == nullptr)
     {
         int normalX = 0;
         int normalZ = 0;
@@ -890,21 +894,21 @@ void MyGL::CheckForBoundary()
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
     // Minus situation
-    if(xMinusDirChunk == nullptr && zMinusDirChunk != nullptr)
+    else if(xMinusDirChunk == nullptr && zMinusDirChunk != nullptr)
     {
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - 5, z, normalX, normalZ);
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
-    if(xMinusDirChunk != nullptr && zMinusDirChunk == nullptr)
+    else if(xMinusDirChunk != nullptr && zMinusDirChunk == nullptr)
     {
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z - 5, normalX, normalZ);
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
-    if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
+    else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
     {
         int normalX = 0;
         int normalZ = 0;
@@ -915,6 +919,7 @@ void MyGL::CheckForBoundary()
         NormalizeXZ(x - 5, z - 5, normalX, normalZ);
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
+    update();
 }
 
 void MyGL::keyReleaseEvent(QKeyEvent *e)
