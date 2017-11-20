@@ -25,7 +25,7 @@ MyGL::MyGL(QWidget *parent)
     c.setPos(mapToGlobal(QPoint(width()/2 , height() / 2)));
     setCursor(c); // Make the cursor invisible
     showmouse=true;
-    speed = 15.0 / 60.0;
+    speed = 8.0 / 60.0;
     flag_moving_forward = 0;
     flag_moving_backward = 0;
     flag_moving_right = 0;
@@ -1010,18 +1010,22 @@ void MyGL::keyReleaseEvent(QKeyEvent *e)
     else if (e->key() == Qt::Key_W)
     {
         flag_moving_forward = 0;
+        walk_end();
     }
     else if (e->key() == Qt::Key_S)
     {
         flag_moving_backward = 0;
+                walk_end();
     }
     else if (e->key() == Qt::Key_D)
     {
         flag_moving_right = 0;
+                walk_end();
     }
     else if (e->key() == Qt::Key_A)
     {
         flag_moving_left = 0;
+                walk_end();
     }
     else if (e->key() == Qt::Key_Right)
     {

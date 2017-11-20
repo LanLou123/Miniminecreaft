@@ -172,15 +172,12 @@ void player::Jump()
 //    {
 //    external_force_a = 0;
     if(vertical_velocity == 0)
-        vertical_velocity = 9.0f;
+        vertical_velocity = 10.0f;
 //    }
 }
 
 void player::Fall()
 {
-
-
-
     refresh(cam);
     if(DisableFlyingCollision)
     {
