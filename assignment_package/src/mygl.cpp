@@ -636,13 +636,15 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         // First get the intersection point
                         glm::vec3 r0 = mp_camera->eye;
                         glm::vec3 rd = mp_camera->eye + 3.f * glm::normalize(mp_camera->ref - mp_camera->eye);
-                        glm::vec3 intersection = r0 + tNear * (rd - r0);
+                        glm::vec3 intersection = r0 + tempNear * (rd - r0);
                         // Find which face its on
-                        float xOnFace = (int)(intersection[0]) + 0.5f;
-                        float yOnFace = (int)(intersection[1]) + 0.5f;
-                        float zOnFace = (int)(intersection[2]) + 0.5f;
-                        if(glm::abs(intersection[0] - xOnFace) < 1e-3)//intersect on some  x slab
+
+                        std::cout<<intersection[0]<<" "<<intersection[1]<<" "<<intersection[2]<<" "<<std::endl;
+                        std::cout<<cubeCenter[0]<<" "<<cubeCenter[1]<<" "<<cubeCenter[2]<<" "<<std::endl;
+
+                        if(glm::abs(glm::abs(intersection[0] - cubeCenter[0]) - 0.5f) < 1e-3)//intersect on some  x slab
                         {
+                            std::cout<<"x slab"<<std::endl;
                             if(intersection[0] < cubeCenter[0])
                             {
                                 cubeToAdd = cubeCenter - glm::vec3(1.f, 0.f, 0.f);
@@ -652,8 +654,9 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                                 cubeToAdd = cubeCenter + glm::vec3(1.f, 0.f, 0.f);
                             }
                         }
-                        else if(glm::abs(intersection[1] - yOnFace) < 1e-3)//intersect on some  y slab
+                        else if(glm::abs(glm::abs(intersection[1] - cubeCenter[1]) - 0.5f) < 1e-3)//intersect on some  y slab
                         {
+                            std::cout<<"y slab"<<std::endl;
                             if(intersection[1] < cubeCenter[1])
                             {
                                 cubeToAdd = cubeCenter - glm::vec3(0.f, 1.f, 0.f);
@@ -665,6 +668,7 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         }
                         else //intersect on some  z slab
                         {
+                            std::cout<<"z slab"<<std::endl;
                             if(intersection[2] < cubeCenter[2])
                             {
                                 cubeToAdd = cubeCenter - glm::vec3(0.f, 0.f, 1.f);
@@ -674,20 +678,29 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                                 cubeToAdd = cubeCenter + glm::vec3(0.f, 0.f, 1.f);
                             }
                         }
-//                        if(glm::length(cubeToAdd - gridLoc) < 1e-4)
-//                        {
-//                            continue;
-//                        }
+                        if(       (glm::abs(cubeToAdd[0] - gridLoc[0])<1e-5 && glm::abs(cubeToAdd[2] - gridLoc[2])<1e-5 && glm::abs(cubeToAdd[1] - gridLoc[1])<1e-5)
+                                ||(glm::abs(cubeToAdd[0] - gridLoc[0] -1.f)<1e-5 && glm::abs(cubeToAdd[2] - gridLoc[2])<1e-5 && glm::abs(cubeToAdd[1] - gridLoc[1])<1e-5)
+                                ||(glm::abs(cubeToAdd[0] - gridLoc[0])<1e-5 && glm::abs(cubeToAdd[2] - gridLoc[2] - 1.f)<1e-5 && glm::abs(cubeToAdd[1] - gridLoc[1])<1e-5)
+                                ||(glm::abs(cubeToAdd[0] - gridLoc[0] -1.f)<1e-5 && glm::abs(cubeToAdd[2] - gridLoc[2] - 1.f)<1e-5 && glm::abs(cubeToAdd[1] - gridLoc[1])<1e-5)
+                                ||(glm::abs(cubeToAdd[0] - gridLoc[0])<1e-5 && glm::abs(cubeToAdd[2] - gridLoc[2])<1e-5 && glm::abs(cubeToAdd[1] - gridLoc[1] + 1.f)<1e-5)
+                                ||(glm::abs(cubeToAdd[0] - gridLoc[0] -1.f)<1e-5 && glm::abs(cubeToAdd[2] - gridLoc[2])<1e-5 && glm::abs(cubeToAdd[1] - gridLoc[1] + 1.f)<1e-5)
+                                ||(glm::abs(cubeToAdd[0] - gridLoc[0])<1e-5 && glm::abs(cubeToAdd[2] - gridLoc[2] - 1.f)<1e-5 && glm::abs(cubeToAdd[1] - gridLoc[1] + 1.f)<1e-5)
+                                ||(glm::abs(cubeToAdd[0] - gridLoc[0] -1.f)<1e-5 && glm::abs(cubeToAdd[2] - gridLoc[2] - 1.f)<1e-5 && glm::abs(cubeToAdd[1] - gridLoc[1] + 1.f)<1e-5)
+                                )
+                        {
+                            continue;
+                        }
                         int x = (int)(cubeToAdd[0]);
                         int y = (int)(cubeToAdd[1]);
                         int z = (int)(cubeToAdd[2]);
                         if(mp_terrain->getBlockAt(x,y,z) != EMPTY)
                         {
+                            std::cout<<"in add block"<<std::endl;
                             continue;
                         }
-
+                        std::cout<<"in add block 2 "<<std::endl;
                         tNear = tempNear;
-                        cubeToAdd = cubeCenter;
+
                         flag_ValidCubes = true;
                     }
                 }
@@ -747,7 +760,7 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         // First get the intersection point
                         glm::vec3 r0 = mp_camera->eye;
                         glm::vec3 rd = mp_camera->eye + 3.f * glm::normalize(mp_camera->ref - mp_camera->eye);
-                        glm::vec3 intersection = r0 + tNear * (rd - r0);
+                        glm::vec3 intersection = r0 + tempNear * (rd - r0);
                         // Find which face its on
                         float xOnFace = (int)(intersection[0]) + 0.5f;
                         float yOnFace = (int)(intersection[1]) + 0.5f;
@@ -794,6 +807,7 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
                         int z = (int)(cubeToAdd[2]);
                         if(mp_terrain->getBlockAt(x,y,z) != EMPTY)
                         {
+                            std::cout<<"in add block"<<std::endl;
                             continue;
                         }
                         tNear = tempNear;
@@ -881,6 +895,7 @@ void MyGL::mousePressEvent(QMouseEvent *me)
                 // if now Empty, then set it into Empty
                 if(bt == EMPTY)
                 {
+                    std::cout<<"ready to add "<<std::endl;
                     chunk->destroy();
                     mp_terrain->setBlockAt(x,y,z,LAVA);
                     chunk->create();
