@@ -698,18 +698,22 @@ void MyGL::keyReleaseEvent(QKeyEvent *e)
     else if (e->key() == Qt::Key_W)
     {
         flag_moving_forward = 0;
+        walk_end();
     }
     else if (e->key() == Qt::Key_S)
     {
         flag_moving_backward = 0;
+                walk_end();
     }
     else if (e->key() == Qt::Key_D)
     {
         flag_moving_right = 0;
+                walk_end();
     }
     else if (e->key() == Qt::Key_A)
     {
         flag_moving_left = 0;
+                walk_end();
     }
     else if (e->key() == Qt::Key_Right)
     {
