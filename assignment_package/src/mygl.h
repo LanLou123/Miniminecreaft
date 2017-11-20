@@ -52,6 +52,16 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *e);
 
+
+    void mousePressEvent(QMouseEvent *me);
+
+    void RayCubeIntersection(glm::vec3 cubeCenter, float& tNear, float& tFar);
+
+    glm::ivec3 CubeToOperate();
+
+    void CheckForBoundary();
+
+
     bool flag_moving_forward;
     bool flag_moving_backward;
     bool flag_moving_right;
@@ -65,12 +75,13 @@ protected:
     bool flag_moving_down;
     float speed;
     void keyReleaseEvent(QKeyEvent *e);
-    void mousePressEvent(QMouseEvent *e);
+
     void mouseMoveEvent(QMouseEvent *e);
     void wheelEvent(QWheelEvent *e);
     void walk_begin();
     void walk_end();
     void moving();
+
 private slots:
     /// Slot that gets called ~60 times per second
     void timerUpdate();
