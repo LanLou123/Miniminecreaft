@@ -57,7 +57,9 @@ protected:
 
     void RayCubeIntersection(glm::vec3 cubeCenter, float& tNear, float& tFar);
 
-    glm::ivec3 CubeToOperate();
+    glm::ivec3 CubeToRemove(bool &valid);
+
+    glm::ivec3 CubeToAdd(bool &valid);
 
     void CheckForBoundary();
 
