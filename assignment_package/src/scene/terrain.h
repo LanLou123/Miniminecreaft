@@ -89,11 +89,11 @@ struct xzCoords
 
 {
 
-    int64_t x;
+    int32_t x;
 
-    int64_t z;
+    int32_t z;
 
-    xzCoords(int64_t x, int64_t z);
+    xzCoords(int32_t x, int32_t z);
 
 };
 
@@ -166,8 +166,10 @@ public:
     static xzCoords getXZCoordUnpacked(int64_t p)
 
     {
+        int32_t x = p >> 32;
+        int32_t z = p & 0x00000000FFFFFFFF;
 
-        return xzCoords(p >> 32, p & 0xFFFFFFFF);
+        return xzCoords(x, z);
 
     }
 
@@ -176,8 +178,9 @@ public:
     static int64_t getXZCoordPacked(xzCoords c)
 
     {
-
-        return c.x << 32 | c.z;
+        int64_t xExtended = c.x;
+        int64_t zExtended = c.z;
+        return xExtended << 32 | (zExtended & 0x00000000FFFFFFFF);
 
     }
 

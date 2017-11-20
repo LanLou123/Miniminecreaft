@@ -252,9 +252,9 @@ void Chunk::create()
     this->ele.clear();
     for (size_t x = 0; x != 16; ++x)
     {
-        for (size_t y = 0; y != 256; ++y)
+        for (size_t z = 0; z != 16; ++z)
         {
-            for (size_t z = 0; z != 16; ++z)
+            for (size_t y = 0; y != 256; ++y)
             {
                 if (this->getBlockType(x, y, z) == EMPTY)
                 {

@@ -20,7 +20,7 @@ Terrain::~Terrain()
 
 }
 
-xzCoords::xzCoords(int64_t x, int64_t z) : x(x), z(z)
+xzCoords::xzCoords(int32_t x, int32_t z) : x(x), z(z)
 {}
 
 int64_t getChunkOrigin(int64_t val)
