@@ -15,7 +15,11 @@ SOURCES += \
     $$PWD/openglcontext.cpp \
     $$PWD/scene/terrain.cpp \
     $$PWD/scene/worldaxes.cpp \
+<<<<<<< HEAD
     $$PWD/chunk.cpp\
+=======
+    $$PWD/chunk.cpp \
+>>>>>>> ed3ef97cdff6d3b58eeafbff5276c062a56222b0
     $$PWD/player.cpp
 
 
