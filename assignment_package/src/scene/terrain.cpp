@@ -6,6 +6,7 @@
 
 #include <scene/cube.h>
 
+#include <iostream>
 
 Terrain::Terrain() : dimensions(64, 256, 64)
 {}
@@ -128,6 +129,7 @@ float noise (glm::vec2 st)
 #define OCTAVES 6
 float fbm (glm::vec2 st)
 {
+
     // Initial values
     float value = 0.0f;
     float amplitud = 0.5f;
@@ -138,6 +140,7 @@ float fbm (glm::vec2 st)
         st *= 2.f;
         amplitud *= 0.5f;
     }
+
     return value;
 }
 
@@ -205,12 +208,11 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
     {
         pair.second->create();
     }
-   // std::cout<<"setup";
+   std::cout<<"setup";
 }
 
 void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
 {
-
 
     // normalize x and z coord
     int normalX = 0;
@@ -253,7 +255,6 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
 
             int heightInt = (int) (height * 128.f);
 
-
             for(int y = 0; y < 256; ++y)
             {
                 if(y < 129)
@@ -277,16 +278,6 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
         }
     }
 
-
-//    for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
-//    {
-//        pair.second->create();
-
-//    // Add "walls" for collision testing
-  
-
-
-//    }
     for(int i = 0; i < 4; i++)
     {
         for(int j = 0; j < 4 ;j++)
@@ -294,4 +285,5 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
             this->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
         }
     }
+
 }

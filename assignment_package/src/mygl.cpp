@@ -168,8 +168,6 @@ void MyGL::paintGL()
     mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
     mp_progLambert->setViewProjMatrix(mp_camera->getViewProj() );
 
-    CheckForBoundary();
-
     GLDrawScene();
 
     glDisable(GL_DEPTH_TEST);
@@ -313,6 +311,8 @@ void MyGL::moving()
     {
         player1.CheckTranslateAlongUp(-speed);
     }
+    CheckForBoundary();
+
 }
 void MyGL::walk_begin()
 {
