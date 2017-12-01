@@ -2,7 +2,7 @@
 #include <la.h>
 
 Drawable::Drawable(OpenGLContext* context)
-    : bufIdx(), bufPos(), bufNor(), bufCol(),
+    : bufIdx(), bufPos(), bufNor(), bufCol(), bufUV(), bufFlow(),
       idxBound(false), posBound(false), norBound(false), colBound(false),
       context(context)
 {}
@@ -17,6 +17,8 @@ void Drawable::destroy()
     context->glDeleteBuffers(1, &bufPos);
     context->glDeleteBuffers(1, &bufNor);
     context->glDeleteBuffers(1, &bufCol);
+    context->glDeleteBuffers(1, &bufUV);
+    context->glDeleteBuffers(1, &bufFlow);
 }
 
 GLenum Drawable::drawMode()
@@ -63,6 +65,18 @@ void Drawable::generateCol()
     context->glGenBuffers(1, &bufCol);
 }
 
+void Drawable::generateUV()
+{
+    uvBound = true;
+    context->glGenBuffers(1, &bufUV);
+}
+
+void Drawable::generateFlow()
+{
+    flowBound = true;
+    context->glGenBuffers(1, &bufFlow);
+}
+
 bool Drawable::bindIdx()
 {
     if(idxBound) {
@@ -93,4 +107,19 @@ bool Drawable::bindCol()
         context->glBindBuffer(GL_ARRAY_BUFFER, bufCol);
     }
     return colBound;
+}
+
+bool Drawable::bindUV()
+{
+    if(colBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufUV);
+    }
+    return uvBound;
+}
+
+bool Drawable::bindFlow()
+{
+    if(flowBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufFlow);
+    }
 }

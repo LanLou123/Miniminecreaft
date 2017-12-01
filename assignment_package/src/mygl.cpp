@@ -9,7 +9,7 @@ MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
-      mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0)
+      mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0)
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -164,8 +164,11 @@ void MyGL::paintGL()
 
     mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
     mp_progLambert->setViewProjMatrix(mp_camera->getViewProj() );
+    mp_progLambert->setTimeCount(m_time);
 
     GLDrawScene();
+
+    ++m_time;
 
     glDisable(GL_DEPTH_TEST);
     mp_progFlat->setModelMatrix(glm::mat4());

@@ -13,6 +13,8 @@
 
 uniform vec4 u_Color; // The color with which to render this instance of geometry.
 
+uniform int u_Time;
+
 // These are the interpolated values out of the rasterizer, so you can't know
 // their specific values without knowing the vertices that contributed to them
 in vec4 fs_Nor;

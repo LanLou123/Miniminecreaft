@@ -31,7 +31,7 @@ enum BlockType : unsigned char
 
 {
 
-    EMPTY, GRASS, DIRT, STONE, LAVA
+    EMPTY, GRASS, DIRT, STONE, LAVA, WOOD, LEAF, BEDROCK, WATER, ICE
 
 };
 
@@ -119,7 +119,11 @@ private:
 
     std::vector<GLfloat> nor;
 
-    std::vector<GLfloat> col;
+    /*std::vector<GLfloat> col;*/
+
+    std::vector<GLfloat> uv;
+
+    std::vector<GLint> flowFlag;
 
     std::vector<GLuint> ele;
 

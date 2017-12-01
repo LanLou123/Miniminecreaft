@@ -37,7 +37,7 @@ private:
     void MoveMouseToCenter(); // Forces the mouse position to the screen's center. You should call this
                               // from within a mouse move event after reading the mouse movement so that
                               // your mouse stays within the screen bounds and is always read.
-
+    int m_time;
 
 public:
     explicit MyGL(QWidget *parent = 0);
