@@ -12,9 +12,10 @@
 #include <unordered_map>
 
 #include "drawable.h"
-
+#include "river.h"
 #include <stdint.h>
-
+#include <map>
+#include <tuple>
 #include <unordered_map>
 
 
@@ -52,8 +53,9 @@ public:
 
 
     glm::ivec3 dimensions;
-
-
+    River river1;
+    River river2;
+    std::map<std::tuple<int,int>,int> RiversideHeight;
 
     BlockType getBlockAt(int x, int y, int z) const;   // Given a world-space coordinate (which may have negative
 
@@ -79,6 +81,16 @@ public:
 
     void GenerateFirstTerrain(OpenGLContext *parent);
 //*********************end
+//*********************lanlou L river part
+    std::map<std::tuple<int,int>,int> riverbank_height;
+    bool If_Water(int x,int y);
+    void update_riverbank();
+    void updateFirstRiver();
+    void riverside_curvature(int &height,  int &i);
+    void updateRiver(int origin_x, int origin_z);
+    void Calculate_corner_Riverside(int x, int y, int z);
+    void create_riverside();
+//**********************end
     ~Terrain();
 
 };
