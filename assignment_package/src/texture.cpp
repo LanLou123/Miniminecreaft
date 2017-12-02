@@ -14,8 +14,8 @@ void Texture::create(const char *texturePath)
     context->printGLErrorLog();
 
     QImage img(texturePath);
-    //img.convertToFormat(QImage::Format_ARGB32);
-    //img = img.mirrored();
+    img.convertToFormat(QImage::Format_ARGB32);
+    img = img.mirrored();
     m_textureImage = std::make_shared<QImage>(img);
     context->glGenTextures(1, &m_textureHandle);
 
@@ -37,9 +37,9 @@ void Texture::load(int texSlot = 0)
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-    context->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB,
+    context->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
                           m_textureImage->width(), m_textureImage->height(),
-                          0, GL_RGB, GL_UNSIGNED_BYTE, m_textureImage->bits());
+                          0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, m_textureImage->bits());
     context->printGLErrorLog();
 }
 

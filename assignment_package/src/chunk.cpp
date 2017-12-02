@@ -72,9 +72,9 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
     glm::vec2 trivialFaceUV[4] =
     {
         glm::vec2(0.0f, 0.0f),
-        glm::vec2(0.0f, 0.0f),
-        glm::vec2(0.0f, 0.0f),
-        glm::vec2(0.0f, 0.0f)
+        glm::vec2(1.0f, 0.0f),
+        glm::vec2(1.0f, 1.0f),
+        glm::vec2(0.0f, 1.0f)
     };
 
     switch (type)
