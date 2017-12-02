@@ -1,7 +1,6 @@
 #version 150
 
 uniform vec4 u_Color;
-uniform int u_Time;
 
 uniform sampler2D u_Surface;
 uniform sampler2D u_Normal;

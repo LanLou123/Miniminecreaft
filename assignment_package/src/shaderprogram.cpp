@@ -7,7 +7,7 @@
 
 ShaderProgram::ShaderProgram(OpenGLContext *context)
     : vertShader(), fragShader(), prog(),
-      attrPos(-1), attrNor(-1), /*attrCol(-1),*/ attrUV(-1), attrFlow(-1),
+      attrPos(-1), attrNor(-1), attrCol(-1), attrUV(-1), attrFlowVelocity(-1),
       unifModel(-1), unifModelInvTr(-1), unifViewProj(-1), unifColor(-1),
       context(context)
 {}
@@ -62,9 +62,9 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
 
     attrPos = context->glGetAttribLocation(prog, "vs_Pos");
     attrNor = context->glGetAttribLocation(prog, "vs_Nor");
-    //attrCol = context->glGetAttribLocation(prog, "vs_Col");
+    attrCol = context->glGetAttribLocation(prog, "vs_Col");
     attrUV = context->glGetAttribLocation(prog, "vs_UV");
-    attrFlow = context->glGetAttribLocation(prog, "vs_FlowFlag");
+    attrFlowVelocity = context->glGetAttribLocation(prog, "vs_FlowVelocity");
 
     unifModel      = context->glGetUniformLocation(prog, "u_Model");
     unifModelInvTr = context->glGetUniformLocation(prog, "u_ModelInvTr");
@@ -164,19 +164,19 @@ void ShaderProgram::draw(Drawable &d)
         context->glVertexAttribPointer(attrNor, 4, GL_FLOAT, false, 0, NULL);
     }
 
-    /*if (attrCol != -1 && d.bindCol()) {
+    if (attrCol != -1 && d.bindCol()) {
         context->glEnableVertexAttribArray(attrCol);
         context->glVertexAttribPointer(attrCol, 4, GL_FLOAT, false, 0, NULL);
-    }*/
+    }
 
     if (attrUV != -1 && d.bindUV()) {
         context->glEnableVertexAttribArray(attrUV);
         context->glVertexAttribPointer(attrUV, 2, GL_FLOAT, false, 0, NULL);
     }
 
-    if (attrFlow != -1 && d.bindFlow()) {
-        context->glEnableVertexAttribArray(attrFlow);
-        context->glVertexAttribIPointer(attrFlow, 1, GL_INT, 0, NULL);
+    if (attrFlowVelocity != -1 && d.bindFlowVelocity()) {
+        context->glEnableVertexAttribArray(attrFlowVelocity);
+        context->glVertexAttribPointer(attrFlowVelocity, 2, GL_FLOAT, false, 0, NULL);
     }
 
     if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
@@ -190,9 +190,9 @@ void ShaderProgram::draw(Drawable &d)
 
     if (attrPos != -1) context->glDisableVertexAttribArray(attrPos);
     if (attrNor != -1) context->glDisableVertexAttribArray(attrNor);
-    //if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
+    if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
     if (attrUV != -1) context->glDisableVertexAttribArray(attrUV);
-    if (attrFlow != -1) context->glDisableVertexAttribArray(attrFlow);
+    if (attrFlowVelocity != -1) context->glDisableVertexAttribArray(attrFlowVelocity);
 
     context->printGLErrorLog();
 }
