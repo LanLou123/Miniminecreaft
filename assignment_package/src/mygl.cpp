@@ -164,7 +164,7 @@ void MyGL::timerUpdate()
     int64_t m = QDateTime::currentMSecsSinceEpoch();
 
     int64_t delta = m - msec;
-    this->Time_elapsed += delta / 1000.0f;//time(sec) elapsed since last update
+    this->Time_elapsed = delta / 1000.0f;//time(sec) elapsed since last update
     update();
     moving();
     player1.Fall();
