@@ -29,6 +29,7 @@ public:
     void Jump();
     void Fall();
     bool bottom_test();
+    bool roof_test();
     void ChangeMode();
     void refresh(Camera *Maincam);
     void CheckTranslateAlongLook(float amt);

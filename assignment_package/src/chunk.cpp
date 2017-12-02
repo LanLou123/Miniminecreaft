@@ -115,6 +115,9 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
     case LAVA:
         ptr2UVSquare = lava;
         break;
+    case WATER:
+        ptr2UVSquare = water;
+        break;
     default:
         ptr2UVSquare = leaf;
         break;

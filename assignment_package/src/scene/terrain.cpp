@@ -490,19 +490,19 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
             std::tuple<int,int> pos2 = std::make_tuple(x,z);
             std::tuple<int,int,int> pos1 = std::make_tuple(x,0,z);
             if((river1.is_river[pos1]==true)&&
-                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=LAVA)
+                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
                 for(int i = 0 ;i<river_depth ;i++)
                 {
-                    this->setBlockAt(x,seaLevel-i,z,LAVA);
+                    this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
             }
             if((river2.is_river[pos1]==true)&&
-                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=LAVA)
+                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
                 for(int i = 0 ;i<river_depth ;i++)
                 {
-                    this->setBlockAt(x,seaLevel-i,z,LAVA);
+                    this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
             }
             for( int y = min_bound_y ;y<max_bound_y ; y++)
@@ -550,19 +550,19 @@ void Terrain::updateRiver(int origin_x, int origin_z)//called every time when it
             std::tuple<int,int,int> pos1 = std::make_tuple(x,0,z);
             std::tuple<int,int> pos2 = std::make_tuple(x,z);
             if((river1.is_river[pos1]==true)&&
-                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=LAVA)
+                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
                 for(int i = 0 ;i<river_depth ;i++)
                 {
-                    this->setBlockAt(x,seaLevel-i,z,LAVA);
+                    this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
             }
             if((river2.is_river[pos1]==true)&&
-                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=LAVA)
+                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
                 for(int i = 0 ;i<river_depth ;i++)
                 {
-                    this->setBlockAt(x,seaLevel-i,z,LAVA);
+                    this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
             }
             for( int y = min_bound_y ;y<max_bound_y ; y++)

@@ -17,11 +17,9 @@ SOURCES += \
     $$PWD/scene/worldaxes.cpp \
     $$PWD/chunk.cpp \
     $$PWD/player.cpp \
-<<<<<<< HEAD
-    $$PWD/river.cpp
-=======
+    $$PWD/river.cpp\
     $$PWD/texture.cpp
->>>>>>> 1b7fb17dedb10849e8bbcc25e3335c233f322a90
+
 
 
 HEADERS += \
@@ -39,8 +37,5 @@ HEADERS += \
     $$PWD/scene/terrain.h \
     $$PWD/scene/worldaxes.h \
     $$PWD/player.h \
-<<<<<<< HEAD
-    $$PWD/river.h
-=======
+    $$PWD/river.h\
     $$PWD/texture.h
->>>>>>> 1b7fb17dedb10849e8bbcc25e3335c233f322a90
