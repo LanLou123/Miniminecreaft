@@ -14,7 +14,7 @@ const float gravity_acceleration = -10.0f;
 class player : public Camera
 {
 public:
-
+    float add_deg;
     Camera *cam;
     float vertical_velocity;
     bool DisableFlyingCollision;

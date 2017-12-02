@@ -1,6 +1,7 @@
 # include <scene/terrain.h>
 
 const float gridOffset = 1.0f / 16.0f;
+const float epsilonPadding = 1e-4f;
 
 struct uvGrid
 {
@@ -8,10 +9,10 @@ struct uvGrid
     uvGrid(int gridX, int gridY) :
         squareUV
         {
-            glm::vec2(gridX * gridOffset, gridY * gridOffset),
-            glm::vec2((gridX + 1) * gridOffset, gridY * gridOffset),
-            glm::vec2((gridX + 1) * gridOffset, (gridY + 1) * gridOffset),
-            glm::vec2(gridX * gridOffset, (gridY + 1) * gridOffset)
+            glm::vec2(gridX * gridOffset + epsilonPadding, gridY * gridOffset + epsilonPadding),
+            glm::vec2((gridX + 1) * gridOffset - epsilonPadding, gridY * gridOffset + epsilonPadding),
+            glm::vec2((gridX + 1) * gridOffset - epsilonPadding, (gridY + 1) * gridOffset - epsilonPadding),
+            glm::vec2(gridX * gridOffset + epsilonPadding, (gridY + 1) * gridOffset - epsilonPadding)
         }
     {}
 };
@@ -249,9 +250,9 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
     glm::vec4 square[4] =
     {
         glm::vec4(x - cubeHR, y - cubeHR, z - cubeHR, 1.0f),
-        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f),
         glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f),
-        glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f)
+        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);

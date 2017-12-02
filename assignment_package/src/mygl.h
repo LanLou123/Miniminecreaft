@@ -39,7 +39,7 @@ private:
                               // from within a mouse move event after reading the mouse movement so that
                               // your mouse stays within the screen bounds and is always read.
     int m_time;
-
+    float add_deg;
     Texture *surfaceMap;
     Texture *normalMap;
     Texture *greyScaleMap;

@@ -32,14 +32,16 @@ void Texture::load(int texSlot = 0)
     // These parameters need to be set for EVERY texture you create
     // They don't always have to be set to the values given here, but they do need
     // to be set
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
     context->glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA,
                           m_textureImage->width(), m_textureImage->height(),
                           0, GL_BGRA, GL_UNSIGNED_INT_8_8_8_8_REV, m_textureImage->bits());
+    context->glGenerateMipmap(GL_TEXTURE_2D);
+
     context->printGLErrorLog();
 }
 
