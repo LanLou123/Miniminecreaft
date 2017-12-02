@@ -20,6 +20,11 @@ struct uvGrid
 static const GLfloat cubeRadius = 1.0f;
 static const GLfloat cubeHR = 0.5f * cubeRadius;
 
+int64_t Chunk::getXZGlobalPositions()
+{
+    return this->xzGlobalPos;
+}
+
 Chunk* Chunk::getLeftAdjacent()
 {
     xzCoords c = this->getXZCoordUnpacked(this->xzGlobalPos);

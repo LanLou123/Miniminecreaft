@@ -89,14 +89,24 @@ Chunk* Terrain::getChunkAt(int64_t x, int64_t z) const
 
 }
 
-void Terrain::addChunkAt(OpenGLContext *parent, int x, int z)
+/*void Terrain::addChunkAt(OpenGLContext *parent, int x, int z)
 {
     int64_t xzCoordinate = Chunk::getXZCoordPacked(xzCoords(x, z));
     Chunk* newChunk = new Chunk(parent, this, xzCoordinate);
     this->ChunkTable[xzCoordinate] = newChunk;
 
+}*/
+
+Chunk* Terrain::newChunkAt(OpenGLContext *parent, int x, int z)
+{
+    int64_t xzCoordinate = Chunk::getXZCoordPacked(xzCoords(x, z));
+    return new Chunk(parent, this, xzCoordinate);
 }
 
+void Terrain::addChunk2Map(Chunk *chunk)
+{
+    this->ChunkTable[chunk->getXZGlobalPositions()] = chunk;
+}
 
 
 //**************MJ's****//
@@ -164,7 +174,8 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
    {
        for(int j = 0; j < 4 ;j++)
        {
-           this->addChunkAt(parent, i * 16, j * 16);
+           Chunk* newChunk = this->newChunkAt(parent, i * 16, j * 16);
+           this->addChunk2Map(newChunk);
        }
    }
 
@@ -238,7 +249,8 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
     {
         for(int j = 0; j < 4 ;j++)
         {
-            this->addChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+            Chunk* newChunk = this->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+            this->addChunk2Map(newChunk);
         }
     }
     for(int x = left; x < left + 64; ++x)

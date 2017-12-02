@@ -73,8 +73,9 @@ public:
 
     Chunk* getChunkAt(int64_t x, int64_t z) const;
 
-    void addChunkAt(OpenGLContext* parent, int x, int z);
-
+    //void addChunkAt(OpenGLContext* parent, int x, int z);
+    Chunk* newChunkAt(OpenGLContext* parent, int x, int z);
+    void addChunk2Map(Chunk* chunk);
 
 
     std::unordered_map<int64_t, Chunk*> ChunkTable;
@@ -130,8 +131,6 @@ private:
 
     std::vector<GLuint> ele;
 
-
-
     Chunk* getLeftAdjacent();
 
     Chunk* getRightAdjacent();
@@ -168,7 +167,7 @@ public:
 
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
 
-
+    int64_t getXZGlobalPositions();
 
     static xzCoords getXZCoordUnpacked(int64_t p)
 
