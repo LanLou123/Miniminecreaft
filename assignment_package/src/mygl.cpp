@@ -1020,9 +1020,9 @@ void MyGL::mouseMoveEvent(QMouseEvent *e)
     float UPdeg = m_speed * dx / width();
     float RIGHTdeg = m_speed * dy / height();
     player1.CheckRotateAboutRight(-RIGHTdeg);
-    if(abs(UPdeg)>=90)
+    if(abs(UPdeg)>=85)
     {
-        UPdeg=UPdeg>0?89.9:-89.9;
+        UPdeg=UPdeg>0?85:-85;
     }
     player1.CheckRotateAboutUp(-UPdeg);
     c.setPos(mapToGlobal(QPoint(width() / 2 , height() / 2 )));
