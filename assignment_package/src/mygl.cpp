@@ -12,9 +12,15 @@
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
-      mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)), mp_progLiquid(new ShaderProgram(this)),
-      mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0),
-      m_QuadBoard(new Quad(this))
+
+      m_QuadBoard(new Quad(this)),
+      mp_progLiquid(new ShaderProgram(this)),
+      mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
+      mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
+      surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
+      chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()),
+      isCheckingBoundary(false)
+
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -58,7 +64,13 @@ MyGL::~MyGL()
     delete mp_camera;
     delete mp_terrain;
 
+
     delete m_QuadBoard;
+
+    delete surfaceMap;
+    delete normalMap;
+    delete greyScaleMap;
+
 }
 
 
@@ -126,6 +138,17 @@ void MyGL::initializeGL()
  
     msec = QDateTime::currentMSecsSinceEpoch();
 
+    surfaceMap->create(":/texture/minecraft_textures_all.png");
+    surfaceMap->load(SURFACE);
+    surfaceMap->bind(SURFACE);
+
+    normalMap->create(":/texture/minecraft_normals_all.png");
+    normalMap->load(NORMAL);
+    normalMap->bind(NORMAL);
+
+    greyScaleMap->create(":/texture/minecraft_textures_all_grey_grass.png");
+    greyScaleMap->load(GREYSCALE);
+    greyScaleMap->bind(GREYSCALE);
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -160,9 +183,26 @@ void MyGL::timerUpdate()
     int64_t m = QDateTime::currentMSecsSinceEpoch();
 
     int64_t delta = m - msec;
-    this->Time_elapsed += delta / 1000.0f;//time(sec) elapsed since last update
+    this->Time_elapsed = delta / 1000.0f;//time(sec) elapsed since last update
+
+    // Try to get the lock
+    bool occupied = chunkMutex->tryLock(0);
+    // If the mutex is not locked by other threads
+    if(occupied)
+    {
+        int chunkNum = chunkToAdd->size();
+        for(int index = chunkNum-1; index >= 0; index--)
+        {
+            ((*chunkToAdd)[index])->create();
+            mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+            chunkToAdd->pop_back();
+        }
+        chunkMutex->unlock();
+    }
+
     update();
     moving();
+
     player1.Fall();
 }
 
@@ -176,8 +216,11 @@ void MyGL::paintGL()
 
     mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
     mp_progLambert->setViewProjMatrix(mp_camera->getViewProj() );
+    mp_progLambert->setTimeCount(m_time);
 
     GLDrawScene();
+
+    ++m_time;
 
     glDisable(GL_DEPTH_TEST);
     mp_progFlat->setModelMatrix(glm::mat4());
@@ -295,8 +338,11 @@ void MyGL::moving()
     {
         player1.CheckTranslateAlongUp(-speed);
     }
-    CheckForBoundary();
 
+    if(isCheckingForBoundary == false)
+    {
+        CheckForBoundary();
+    }
 }
 void MyGL::walk_begin()
 {
@@ -907,7 +953,6 @@ void MyGL::CheckForBoundary()
     int x = gridLoc[0];
     int z = gridLoc[2];
 
-    QMutex* newChunkMutex = new QMutex();
 // How to use getChunkAt
     Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5, z);
     Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5, z);
@@ -915,14 +960,15 @@ void MyGL::CheckForBoundary()
     Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
     if(xDirChunk == nullptr && zDirChunk != nullptr)
     {
+        isCheckingBoundary = true;
         std::cout<<"thread working?"<<std::endl;
 
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + 5, z, normalX, normalZ);
-        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        // mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 
-        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,newChunkMutex,mp_terrain,this);
+        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain,this, isCheckingForBoundary);
         QThreadPool::globalInstance()->start(terrainGenerator);
     }
     else if(xDirChunk != nullptr && zDirChunk == nullptr)
@@ -930,7 +976,9 @@ void MyGL::CheckForBoundary()
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z + 5, normalX, normalZ);
-        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        // mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain,this, isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator);
     }
     else if(xDirChunk == nullptr && zDirChunk == nullptr)
     {
@@ -969,7 +1017,7 @@ void MyGL::CheckForBoundary()
         NormalizeXZ(x - 5, z - 5, normalX, normalZ);
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
-    update();
+    //update();
 }
 
 void MyGL::keyReleaseEvent(QKeyEvent *e)

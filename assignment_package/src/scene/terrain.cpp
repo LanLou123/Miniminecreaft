@@ -90,14 +90,24 @@ Chunk* Terrain::getChunkAt(int64_t x, int64_t z) const
 
 }
 
-void Terrain::addChunkAt(OpenGLContext *parent, int x, int z)
+/*void Terrain::addChunkAt(OpenGLContext *parent, int x, int z)
 {
     int64_t xzCoordinate = Chunk::getXZCoordPacked(xzCoords(x, z));
     Chunk* newChunk = new Chunk(parent, this, xzCoordinate);
     this->ChunkTable[xzCoordinate] = newChunk;
 
+}*/
+
+Chunk* Terrain::newChunkAt(OpenGLContext *parent, int x, int z)
+{
+    int64_t xzCoordinate = Chunk::getXZCoordPacked(xzCoords(x, z));
+    return new Chunk(parent, this, xzCoordinate);
 }
 
+void Terrain::addChunk2Map(Chunk *chunk)
+{
+    this->ChunkTable[chunk->getXZGlobalPositions()] = chunk;
+}
 
 
 //**************MJ's****//
@@ -165,7 +175,8 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
    {
        for(int j = 0; j < 4 ;j++)
        {
-           this->addChunkAt(parent, i * 16, j * 16);
+           Chunk* newChunk = this->newChunkAt(parent, i * 16, j * 16);
+           this->addChunk2Map(newChunk);
        }
    }
 
@@ -239,7 +250,8 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
     {
         for(int j = 0; j < 4 ;j++)
         {
-            this->addChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+            Chunk* newChunk = this->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+            this->addChunk2Map(newChunk);
         }
     }
     for(int x = left; x < left + 64; ++x)
@@ -288,12 +300,16 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
 TerrainAtBoundary::TerrainAtBoundary(int cornerX,
                                      int cornerZ,
                                      QMutex* m,
+                                     std::vector<Chunk*> *chunkToAdd,
                                      Terrain* currentTerrain,
-                                     OpenGLContext *parent)
+                                     OpenGLContext *parent,
+                                     bool &isCheckingForBoundary)
     :left(cornerX), bottom(cornerZ),
       chunkMutex(m),
+      chunkToAdd(chunkToAdd),
       currentTerrain(currentTerrain),
-      parent(parent)
+      parent(parent),
+      isCheckingForBoundary(isCheckingForBoundary)
 {
 
 }
@@ -324,16 +340,21 @@ void TerrainAtBoundary::run()
         normalZ = (- bottom - 1) / 16 + 1;
         normalZ *= -16;
     }
-
+std::cout<<"OK here0" <<std::endl;
     chunkMutex->lock();
 
     for(int i = 0; i < 4; i++)
     {
         for(int j = 0; j < 4 ;j++)
         {
-            currentTerrain->addChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+            //currentTerrain->addChunk2Map(newChunk);
+            chunkToAdd->push_back(newChunk);
         }
     }
+
+    std::cout<<"OK here1" <<std::endl;
+
     for(int x = left; x < left + 64; ++x)
     {
         for(int z = bottom; z < bottom + 64; ++z)
@@ -366,13 +387,16 @@ void TerrainAtBoundary::run()
             }
         }
     }
-
-    for(int i = 0; i < 4; i++)
-    {
-        for(int j = 0; j < 4 ;j++)
-        {
-            currentTerrain->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
-        }
-    }
+std::cout<<"OK here2" <<std::endl;
+//    for(int i = 0; i < 4; i++)
+//    {
+//        for(int j = 0; j < 4 ;j++)
+//        {
+//            currentTerrain->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
+//        }
+//    }
     chunkMutex->unlock();
+    std::cout<<"OK here3" <<std::endl;
+    isCheckingForBoundary = false;
+
 }

@@ -1,12 +1,29 @@
 # include <scene/terrain.h>
 
-static const GLfloat dirtColor[4] = {0.475f, 0.333f, 0.227f, 1.0f};
-static const GLfloat grassColor[4] = {0.373f, 0.624f, 0.208f, 1.0f};
-static const GLfloat stoneColor[4] = {0.5f, 0.5f, 0.5f, 1.0f};
-static const GLfloat lavaColor[4] = {0.81f, 0.06f, 0.14f, 1.0f};
+const float gridOffset = 1.0f / 16.0f;
+const float epsilonPadding = 1e-4f;
+
+struct uvGrid
+{
+    glm::vec2 squareUV[4];
+    uvGrid(int gridX, int gridY) :
+        squareUV
+        {
+            glm::vec2(gridX * gridOffset + epsilonPadding, gridY * gridOffset + epsilonPadding),
+            glm::vec2((gridX + 1) * gridOffset - epsilonPadding, gridY * gridOffset + epsilonPadding),
+            glm::vec2((gridX + 1) * gridOffset - epsilonPadding, (gridY + 1) * gridOffset - epsilonPadding),
+            glm::vec2(gridX * gridOffset + epsilonPadding, (gridY + 1) * gridOffset - epsilonPadding)
+        }
+    {}
+};
 
 static const GLfloat cubeRadius = 1.0f;
-static const GLfloat cubeHR = 0.5f;
+static const GLfloat cubeHR = 0.5f * cubeRadius;
+
+int64_t Chunk::getXZGlobalPositions()
+{
+    return this->xzGlobalPos;
+}
 
 Chunk* Chunk::getLeftAdjacent()
 {
@@ -51,7 +68,20 @@ BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
     return this->blocks[4096*x + 256*z + y];
 }
 
-void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type)
+static const glm::vec2 grassTop[4] = uvGrid(8, 13).squareUV;
+static const glm::vec2 grassSide[4] = uvGrid(3, 15).squareUV;
+static const glm::vec2 dirt[4] = uvGrid(2, 15).squareUV;
+static const glm::vec2 stone[4] = uvGrid(1, 15).squareUV;
+static const glm::vec2 bedRock[4] = uvGrid(1, 14).squareUV;
+static const glm::vec2 woodSide[4] = uvGrid(4, 14).squareUV;
+static const glm::vec2 woodTopBot[4] = uvGrid(5, 14).squareUV;
+static const glm::vec2 leaf[4] = uvGrid(5, 12).squareUV;
+static const glm::vec2 sandBottom[4] = uvGrid(2, 14).squareUV;
+static const glm::vec2 ice[4] = uvGrid(3, 11).squareUV;
+static const glm::vec2 water[4] = uvGrid(13, 3).squareUV;
+static const glm::vec2 lava[4] = uvGrid(13, 1).squareUV;
+
+void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing)
 {
     for (unsigned i = 0; i!=4; ++i)
     {
@@ -67,46 +97,43 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type)
             nor.push_back(normal[j]);
         }
     }
+
+    const glm::vec2* ptr2UVSquare;
+
     switch (type)
     {
     case GRASS:
-        for (unsigned i = 0; i!=4; ++i)
+        if (facing == UP)
         {
-            for (unsigned j = 0; j!=4; ++j)
-            {
-                col.push_back(grassColor[j]);
-            }
+            ptr2UVSquare = grassTop;
+        }
+        else
+        {
+            ptr2UVSquare = grassSide;
         }
         break;
     case DIRT:
-        for (unsigned i = 0; i!=4; ++i)
-        {
-            for (unsigned j = 0; j!=4; ++j)
-            {
-                col.push_back(dirtColor[j]);
-            }
-        }
+        ptr2UVSquare = dirt;
         break;
     case STONE:
-        for (unsigned i = 0; i!=4; ++i)
-        {
-            for (unsigned j = 0; j!=4; ++j)
-            {
-                col.push_back(stoneColor[j]);
-            }
-        }
+        ptr2UVSquare = stone;
         break;
     case LAVA:
-        for (unsigned i = 0; i!=4; ++i)
-        {
-            for (unsigned j = 0; j!=4; ++j)
-            {
-                col.push_back(lavaColor[j]);
-            }
-        }
+        ptr2UVSquare = lava;
+        break;
+    case WATER:
+        ptr2UVSquare = water;
         break;
     default:
+        ptr2UVSquare = leaf;
         break;
+    }
+    for (unsigned i = 0; i!=4; ++i)
+    {
+        for (unsigned j = 0; j!=2; ++j)
+        {
+            uv.push_back((*(ptr2UVSquare + i))[j]);
+        }
     }
 
     size_t indexoffset = ele.size() / 3 * 2;
@@ -136,7 +163,7 @@ void Chunk::fillLeftFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, LEFT);
 }
 
 void Chunk::fillRightFace(size_t x, size_t y, size_t z, BlockType type)
@@ -144,28 +171,7 @@ void Chunk::fillRightFace(size_t x, size_t y, size_t z, BlockType type)
     glm::vec4 square[4] =
     {
         glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f),
-        glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f),
-        glm::vec4(x + cubeHR, y + cubeHR, z + cubeHR, 1.0f),
-        glm::vec4(x + cubeHR, y - cubeHR, z + cubeHR, 1.0f)
-    };
-    xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
-    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
-
-    for (unsigned i = 0; i!=4; ++i)
-    {
-        square[i] += offset;
-    }
-
-    glm::vec4 normal = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-    this->fillFace(square, normal, type);
-}
-
-void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
-{
-    glm::vec4 square[4] =
-    {
-        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f),
-        glm::vec4(x - cubeHR, y + cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y - cubeHR, z + cubeHR, 1.0f),
         glm::vec4(x + cubeHR, y + cubeHR, z + cubeHR, 1.0f),
         glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f)
     };
@@ -177,8 +183,29 @@ void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
         square[i] += offset;
     }
 
+    glm::vec4 normal = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
+    this->fillFace(square, normal, type, RIGHT);
+}
+
+void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
+{
+    glm::vec4 square[4] =
+    {
+        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x - cubeHR, y + cubeHR, z + cubeHR, 1.0f)
+    };
+    xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
+    glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
+
+    for (unsigned i = 0; i!=4; ++i)
+    {
+        square[i] += offset;
+    }
+
     glm::vec4 normal = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, UP);
 }
 
 void Chunk::fillDownFace(size_t x, size_t y, size_t z, BlockType type)
@@ -199,7 +226,7 @@ void Chunk::fillDownFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, DOWN);
 }
 
 void Chunk::fillFrontFace(size_t x, size_t y, size_t z, BlockType type)
@@ -220,7 +247,7 @@ void Chunk::fillFrontFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, FRONT);
 }
 
 void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
@@ -228,9 +255,9 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
     glm::vec4 square[4] =
     {
         glm::vec4(x - cubeHR, y - cubeHR, z - cubeHR, 1.0f),
-        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f),
         glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f),
-        glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f)
+        glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
@@ -241,14 +268,15 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, BACK);
 }
 
 void Chunk::create()
 {
     this->pos.clear();
     this->nor.clear();
-    this->col.clear();
+    this->uv.clear();
+    this->flowFlag.clear();
     this->ele.clear();
     for (size_t x = 0; x != 16; ++x)
     {
@@ -374,9 +402,13 @@ void Chunk::create()
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * nor.size(),
                              reinterpret_cast<void*>(nor.data()), GL_STATIC_DRAW);
 
-    generateCol();
-    context->glBindBuffer(GL_ARRAY_BUFFER, bufCol);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * col.size(),
-                             reinterpret_cast<void*>(col.data()), GL_STATIC_DRAW);
+    generateUV();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufUV);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * uv.size(),
+                            reinterpret_cast<void*>(uv.data()), GL_STATIC_DRAW);
 
+    generateFlow();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufFlow);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * flowFlag.size(),
+                            reinterpret_cast<void*>(flowFlag.data()), GL_STATIC_DRAW);
 }

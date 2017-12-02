@@ -8,6 +8,10 @@
 #include "drawable.h"
 
 
+enum textureSlot : unsigned char
+{ SURFACE, NORMAL, GREYSCALE };
+
+
 class ShaderProgram
 {
 public:
@@ -17,13 +21,19 @@ public:
 
     int attrPos; // A handle for the "in" vec4 representing vertex position in the vertex shader
     int attrNor; // A handle for the "in" vec4 representing vertex normal in the vertex shader
-    int attrCol; // A handle for the "in" vec4 representing vertex color in the vertex shader
+    //int attrCol; // A handle for the "in" vec4 representing vertex color in the vertex shader
+    int attrUV; // A handle for the "in" vec2 representing vertex UV coordinates
+    int attrFlow; // A handle for the "in" byte representing a flag indicating if it's from a fluid block
 
     int unifModel; // A handle for the "uniform" mat4 representing model matrix in the vertex shader
     int unifModelInvTr; // A handle for the "uniform" mat4 representing inverse transpose of the model matrix in the vertex shader
     int unifViewProj; // A handle for the "uniform" mat4 representing combined projection and view matrices in the vertex shader
     int unifColor; // A handle for the "uniform" vec4 representing color of geometry in the vertex shader
     int unifTime;
+
+    int unifSamplerSurface;
+    int unifSamplerNormal;
+    int unifSamplerGreyScale;
 
 public:
     ShaderProgram(OpenGLContext* context);
@@ -45,7 +55,7 @@ public:
     void printShaderInfoLog(int shader);
     // Utility function that prints any shader linking errors to the console
     void printLinkInfoLog(int prog);
-void setTimeCount(int time);
+    void setTimeCount(int time);
     QString qTextFileRead(const char*);
 
 private:

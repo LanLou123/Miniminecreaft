@@ -11,8 +11,11 @@
 #include"player.h"
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
+#include <texture.h>
 
 #include <scene/quad.h>
+
+#include <QMutex>
 
 class MyGL : public OpenGLContext
 {
@@ -41,8 +44,17 @@ private:
     void MoveMouseToCenter(); // Forces the mouse position to the screen's center. You should call this
                               // from within a mouse move event after reading the mouse movement so that
                               // your mouse stays within the screen bounds and is always read.
+    int m_time;
+
 
     Quad* m_QuadBoard;
+    Texture *surfaceMap;
+    Texture *normalMap;
+    Texture *greyScaleMap;
+
+    QMutex* chunkMutex;
+
+    bool isCheckingBoundary;
 public:
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();
@@ -52,6 +64,9 @@ public:
     void paintGL();
 
     void GLDrawScene();
+
+    // For multi-Threading
+    std::vector<Chunk*> *chunkToAdd;
 
 protected:
     void keyPressEvent(QKeyEvent *e);

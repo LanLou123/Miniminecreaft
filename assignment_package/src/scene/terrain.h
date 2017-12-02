@@ -23,8 +23,18 @@
 
 enum BlockType : unsigned char
 {
-    EMPTY, GRASS, DIRT, STONE, LAVA
+
+    EMPTY, GRASS, DIRT, STONE, LAVA, WOOD, LEAF, BEDROCK, WATER, ICE
+
 };
+
+enum FaceFacing : unsigned char
+
+{
+    FRONT, BACK, LEFT, RIGHT, UP, DOWN
+};
+
+
 class Chunk;
 class TerrainAtBoundary;
 class Terrain
@@ -42,7 +52,12 @@ public:
                                                            // given type.
 
     Chunk* getChunkAt(int64_t x, int64_t z) const;
-    void addChunkAt(OpenGLContext* parent, int x, int z);
+
+
+    //void addChunkAt(OpenGLContext* parent, int x, int z);
+    Chunk* newChunkAt(OpenGLContext* parent, int x, int z);
+    void addChunk2Map(Chunk* chunk);
+
     std::unordered_map<int64_t, Chunk*> ChunkTable;
     // Generate a 64* 256 * 64 Terrain at a given point(the bottom-left of new terrain)
     void GenerateTerrainAt(int left, int bottom, OpenGLContext *parent);
@@ -78,7 +93,11 @@ private:
 
     std::vector<GLfloat> pos;
     std::vector<GLfloat> nor;
-    std::vector<GLfloat> col;
+
+    std::vector<GLfloat> uv;
+
+    std::vector<GLint> flowFlag;
+
     std::vector<GLuint> ele;
 
     Chunk* getLeftAdjacent();
@@ -92,12 +111,20 @@ private:
     void fillBackFace(size_t x, size_t y, size_t z, BlockType type);
     void fillUpFace(size_t x, size_t y, size_t z, BlockType type);
     void fillDownFace(size_t x, size_t y, size_t z, BlockType type);
-    void fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type);
+
+
+    void fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing);
+
+
 public:
 
     Chunk(OpenGLContext* parent, Terrain *terrain, int64_t xz);
     BlockType getBlockType(size_t x, size_t y, size_t z) const;
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
+
+
+    int64_t getXZGlobalPositions();
+
     static xzCoords getXZCoordUnpacked(int64_t p)
     {
         int32_t x = p >> 32;
@@ -122,9 +149,17 @@ private:
     int left;
     int bottom;
     QMutex* chunkMutex;
+    std::vector<Chunk*> *chunkToAdd;
     Terrain* currentTerrain;
     OpenGLContext *parent;
+    bool isCheckingForBoundary;
 public:
-    TerrainAtBoundary(int cornerX, int cornerZ, QMutex* m, Terrain* currentTerrain, OpenGLContext *parent);
+    TerrainAtBoundary(int cornerX,
+                      int cornerZ,
+                      QMutex* m,
+                      std::vector<Chunk*> *chunkToAdd,
+                      Terrain* currentTerrain,
+                      OpenGLContext *parent,
+                      bool& isCheckingForBoundary);
     void run() override;
 };
