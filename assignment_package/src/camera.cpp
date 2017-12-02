@@ -78,7 +78,6 @@ void Camera::RotateAboutUp(float deg)
 void Camera::RotateAboutRight(float deg)
 {
     add_deg+=deg;
-    std::cout<<add_deg<<std::endl;
     if(abs(add_deg)>89)
         deg=0;
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(deg), right);
