@@ -11,6 +11,7 @@
 #include"player.h"
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
+#include <texture.h>
 
 
 class MyGL : public OpenGLContext
@@ -38,6 +39,10 @@ private:
                               // from within a mouse move event after reading the mouse movement so that
                               // your mouse stays within the screen bounds and is always read.
     int m_time;
+
+    Texture *surfaceMap;
+    Texture *normalMap;
+    Texture *greyScaleMap;
 
 public:
     explicit MyGL(QWidget *parent = 0);

@@ -7,7 +7,7 @@
 
 ShaderProgram::ShaderProgram(OpenGLContext *context)
     : vertShader(), fragShader(), prog(),
-      attrPos(-1), attrNor(-1), attrCol(-1), attrUV(-1), attrFlow(-1),
+      attrPos(-1), attrNor(-1), /*attrCol(-1),*/ attrUV(-1), attrFlow(-1),
       unifModel(-1), unifModelInvTr(-1), unifViewProj(-1), unifColor(-1),
       context(context)
 {}
@@ -62,7 +62,7 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
 
     attrPos = context->glGetAttribLocation(prog, "vs_Pos");
     attrNor = context->glGetAttribLocation(prog, "vs_Nor");
-    attrCol = context->glGetAttribLocation(prog, "vs_Col");
+    //attrCol = context->glGetAttribLocation(prog, "vs_Col");
     attrUV = context->glGetAttribLocation(prog, "vs_UV");
     attrFlow = context->glGetAttribLocation(prog, "vs_FlowFlag");
 
@@ -71,6 +71,10 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
     unifViewProj   = context->glGetUniformLocation(prog, "u_ViewProj");
     unifColor      = context->glGetUniformLocation(prog, "u_Color");
     unifTime       = context->glGetUniformLocation(prog, "u_Time");
+
+    unifSamplerSurface = context->glGetUniformLocation(prog, "u_Surface");
+    unifSamplerNormal = context->glGetUniformLocation(prog, "u_Normal");
+    unifSamplerGreyScale = context->glGetUniformLocation(prog, "u_GreyScale");
 }
 
 void ShaderProgram::useMe()
@@ -160,10 +164,10 @@ void ShaderProgram::draw(Drawable &d)
         context->glVertexAttribPointer(attrNor, 4, GL_FLOAT, false, 0, NULL);
     }
 
-    if (attrCol != -1 && d.bindCol()) {
+    /*if (attrCol != -1 && d.bindCol()) {
         context->glEnableVertexAttribArray(attrCol);
         context->glVertexAttribPointer(attrCol, 4, GL_FLOAT, false, 0, NULL);
-    }
+    }*/
 
     if (attrUV != -1 && d.bindUV()) {
         context->glEnableVertexAttribArray(attrUV);
@@ -175,6 +179,10 @@ void ShaderProgram::draw(Drawable &d)
         context->glVertexAttribIPointer(attrFlow, 1, GL_INT, 0, NULL);
     }
 
+    if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
+    if (unifSamplerNormal != -1) context->glUniform1i(unifSamplerNormal, NORMAL);
+    if (unifSamplerGreyScale != -1) context->glUniform1i(unifSamplerGreyScale, GREYSCALE);
+
     // Bind the index buffer and then draw shapes from it.
     // This invokes the shader program, which accesses the vertex buffers.
     d.bindIdx();
@@ -182,7 +190,9 @@ void ShaderProgram::draw(Drawable &d)
 
     if (attrPos != -1) context->glDisableVertexAttribArray(attrPos);
     if (attrNor != -1) context->glDisableVertexAttribArray(attrNor);
-    if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
+    //if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
+    if (attrUV != -1) context->glDisableVertexAttribArray(attrUV);
+    if (attrFlow != -1) context->glDisableVertexAttribArray(attrFlow);
 
     context->printGLErrorLog();
 }

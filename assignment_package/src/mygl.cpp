@@ -9,7 +9,8 @@ MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
-      mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0)
+      mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
+      surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this))
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -52,6 +53,10 @@ MyGL::~MyGL()
     delete mp_progFlat;
     delete mp_camera;
     delete mp_terrain;
+
+    delete surfaceMap;
+    delete normalMap;
+    delete greyScaleMap;
 }
 
 
@@ -114,6 +119,17 @@ void MyGL::initializeGL()
  
     msec = QDateTime::currentMSecsSinceEpoch();
 
+    surfaceMap->create(":/texture/minecraft_textures_all.png");
+    surfaceMap->load(SURFACE);
+    surfaceMap->bind(SURFACE);
+
+    normalMap->create(":/texture/minecraft_normals_all.png");
+    normalMap->load(NORMAL);
+    normalMap->bind(NORMAL);
+
+    greyScaleMap->create(":/texture/minecraft_textures_all_grey_grass.png");
+    greyScaleMap->load(GREYSCALE);
+    greyScaleMap->bind(GREYSCALE);
 }
 
 void MyGL::resizeGL(int w, int h)

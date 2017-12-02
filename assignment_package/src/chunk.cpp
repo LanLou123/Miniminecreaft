@@ -51,7 +51,7 @@ BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
     return this->blocks[4096*x + 256*z + y];
 }
 
-void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type)
+void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing)
 {
     for (unsigned i = 0; i!=4; ++i)
     {
@@ -67,41 +67,51 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type)
             nor.push_back(normal[j]);
         }
     }
+
+    //NOT supposed to be used later!
+    glm::vec2 trivialFaceUV[4] =
+    {
+        glm::vec2(0.0f, 0.0f),
+        glm::vec2(0.0f, 0.0f),
+        glm::vec2(0.0f, 0.0f),
+        glm::vec2(0.0f, 0.0f)
+    };
+
     switch (type)
     {
     case GRASS:
         for (unsigned i = 0; i!=4; ++i)
         {
-            for (unsigned j = 0; j!=4; ++j)
+            for (unsigned j = 0; j!=2; ++j)
             {
-                col.push_back(grassColor[j]);
+                uv.push_back(trivialFaceUV[i][j]);
             }
         }
         break;
     case DIRT:
         for (unsigned i = 0; i!=4; ++i)
         {
-            for (unsigned j = 0; j!=4; ++j)
+            for (unsigned j = 0; j!=2; ++j)
             {
-                col.push_back(dirtColor[j]);
+                uv.push_back(trivialFaceUV[i][j]);
             }
         }
         break;
     case STONE:
         for (unsigned i = 0; i!=4; ++i)
         {
-            for (unsigned j = 0; j!=4; ++j)
+            for (unsigned j = 0; j!=2; ++j)
             {
-                col.push_back(stoneColor[j]);
+                uv.push_back(trivialFaceUV[i][j]);
             }
         }
         break;
     case LAVA:
         for (unsigned i = 0; i!=4; ++i)
         {
-            for (unsigned j = 0; j!=4; ++j)
+            for (unsigned j = 0; j!=2; ++j)
             {
-                col.push_back(lavaColor[j]);
+                uv.push_back(trivialFaceUV[i][j]);
             }
         }
         break;
@@ -136,7 +146,7 @@ void Chunk::fillLeftFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(-1.0f, 0.0f, 0.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, LEFT);
 }
 
 void Chunk::fillRightFace(size_t x, size_t y, size_t z, BlockType type)
@@ -157,7 +167,7 @@ void Chunk::fillRightFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(1.0f, 0.0f, 0.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, RIGHT);
 }
 
 void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
@@ -165,9 +175,9 @@ void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
     glm::vec4 square[4] =
     {
         glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f),
-        glm::vec4(x - cubeHR, y + cubeHR, z + cubeHR, 1.0f),
+        glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f),
         glm::vec4(x + cubeHR, y + cubeHR, z + cubeHR, 1.0f),
-        glm::vec4(x + cubeHR, y + cubeHR, z - cubeHR, 1.0f)
+        glm::vec4(x - cubeHR, y + cubeHR, z + cubeHR, 1.0f)
     };
     xzCoords xzCoordinate = this->getXZCoordUnpacked(this->xzGlobalPos);
     glm::vec4 offset = glm::vec4(xzCoordinate.x, 0.0f, xzCoordinate.z, 0.0f);
@@ -178,7 +188,7 @@ void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(0.0f, 1.0f, 0.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, UP);
 }
 
 void Chunk::fillDownFace(size_t x, size_t y, size_t z, BlockType type)
@@ -199,7 +209,7 @@ void Chunk::fillDownFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(0.0f, -1.0f, 0.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, DOWN);
 }
 
 void Chunk::fillFrontFace(size_t x, size_t y, size_t z, BlockType type)
@@ -220,7 +230,7 @@ void Chunk::fillFrontFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(0.0f, 0.0f, 1.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, FRONT);
 }
 
 void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
@@ -241,14 +251,15 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
     }
 
     glm::vec4 normal = glm::vec4(0.0f, 0.0f, -1.0f, 0.0f);
-    this->fillFace(square, normal, type);
+    this->fillFace(square, normal, type, BACK);
 }
 
 void Chunk::create()
 {
     this->pos.clear();
     this->nor.clear();
-    this->col.clear();
+    this->uv.clear();
+    this->flowFlag.clear();
     this->ele.clear();
     for (size_t x = 0; x != 16; ++x)
     {
@@ -374,8 +385,13 @@ void Chunk::create()
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * nor.size(),
                              reinterpret_cast<void*>(nor.data()), GL_STATIC_DRAW);
 
-    generateCol();
-    context->glBindBuffer(GL_ARRAY_BUFFER, bufCol);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * col.size(),
-                             reinterpret_cast<void*>(col.data()), GL_STATIC_DRAW);
+    generateUV();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufUV);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * uv.size(),
+                            reinterpret_cast<void*>(uv.data()), GL_STATIC_DRAW);
+
+    generateFlow();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufFlow);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * flowFlag.size(),
+                            reinterpret_cast<void*>(flowFlag.data()), GL_STATIC_DRAW);
 }

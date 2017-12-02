@@ -35,6 +35,11 @@ enum BlockType : unsigned char
 
 };
 
+enum FaceFacing : unsigned char
+
+{
+    FRONT, BACK, LEFT, RIGHT, UP, DOWN
+};
 
 class Chunk;
 
@@ -119,8 +124,6 @@ private:
 
     std::vector<GLfloat> nor;
 
-    /*std::vector<GLfloat> col;*/
-
     std::vector<GLfloat> uv;
 
     std::vector<GLint> flowFlag;
@@ -153,7 +156,7 @@ private:
 
 
 
-    void fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type);
+    void fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing);
 
 
 

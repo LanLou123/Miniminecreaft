@@ -111,7 +111,7 @@ bool Drawable::bindCol()
 
 bool Drawable::bindUV()
 {
-    if(colBound){
+    if(uvBound){
         context->glBindBuffer(GL_ARRAY_BUFFER, bufUV);
     }
     return uvBound;
