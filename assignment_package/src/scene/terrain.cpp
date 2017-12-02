@@ -14,7 +14,7 @@ const float fbm_magnitude=0.2f;
 const int step = 3;
 Terrain::Terrain() : dimensions(64, 256, 64)
 {
-      river1=River(10,35,1);
+      river1=River(10,25,1);
       river2=River(10,210,2);
       create_riverside();
 }
