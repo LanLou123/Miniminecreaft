@@ -68,6 +68,14 @@ BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
     return this->blocks[4096*x + 256*z + y];
 }
 
+BlockType& Chunk::accessBlockTypeGlobalCoords(int x, int y, int z)
+{
+    xzCoords coord = Chunk::getXZCoordUnpacked(this->xzGlobalPos);
+    x -= coord.x;
+    z -= coord.z;
+    return this->accessBlockType(x, y, z);
+}
+
 static const glm::vec2 grassTop[4] = uvGrid(8, 13).squareUV;
 static const glm::vec2 grassSide[4] = uvGrid(3, 15).squareUV;
 static const glm::vec2 dirt[4] = uvGrid(2, 15).squareUV;
@@ -80,6 +88,23 @@ static const glm::vec2 sandBottom[4] = uvGrid(2, 14).squareUV;
 static const glm::vec2 ice[4] = uvGrid(3, 11).squareUV;
 static const glm::vec2 water[4] = uvGrid(13, 3).squareUV;
 static const glm::vec2 lava[4] = uvGrid(13, 1).squareUV;
+
+void Chunk::appendUV(const glm::vec2 uvCoords[])
+{
+    for (unsigned i = 0; i!=4; ++i)
+    {
+        for (unsigned j = 0; j!=2; ++j)
+        {
+            uv.push_back((*(uvCoords + i))[j]);
+        }
+    }
+}
+
+void Chunk::appendFlow(glm::vec2 speed)
+{
+    flowVelocity.push_back(speed[0]);
+    flowVelocity.push_back(speed[1]);
+}
 
 void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing)
 {
@@ -98,42 +123,37 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
         }
     }
 
-    const glm::vec2* ptr2UVSquare;
-
     switch (type)
     {
     case GRASS:
         if (facing == UP)
         {
-            ptr2UVSquare = grassTop;
+            appendUV(grassTop);
+        }
+        else if (facing == DOWN)
+        {
+            appendUV(dirt);
         }
         else
         {
-            ptr2UVSquare = grassSide;
+            appendUV(grassSide);
         }
         break;
     case DIRT:
-        ptr2UVSquare = dirt;
+        appendUV(dirt);
         break;
     case STONE:
-        ptr2UVSquare = stone;
+        appendUV(stone);
         break;
     case LAVA:
-        ptr2UVSquare = lava;
+        appendUV(lava);
         break;
     case WATER:
-        ptr2UVSquare = water;
+        appendUV(water);
         break;
     default:
-        ptr2UVSquare = leaf;
+        appendUV(stone);
         break;
-    }
-    for (unsigned i = 0; i!=4; ++i)
-    {
-        for (unsigned j = 0; j!=2; ++j)
-        {
-            uv.push_back((*(ptr2UVSquare + i))[j]);
-        }
     }
 
     size_t indexoffset = ele.size() / 3 * 2;
@@ -276,7 +296,7 @@ void Chunk::create()
     this->pos.clear();
     this->nor.clear();
     this->uv.clear();
-    this->flowFlag.clear();
+    this->flowVelocity.clear();
     this->ele.clear();
     for (size_t x = 0; x != 16; ++x)
     {
@@ -407,8 +427,8 @@ void Chunk::create()
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * uv.size(),
                             reinterpret_cast<void*>(uv.data()), GL_STATIC_DRAW);
 
-    generateFlow();
-    context->glBindBuffer(GL_ARRAY_BUFFER, bufFlow);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * flowFlag.size(),
-                            reinterpret_cast<void*>(flowFlag.data()), GL_STATIC_DRAW);
+    generateFlowVelocity();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufFlowVelocity);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * flowVelocity.size(),
+                            reinterpret_cast<void*>(flowVelocity.data()), GL_STATIC_DRAW);
 }

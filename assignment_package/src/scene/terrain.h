@@ -85,6 +85,9 @@ struct xzCoords
 
 class Chunk : public Drawable
 {
+
+friend class Terrain;
+
 private:
 
     BlockType blocks[65536];
@@ -96,7 +99,7 @@ private:
 
     std::vector<GLfloat> uv;
 
-    std::vector<GLint> flowFlag;
+    std::vector<GLfloat> flowVelocity;
 
     std::vector<GLuint> ele;
 
@@ -115,12 +118,17 @@ private:
 
     void fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing);
 
+    void appendUV(const glm::vec2 uvCoords[]);
+
+    void appendFlow(glm::vec2 speed);
+
+    BlockType getBlockType(size_t x, size_t y, size_t z) const;
+
+    BlockType& accessBlockType(size_t x, size_t y, size_t z);
 
 public:
 
     Chunk(OpenGLContext* parent, Terrain *terrain, int64_t xz);
-    BlockType getBlockType(size_t x, size_t y, size_t z) const;
-    BlockType& accessBlockType(size_t x, size_t y, size_t z);
 
 
     int64_t getXZGlobalPositions();
@@ -132,6 +140,10 @@ public:
 
         return xzCoords(x, z);
     }
+
+
+    BlockType& accessBlockTypeGlobalCoords(int x, int y, int z);
+
     static int64_t getXZCoordPacked(xzCoords c)
     {
         int64_t xExtended = c.x;
@@ -150,8 +162,8 @@ private:
     int bottom;
     QMutex* chunkMutex;
     std::vector<Chunk*> *chunkToAdd;
-    Terrain* currentTerrain;
     OpenGLContext *parent;
+    Terrain* currentTerrain;
     bool isCheckingForBoundary;
 public:
     TerrainAtBoundary(int cornerX,

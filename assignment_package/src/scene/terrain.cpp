@@ -341,53 +341,55 @@ void TerrainAtBoundary::run()
         normalZ *= -16;
     }
 std::cout<<"OK here0" <<std::endl;
-    chunkMutex->lock();
+
 
     for(int i = 0; i < 4; i++)
     {
         for(int j = 0; j < 4 ;j++)
         {
             Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+            // Populate this chunk
+            for(int x = left; x < left + (i+1) * 16; ++x)
+            {
+                for(int z = bottom; z < bottom + (j+1) *16; ++z)
+                {
+                    float scale = 48.f;
+                    glm::vec2 st = glm::vec2(x, z) / scale;
+                    float height = 0.2f * fbm(st);
+
+                    int heightInt = (int) (height * 128.f);
+
+                    for(int y = 0; y < 256; ++y)
+                    {
+                        if(y < 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
+                        }
+                        else if(y < 129 + heightInt - 1 && y >= 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
+                        }
+                        else if(y == 129 + heightInt - 1 && y >= 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
+                        }
+                        else
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
+                        }
+
+                    }
+                }
+            }
             //currentTerrain->addChunk2Map(newChunk);
+            chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
+            chunkMutex->unlock();
         }
     }
 
     std::cout<<"OK here1" <<std::endl;
 
-    for(int x = left; x < left + 64; ++x)
-    {
-        for(int z = bottom; z < bottom + 64; ++z)
-        {
-            float scale = 48.f;
-            glm::vec2 st = glm::vec2(x, z) / scale;
-            float height = 0.2f * fbm(st);
-
-            int heightInt = (int) (height * 128.f);
-
-            for(int y = 0; y < 256; ++y)
-            {
-                if(y < 129)
-                {
-                    currentTerrain->setBlockAt(x,y,z,STONE);
-                }
-                else if(y < 129 + heightInt - 1 && y >= 129)
-                {
-                    currentTerrain->setBlockAt(x,y,z,DIRT);
-                }
-                else if(y == 129 + heightInt - 1 && y >= 129)
-                {
-                    currentTerrain->setBlockAt(x,y,z,GRASS);
-                }
-                else
-                {
-                    currentTerrain->setBlockAt(x,y,z,EMPTY);
-                }
-
-            }
-        }
-    }
-std::cout<<"OK here2" <<std::endl;
 //    for(int i = 0; i < 4; i++)
 //    {
 //        for(int j = 0; j < 4 ;j++)
@@ -395,7 +397,7 @@ std::cout<<"OK here2" <<std::endl;
 //            currentTerrain->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
 //        }
 //    }
-    chunkMutex->unlock();
+
     std::cout<<"OK here3" <<std::endl;
     isCheckingForBoundary = false;
 

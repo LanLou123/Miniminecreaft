@@ -19,7 +19,7 @@ MyGL::MyGL(QWidget *parent)
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
       chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()),
-      isCheckingBoundary(false)
+      isCheckingForBoundary(false)
 
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
@@ -193,8 +193,8 @@ void MyGL::timerUpdate()
         int chunkNum = chunkToAdd->size();
         for(int index = chunkNum-1; index >= 0; index--)
         {
-            ((*chunkToAdd)[index])->create();
             mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+            ((*chunkToAdd)[index])->create();
             chunkToAdd->pop_back();
         }
         chunkMutex->unlock();
@@ -960,7 +960,7 @@ void MyGL::CheckForBoundary()
     Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
     if(xDirChunk == nullptr && zDirChunk != nullptr)
     {
-        isCheckingBoundary = true;
+        isCheckingForBoundary = true;
         std::cout<<"thread working?"<<std::endl;
 
         int normalX = 0;
@@ -968,7 +968,7 @@ void MyGL::CheckForBoundary()
         NormalizeXZ(x + 5, z, normalX, normalZ);
         // mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 
-        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain,this, isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain, this, isCheckingForBoundary);
         QThreadPool::globalInstance()->start(terrainGenerator);
     }
     else if(xDirChunk != nullptr && zDirChunk == nullptr)
@@ -977,7 +977,7 @@ void MyGL::CheckForBoundary()
         int normalZ = 0;
         NormalizeXZ(x, z + 5, normalX, normalZ);
         // mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain,this, isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain, this,isCheckingForBoundary);
         QThreadPool::globalInstance()->start(terrainGenerator);
     }
     else if(xDirChunk == nullptr && zDirChunk == nullptr)

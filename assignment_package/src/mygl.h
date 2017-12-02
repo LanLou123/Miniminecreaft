@@ -54,7 +54,7 @@ private:
 
     QMutex* chunkMutex;
 
-    bool isCheckingBoundary;
+    bool isCheckingForBoundary;
 public:
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();

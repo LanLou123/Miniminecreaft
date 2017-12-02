@@ -21,9 +21,9 @@ public:
 
     int attrPos; // A handle for the "in" vec4 representing vertex position in the vertex shader
     int attrNor; // A handle for the "in" vec4 representing vertex normal in the vertex shader
-    //int attrCol; // A handle for the "in" vec4 representing vertex color in the vertex shader
+    int attrCol; // A handle for the "in" vec4 representing vertex color in the vertex shader
     int attrUV; // A handle for the "in" vec2 representing vertex UV coordinates
-    int attrFlow; // A handle for the "in" byte representing a flag indicating if it's from a fluid block
+    int attrFlowVelocity; // A handle for the flowing speed
 
     int unifModel; // A handle for the "uniform" mat4 representing model matrix in the vertex shader
     int unifModelInvTr; // A handle for the "uniform" mat4 representing inverse transpose of the model matrix in the vertex shader
