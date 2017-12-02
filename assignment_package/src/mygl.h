@@ -12,6 +12,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 
+#include <scene/quad.h>
 
 class MyGL : public OpenGLContext
 {
@@ -21,6 +22,9 @@ private:
     WorldAxes* mp_worldAxes; // A wireframe representation of the world axes. It is hard-coded to sit centered at (32, 128, 32).
     ShaderProgram* mp_progLambert;// A shader program that uses lambertian reflection
     ShaderProgram* mp_progFlat;// A shader program that uses "flat" reflection (no shadowing at all)
+
+    ShaderProgram* mp_progLiquid;
+
     int timecount;
     GLuint vao; // A handle for our vertex array object. This will store the VBOs created in our geometry classes.
                 // Don't worry too much about this. Just know it is necessary in order to render geometry.
@@ -38,7 +42,7 @@ private:
                               // from within a mouse move event after reading the mouse movement so that
                               // your mouse stays within the screen bounds and is always read.
 
-
+    Quad* m_QuadBoard;
 public:
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();
@@ -83,6 +87,8 @@ protected:
     void walk_begin();
     void walk_end();
     void moving();
+
+    void CheckforLiquid(bool& touch, bool& inside, BlockType& liquidType);
 
 private slots:
     /// Slot that gets called ~60 times per second

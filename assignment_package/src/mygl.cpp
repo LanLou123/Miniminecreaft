@@ -4,12 +4,17 @@
 #include <iostream>
 #include <QApplication>
 #include <QKeyEvent>
+#include <QThreadPool>
+#include <QRunnable>
+#include <QString>
+#include <QMutex>
 
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
-      mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
-      mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0)
+      mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)), mp_progLiquid(new ShaderProgram(this)),
+      mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0),
+      m_QuadBoard(new Quad(this))
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -52,6 +57,8 @@ MyGL::~MyGL()
     delete mp_progFlat;
     delete mp_camera;
     delete mp_terrain;
+
+    delete m_QuadBoard;
 }
 
 
@@ -88,10 +95,15 @@ void MyGL::initializeGL()
     mp_geomCube->create();
     mp_worldAxes->create();
 
+    m_QuadBoard->create();
+
     // Create and set up the diffuse shader
     mp_progLambert->create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
     // Create and set up the flat lighting shader
     mp_progFlat->create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
+
+    // Create a new shader program, to show the water effect
+    mp_progLiquid->create(":/glsl/water.vert.glsl", ":/glsl/water.frag.glsl");
 
     // Set a color with which to draw geometry since you won't have one
     // defined until you implement the Node classes.
@@ -171,6 +183,8 @@ void MyGL::paintGL()
     mp_progFlat->setModelMatrix(glm::mat4());
     mp_progFlat->draw(*mp_worldAxes);
     glEnable(GL_DEPTH_TEST);
+
+    mp_progLiquid->draw(*m_QuadBoard);
 }
 
 void MyGL::GLDrawScene()
@@ -893,6 +907,7 @@ void MyGL::CheckForBoundary()
     int x = gridLoc[0];
     int z = gridLoc[2];
 
+    QMutex* newChunkMutex = new QMutex();
 // How to use getChunkAt
     Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5, z);
     Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5, z);
@@ -900,11 +915,15 @@ void MyGL::CheckForBoundary()
     Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
     if(xDirChunk == nullptr && zDirChunk != nullptr)
     {
+        std::cout<<"thread working?"<<std::endl;
+
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + 5, z, normalX, normalZ);
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 
+        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,newChunkMutex,mp_terrain,this);
+        QThreadPool::globalInstance()->start(terrainGenerator);
     }
     else if(xDirChunk != nullptr && zDirChunk == nullptr)
     {
@@ -1029,5 +1048,33 @@ void MyGL::mouseMoveEvent(QMouseEvent *e)
 void MyGL::wheelEvent(QWheelEvent *e)
 {}
 
+void MyGL::CheckforLiquid(bool &touch, bool &inside, BlockType &liquidType)
+{
 
+    glm::vec3 eyePos = mp_camera->eye;
+    if(!inside)
+    {
+        // foot
+        glm::vec3 footBottom = eyePos - glm::vec3(0.f, 1.5001f, 0.f);
+        BlockType footBlock = mp_terrain->getBlockAt(footBottom[0], footBottom[1], footBottom[2]);
+        if(footBlock == LAVA)
+        {
+            touch = true;
+        }
+        // front and back
+        // foot
+        glm::vec3 front = eyePos + glm::vec3(0.5001f, 0.f, 0.f);
+        BlockType frontBlock = mp_terrain->getBlockAt(front[0], front[1], front[2]);
+        if(frontBlock == LAVA)
+        {
+            touch = true;
+        }
+    }
+    BlockType eyeBlock = mp_terrain->getBlockAt(eyePos[0], eyePos[1], eyePos[2]);
+    if(eyeBlock == LAVA)
+    {
+        inside = true;
+        liquidType = eyeBlock;
+    }
+}
 

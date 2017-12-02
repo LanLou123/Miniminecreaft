@@ -8,7 +8,8 @@
 
 #include <iostream>
 
-Terrain::Terrain() : dimensions(64, 256, 64)
+Terrain::Terrain()
+    : dimensions(64, 256, 64)
 {}
 
 Terrain::~Terrain()
@@ -282,4 +283,96 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
         }
     }
 
+}
+
+TerrainAtBoundary::TerrainAtBoundary(int cornerX,
+                                     int cornerZ,
+                                     QMutex* m,
+                                     Terrain* currentTerrain,
+                                     OpenGLContext *parent)
+    :left(cornerX), bottom(cornerZ),
+      chunkMutex(m),
+      currentTerrain(currentTerrain),
+      parent(parent)
+{
+
+}
+
+void TerrainAtBoundary::run()
+{
+    // normalize x and z coord
+    int normalX = 0;
+    int normalZ = 0;
+    if(left >= 0)
+    {
+        normalX = left / 16;
+        normalX *= 16;
+    }
+    else
+    {
+        normalX = (- left - 1) / 16 + 1;
+        normalX *= -16;
+    }
+    if(bottom >= 0)
+    {
+        normalZ = bottom / 16;
+        normalZ *= 16;
+    }
+    else
+
+    {
+        normalZ = (- bottom - 1) / 16 + 1;
+        normalZ *= -16;
+    }
+
+    chunkMutex->lock();
+
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 4 ;j++)
+        {
+            currentTerrain->addChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+        }
+    }
+    for(int x = left; x < left + 64; ++x)
+    {
+        for(int z = bottom; z < bottom + 64; ++z)
+        {
+            float scale = 48.f;
+            glm::vec2 st = glm::vec2(x, z) / scale;
+            float height = 0.2f * fbm(st);
+
+            int heightInt = (int) (height * 128.f);
+
+            for(int y = 0; y < 256; ++y)
+            {
+                if(y < 129)
+                {
+                    currentTerrain->setBlockAt(x,y,z,STONE);
+                }
+                else if(y < 129 + heightInt - 1 && y >= 129)
+                {
+                    currentTerrain->setBlockAt(x,y,z,DIRT);
+                }
+                else if(y == 129 + heightInt - 1 && y >= 129)
+                {
+                    currentTerrain->setBlockAt(x,y,z,GRASS);
+                }
+                else
+                {
+                    currentTerrain->setBlockAt(x,y,z,EMPTY);
+                }
+
+            }
+        }
+    }
+
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 4 ;j++)
+        {
+            currentTerrain->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
+        }
+    }
+    chunkMutex->unlock();
 }
