@@ -374,7 +374,8 @@ void Chunk::create()
         {
             for (size_t y = 0; y != 256; ++y)
             {
-                if (this->getBlockType(x, y, z) == EMPTY)
+                BlockType currentBlock = this->getBlockType(x, y, z);
+                if (currentBlock == EMPTY)
                 {
                     continue;
                 }
@@ -384,7 +385,7 @@ void Chunk::create()
                 {
                     //Check the chunk to its left
                     Chunk* adjNegX = this->getLeftAdjacent();
-                    if (adjNegX == nullptr || adjNegX->shouldFill(15, y, z))
+                    if (adjNegX == nullptr || adjNegX->shouldFill(15, y, z, currentBlock))
                     {
                         fillLeftFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -392,7 +393,7 @@ void Chunk::create()
                 //Check the block to its left
                 else
                 {
-                    if (this->shouldFill(x - 1, y, z))
+                    if (this->shouldFill(x - 1, y, z, currentBlock))
                     {
                         fillLeftFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -404,7 +405,7 @@ void Chunk::create()
                 {
                     //Checkthe chunk to its right
                     Chunk* adjPosX = this->getRightAdjacent();
-                    if (adjPosX == nullptr || adjPosX->shouldFill(0, y, z))
+                    if (adjPosX == nullptr || adjPosX->shouldFill(0, y, z, currentBlock))
                     {
                         fillRightFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -412,7 +413,7 @@ void Chunk::create()
                 //Check the block to its right
                 else
                 {
-                    if (this->shouldFill(x + 1, y, z))
+                    if (this->shouldFill(x + 1, y, z, currentBlock))
                     {
                         fillRightFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -424,7 +425,7 @@ void Chunk::create()
                 {
                     //Check the chunk to its back
                     Chunk* adjNegZ = this->getBackAdjacent();
-                    if (adjNegZ == nullptr || adjNegZ->shouldFill(x, y, 15))
+                    if (adjNegZ == nullptr || adjNegZ->shouldFill(x, y, 15, currentBlock))
                     {
                         fillBackFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -432,7 +433,7 @@ void Chunk::create()
                 //Check the block to its back
                 else
                 {
-                    if (this->shouldFill(x, y, z - 1))
+                    if (this->shouldFill(x, y, z - 1, currentBlock))
                     {
                         fillBackFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -444,7 +445,7 @@ void Chunk::create()
                 {
                     //Check the chunk to its front
                     Chunk* adjPosZ = this->getFrontAdjacent();
-                    if (adjPosZ == nullptr || adjPosZ->shouldFill(x, y, 0))
+                    if (adjPosZ == nullptr || adjPosZ->shouldFill(x, y, 0, currentBlock))
                     {
                         fillFrontFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -452,7 +453,7 @@ void Chunk::create()
                 //Check the block to its front
                 else
                 {
-                    if (this->shouldFill(x, y, z + 1))
+                    if (this->shouldFill(x, y, z + 1, currentBlock))
                     {
                         fillFrontFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -460,14 +461,14 @@ void Chunk::create()
 
                 //Check up
                 //Check the block above it
-                if (y == 255 || this->shouldFill(x, y + 1, z))
+                if (y == 255 || this->shouldFill(x, y + 1, z, currentBlock))
                 {
                     fillUpFace(x, y, z, this->getBlockType(x, y, z));
                 }
 
                 //Check down
                 //Check the block below it
-                if (y == 0 || this->shouldFill(x, y - 1, z))
+                if (y == 0 || this->shouldFill(x, y - 1, z, currentBlock))
                 {
                     fillDownFace(x, y, z, this->getBlockType(x, y, z));
                 }
