@@ -966,10 +966,10 @@ void MyGL::CheckForBoundary()
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + 5, z, normalX, normalZ);
-        // mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 
-        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain, this, isCheckingForBoundary);
-        QThreadPool::globalInstance()->start(terrainGenerator);
+        //TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain, this, isCheckingForBoundary);
+        //QThreadPool::globalInstance()->start(terrainGenerator);
     }
     else if(xDirChunk != nullptr && zDirChunk == nullptr)
     {

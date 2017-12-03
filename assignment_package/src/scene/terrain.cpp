@@ -251,49 +251,82 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
         for(int j = 0; j < 4 ;j++)
         {
             Chunk* newChunk = this->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
-            this->addChunk2Map(newChunk);
-        }
-    }
-    for(int x = left; x < left + 64; ++x)
-    {
-        for(int z = bottom; z < bottom + 64; ++z)
-        {
-            float scale = 48.f;
-            glm::vec2 st = glm::vec2(x, z) / scale;
-            float height = 0.2f * fbm(st);
-
-            int heightInt = (int) (height * 128.f);
-
-            for(int y = 0; y < 256; ++y)
+            for(int x = left; x < left + (i+1) * 16; ++x)
             {
-                if(y < 129)
+                for(int z = bottom; z < bottom + (j+1) *16; ++z)
                 {
-                    this->setBlockAt(x,y,z,STONE);
-                }
-                else if(y < 129 + heightInt - 1 && y >= 129)
-                {
-                    this->setBlockAt(x,y,z,DIRT);
-                }
-                else if(y == 129 + heightInt - 1 && y >= 129)
-                {
-                    this->setBlockAt(x,y,z,GRASS);
-                }
-                else
-                {
-                    this->setBlockAt(x,y,z,EMPTY);
-                }
+                    float scale = 48.f;
+                    glm::vec2 st = glm::vec2(x, z) / scale;
+                    float height = 0.2f * fbm(st);
 
+                    int heightInt = (int) (height * 128.f);
+
+                    for(int y = 0; y < 256; ++y)
+                    {
+                        if(y < 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
+                        }
+                        else if(y < 129 + heightInt - 1 && y >= 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
+                        }
+                        else if(y == 129 + heightInt - 1 && y >= 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
+                        }
+                        else
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
+                        }
+
+                    }
+                }
             }
-        }
-    }
-
-    for(int i = 0; i < 4; i++)
-    {
-        for(int j = 0; j < 4 ;j++)
-        {
+            this->addChunk2Map(newChunk);
             this->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
         }
     }
+//    for(int x = left; x < left + 64; ++x)
+//    {
+//        for(int z = bottom; z < bottom + 64; ++z)
+//        {
+//            float scale = 48.f;
+//            glm::vec2 st = glm::vec2(x, z) / scale;
+//            float height = 0.2f * fbm(st);
+
+//            int heightInt = (int) (height * 128.f);
+
+//            for(int y = 0; y < 256; ++y)
+//            {
+//                if(y < 129)
+//                {
+//                    this->setBlockAt(x,y,z,STONE);
+//                }
+//                else if(y < 129 + heightInt - 1 && y >= 129)
+//                {
+//                    this->setBlockAt(x,y,z,DIRT);
+//                }
+//                else if(y == 129 + heightInt - 1 && y >= 129)
+//                {
+//                    this->setBlockAt(x,y,z,GRASS);
+//                }
+//                else
+//                {
+//                    this->setBlockAt(x,y,z,EMPTY);
+//                }
+
+//            }
+//        }
+//    }
+
+//    for(int i = 0; i < 4; i++)
+//    {
+//        for(int j = 0; j < 4 ;j++)
+//        {
+//            this->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
+//        }
+//    }
 
 }
 
