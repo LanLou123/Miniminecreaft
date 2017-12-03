@@ -50,19 +50,18 @@ void River::Generate_Lsys_two()
     T_lst.push_back(Branching);
     T_lst.push_back(Fwd);
     T_lst.push_back(Fwd);
-    T_lst.push_back(Fwd);
     T_lst.push_back(Return_to_here);
     T_lst.push_back(Turn);
     T_lst.push_back(Branching);
     T_lst.push_back(now_return);
-    T_lst.push_back(Turn);
-    T_lst.push_back(Return_to_here);
+    T_lst.push_back(Branching);
     T_lst.push_back(Turn);
     T_lst.push_back(Turn);
     T_lst.push_back(Fwd);
     T_lst.push_back(Branching);
     T_lst.push_back(now_return);
     T_lst.push_back(Fwd);
+    T_lst.push_back(Branching);
     T_lst.push_back(Turn);
     T_lst.push_back(Branching);
     T_lst.push_back(Fwd);
@@ -70,6 +69,7 @@ void River::Generate_Lsys_two()
     T_lst.push_back(Turn);
     T_lst.push_back(Turn);
     T_lst.push_back(Fwd);
+    T_lst.push_back(Branching);
     T_lst.push_back(Branching);
     T_lst.push_back(Fwd);
     T_lst.push_back(now_return);
@@ -80,9 +80,7 @@ void River::Generate_Lsys_two()
     T_lst.push_back(Branching);
     T_lst.push_back(Turn);
     T_lst.push_back(Turn);
-    T_lst.push_back(Fwd);
     T_lst.push_back(now_return);
-    T_lst.push_back(Fwd);
     generate_river_1(T_lst,origin_pos,t);
 
 }
@@ -235,7 +233,6 @@ void River::Compute_river_line(glm::vec2 v1,glm::vec2 v2,int t)
         std::swap(x1, x2);
         std::swap(y1, y2);
       }
-
       const float dx = x2 - x1;
       const float dy = fabs(y2 - y1);
       float error = dx / 2.0f;

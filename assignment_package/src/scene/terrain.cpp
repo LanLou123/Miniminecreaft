@@ -489,8 +489,8 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
 {
     int water_weight_count1=0;
     int water_weight_count2=0;
-    int max_bound_x = 64;
-    int max_bound_z = 64;
+    int max_bound_x = 16;
+    int max_bound_z = 16;
     int min_bound_x = 0;
     int min_bound_z = 0;
     int min_bound_y = 0;

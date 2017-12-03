@@ -229,7 +229,7 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
-        speed = 8.0/60.0;//the default speed for running
+        speed = 20.0/60.0;//the default speed for running
     }
     // http://doc.qt.io/qt-5/qt.html#Key-enum
     // This could all be much more efficient if a switch
