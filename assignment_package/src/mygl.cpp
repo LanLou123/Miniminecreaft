@@ -206,22 +206,25 @@ void MyGL::timerUpdate()
     // Try to get the lock
     //bool occupied = chunkMutex->tryLock();
     // If the mutex is not locked by other threads
-    if(chunkMutex->tryLock())
+    if(m_time%2 == 0)
     {
-        int chunkNum = chunkToAdd->size();
-        if(chunkNum == 0)
+        if(chunkMutex->tryLock())
         {
-            chunkMutex->unlock();
-        }
-        else
-        {
-            for(int index = chunkNum-1; index >= 0; index--)
+            int chunkNum = chunkToAdd->size();
+            if(chunkNum == 0)
             {
-                mp_terrain->addChunk2Map((*chunkToAdd)[index]);
-                ((*chunkToAdd)[index])->create();
-                chunkToAdd->pop_back();
+                chunkMutex->unlock();
             }
-            chunkMutex->unlock();
+            else
+            {
+                for(int index = chunkNum-1; index >= 0; index--)
+                {
+                    mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+                    ((*chunkToAdd)[index])->create();
+                    chunkToAdd->pop_back();
+                }
+                chunkMutex->unlock();
+            }
         }
     }
 
@@ -1021,7 +1024,9 @@ void MyGL::CheckForBoundary()
     Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
     if(xDirChunk == nullptr && zDirChunk != nullptr)
     {
+        checkingMutex->lock();
         isCheckingForBoundary = true;
+        checkingMutex->unlock();
 
         int normalX = 0;
         int normalZ = 0;
@@ -1029,13 +1034,42 @@ void MyGL::CheckForBoundary()
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 
         TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 16, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX + 32, normalZ ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 48, normalZ ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator5 = new TerrainAtBoundary(normalX, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator6 = new TerrainAtBoundary(normalX + 16, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator7 = new TerrainAtBoundary(normalX + 32, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator8 = new TerrainAtBoundary(normalX + 48, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator9 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator10 = new TerrainAtBoundary(normalX + 16, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator11 = new TerrainAtBoundary(normalX + 32, normalZ + 32 ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator12 = new TerrainAtBoundary(normalX + 48, normalZ + 32 ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator13 = new TerrainAtBoundary(normalX, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator14 = new TerrainAtBoundary(normalX + 16, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator15 = new TerrainAtBoundary(normalX + 32, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator16 = new TerrainAtBoundary(normalX + 48, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
         QThreadPool::globalInstance()->start(terrainGenerator1);
         QThreadPool::globalInstance()->start(terrainGenerator2);
         QThreadPool::globalInstance()->start(terrainGenerator3);
         QThreadPool::globalInstance()->start(terrainGenerator4);
+        QThreadPool::globalInstance()->start(terrainGenerator5);
+        QThreadPool::globalInstance()->start(terrainGenerator6);
+        QThreadPool::globalInstance()->start(terrainGenerator7);
+        QThreadPool::globalInstance()->start(terrainGenerator8);
+
+        QThreadPool::globalInstance()->start(terrainGenerator9);
+        QThreadPool::globalInstance()->start(terrainGenerator10);
+        QThreadPool::globalInstance()->start(terrainGenerator11);
+        QThreadPool::globalInstance()->start(terrainGenerator12);
+        QThreadPool::globalInstance()->start(terrainGenerator13);
+        QThreadPool::globalInstance()->start(terrainGenerator14);
+        QThreadPool::globalInstance()->start(terrainGenerator15);
+        QThreadPool::globalInstance()->start(terrainGenerator16);
         //isCheckingForBoundary = false;
     }
     else if(xDirChunk != nullptr && zDirChunk == nullptr)
@@ -1046,13 +1080,42 @@ void MyGL::CheckForBoundary()
         NormalizeXZ(x, z + 5, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 16, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX + 32, normalZ ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 48, normalZ ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator5 = new TerrainAtBoundary(normalX, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator6 = new TerrainAtBoundary(normalX + 16, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator7 = new TerrainAtBoundary(normalX + 32, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator8 = new TerrainAtBoundary(normalX + 48, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator9 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator10 = new TerrainAtBoundary(normalX + 16, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator11 = new TerrainAtBoundary(normalX + 32, normalZ + 32 ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator12 = new TerrainAtBoundary(normalX + 48, normalZ + 32 ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator13 = new TerrainAtBoundary(normalX, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator14 = new TerrainAtBoundary(normalX + 16, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator15 = new TerrainAtBoundary(normalX + 32, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator16 = new TerrainAtBoundary(normalX + 48, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
         QThreadPool::globalInstance()->start(terrainGenerator1);
         QThreadPool::globalInstance()->start(terrainGenerator2);
         QThreadPool::globalInstance()->start(terrainGenerator3);
         QThreadPool::globalInstance()->start(terrainGenerator4);
+        QThreadPool::globalInstance()->start(terrainGenerator5);
+        QThreadPool::globalInstance()->start(terrainGenerator6);
+        QThreadPool::globalInstance()->start(terrainGenerator7);
+        QThreadPool::globalInstance()->start(terrainGenerator8);
+
+        QThreadPool::globalInstance()->start(terrainGenerator9);
+        QThreadPool::globalInstance()->start(terrainGenerator10);
+        QThreadPool::globalInstance()->start(terrainGenerator11);
+        QThreadPool::globalInstance()->start(terrainGenerator12);
+        QThreadPool::globalInstance()->start(terrainGenerator13);
+        QThreadPool::globalInstance()->start(terrainGenerator14);
+        QThreadPool::globalInstance()->start(terrainGenerator15);
+        QThreadPool::globalInstance()->start(terrainGenerator16);
         //isCheckingForBoundary = false;
     }
     else if(xDirChunk == nullptr && zDirChunk == nullptr)
@@ -1076,13 +1139,42 @@ void MyGL::CheckForBoundary()
         NormalizeXZ(x - 5, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 16, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX + 32, normalZ ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 48, normalZ ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator5 = new TerrainAtBoundary(normalX, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator6 = new TerrainAtBoundary(normalX + 16, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator7 = new TerrainAtBoundary(normalX + 32, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator8 = new TerrainAtBoundary(normalX + 48, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator9 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator10 = new TerrainAtBoundary(normalX + 16, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator11 = new TerrainAtBoundary(normalX + 32, normalZ + 32 ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator12 = new TerrainAtBoundary(normalX + 48, normalZ + 32 ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator13 = new TerrainAtBoundary(normalX, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator14 = new TerrainAtBoundary(normalX + 16, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator15 = new TerrainAtBoundary(normalX + 32, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator16 = new TerrainAtBoundary(normalX + 48, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
         QThreadPool::globalInstance()->start(terrainGenerator1);
         QThreadPool::globalInstance()->start(terrainGenerator2);
         QThreadPool::globalInstance()->start(terrainGenerator3);
         QThreadPool::globalInstance()->start(terrainGenerator4);
+        QThreadPool::globalInstance()->start(terrainGenerator5);
+        QThreadPool::globalInstance()->start(terrainGenerator6);
+        QThreadPool::globalInstance()->start(terrainGenerator7);
+        QThreadPool::globalInstance()->start(terrainGenerator8);
+
+        QThreadPool::globalInstance()->start(terrainGenerator9);
+        QThreadPool::globalInstance()->start(terrainGenerator10);
+        QThreadPool::globalInstance()->start(terrainGenerator11);
+        QThreadPool::globalInstance()->start(terrainGenerator12);
+        QThreadPool::globalInstance()->start(terrainGenerator13);
+        QThreadPool::globalInstance()->start(terrainGenerator14);
+        QThreadPool::globalInstance()->start(terrainGenerator15);
+        QThreadPool::globalInstance()->start(terrainGenerator16);
     }
     else if(xMinusDirChunk != nullptr && zMinusDirChunk == nullptr)
     {
@@ -1092,13 +1184,42 @@ void MyGL::CheckForBoundary()
         NormalizeXZ(x, z - 5, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 16, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX + 32, normalZ ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 48, normalZ ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator5 = new TerrainAtBoundary(normalX, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator6 = new TerrainAtBoundary(normalX + 16, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator7 = new TerrainAtBoundary(normalX + 32, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator8 = new TerrainAtBoundary(normalX + 48, normalZ + 16,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator9 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator10 = new TerrainAtBoundary(normalX + 16, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator11 = new TerrainAtBoundary(normalX + 32, normalZ + 32 ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator12 = new TerrainAtBoundary(normalX + 48, normalZ + 32 ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
+        TerrainAtBoundary* terrainGenerator13 = new TerrainAtBoundary(normalX, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator14 = new TerrainAtBoundary(normalX + 16, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator15 = new TerrainAtBoundary(normalX + 32, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator16 = new TerrainAtBoundary(normalX + 48, normalZ + 48,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+
         QThreadPool::globalInstance()->start(terrainGenerator1);
         QThreadPool::globalInstance()->start(terrainGenerator2);
         QThreadPool::globalInstance()->start(terrainGenerator3);
         QThreadPool::globalInstance()->start(terrainGenerator4);
+        QThreadPool::globalInstance()->start(terrainGenerator5);
+        QThreadPool::globalInstance()->start(terrainGenerator6);
+        QThreadPool::globalInstance()->start(terrainGenerator7);
+        QThreadPool::globalInstance()->start(terrainGenerator8);
+
+        QThreadPool::globalInstance()->start(terrainGenerator9);
+        QThreadPool::globalInstance()->start(terrainGenerator10);
+        QThreadPool::globalInstance()->start(terrainGenerator11);
+        QThreadPool::globalInstance()->start(terrainGenerator12);
+        QThreadPool::globalInstance()->start(terrainGenerator13);
+        QThreadPool::globalInstance()->start(terrainGenerator14);
+        QThreadPool::globalInstance()->start(terrainGenerator15);
+        QThreadPool::globalInstance()->start(terrainGenerator16);
     }
     else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
     {

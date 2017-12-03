@@ -410,16 +410,16 @@ void TerrainAtBoundary::run()
 
 
 
-    for(int i = 0; i < 2; i++)
-    {
-        for(int j = 0; j < 2 ;j++)
-        {
-            std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
-            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+//    for(int i = 0; i < 1; i++)
+//    {
+//        for(int j = 0; j < 2 ;j++)
+//        {
+            //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
+            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX, normalZ);
             // Populate this chunk
-            for(int x = left + i * 16 ; x < left +  (i+1) * 16; ++x)
+            for(int x = left; x < left + 16; ++x)
             {
-                for(int z = bottom + j * 16; z < bottom + (j+1) * 16; ++z)
+                for(int z = bottom ; z < bottom + 16; ++z)
                 {
                     float scale = 48.f;
                     glm::vec2 st = glm::vec2(x, z) / scale;
@@ -454,8 +454,8 @@ void TerrainAtBoundary::run()
             chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
-        }
-    }
+//        }
+//    }
 
 //std::cout<<"OK here1" <<std::endl;
     checkingMutex->lock();
