@@ -38,4 +38,5 @@ HEADERS += \
     $$PWD/scene/worldaxes.h \
     $$PWD/player.h \
     $$PWD/river.h\
+    $$PWD/chunk.h\
     $$PWD/texture.h

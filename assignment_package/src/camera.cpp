@@ -77,7 +77,7 @@ void Camera::RotateAboutUp(float deg)
 }
 void Camera::RotateAboutRight(float deg)
 {
-    std::cout<<add_deg<<std::endl;
+    float temp = deg;
     add_deg+=deg;
     if(abs(add_deg)>=90)
     {
