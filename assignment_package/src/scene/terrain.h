@@ -191,17 +191,19 @@ private:
     int left;
     int bottom;
     QMutex* chunkMutex;
+    QMutex* checkingMutex;
     std::vector<Chunk*> *chunkToAdd;
     OpenGLContext *parent;
     Terrain* currentTerrain;
-    bool isCheckingForBoundary;
+    bool* isCheckingForBoundary;
 public:
     TerrainAtBoundary(int cornerX,
                       int cornerZ,
                       QMutex* m,
+                      QMutex* m1,
                       std::vector<Chunk*> *chunkToAdd,
                       Terrain* currentTerrain,
                       OpenGLContext *parent,
-                      bool& isCheckingForBoundary);
+                      bool* isCheckingForBoundary);
     void run() override;
 };

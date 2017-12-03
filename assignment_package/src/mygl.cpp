@@ -19,7 +19,8 @@ MyGL::MyGL(QWidget *parent)
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
 
-      chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), drawWater(false),
+      chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
+      drawWater(false),
       isCheckingForBoundary(false),
 
 
@@ -203,18 +204,25 @@ void MyGL::timerUpdate()
     this->Time_elapsed = delta / 1000.0f;//time(sec) elapsed since last update
 
     // Try to get the lock
-    bool occupied = chunkMutex->tryLock(0);
+    //bool occupied = chunkMutex->tryLock();
     // If the mutex is not locked by other threads
-    if(occupied)
+    if(chunkMutex->tryLock())
     {
         int chunkNum = chunkToAdd->size();
-        for(int index = chunkNum-1; index >= 0; index--)
+        if(chunkNum == 0)
         {
-            mp_terrain->addChunk2Map((*chunkToAdd)[index]);
-            ((*chunkToAdd)[index])->create();
-            chunkToAdd->pop_back();
+            chunkMutex->unlock();
         }
-        chunkMutex->unlock();
+        else
+        {
+            for(int index = chunkNum-1; index >= 0; index--)
+            {
+                mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+                ((*chunkToAdd)[index])->create();
+                chunkToAdd->pop_back();
+            }
+            chunkMutex->unlock();
+        }
     }
 
     update();
@@ -995,6 +1003,11 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 
 void MyGL::CheckForBoundary()
 {
+    //std::cout<<isCheckingForBoundary<<std::endl;
+    if(isCheckingForBoundary)
+    {
+        return;
+    }
     glm::vec3 gridLoc = glm::floor(mp_camera->eye);
 
     // check if there exist a chunk at x direction and z direction
@@ -1009,27 +1022,42 @@ void MyGL::CheckForBoundary()
     if(xDirChunk == nullptr && zDirChunk != nullptr)
     {
         isCheckingForBoundary = true;
-        std::cout<<"thread working?"<<std::endl;
 
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + 5, z, normalX, normalZ);
-         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 
-        //TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain, this, isCheckingForBoundary);
-        //QThreadPool::globalInstance()->start(terrainGenerator);
+        TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator1);
+        QThreadPool::globalInstance()->start(terrainGenerator2);
+        QThreadPool::globalInstance()->start(terrainGenerator3);
+        QThreadPool::globalInstance()->start(terrainGenerator4);
+        //isCheckingForBoundary = false;
     }
     else if(xDirChunk != nullptr && zDirChunk == nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z + 5, normalX, normalZ);
-        // mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-        TerrainAtBoundary* terrainGenerator = new TerrainAtBoundary(normalX, normalZ,chunkMutex,chunkToAdd, mp_terrain, this,isCheckingForBoundary);
-        QThreadPool::globalInstance()->start(terrainGenerator);
+        //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator1);
+        QThreadPool::globalInstance()->start(terrainGenerator2);
+        QThreadPool::globalInstance()->start(terrainGenerator3);
+        QThreadPool::globalInstance()->start(terrainGenerator4);
+        //isCheckingForBoundary = false;
     }
     else if(xDirChunk == nullptr && zDirChunk == nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z + 5, normalX, normalZ);
@@ -1042,20 +1070,39 @@ void MyGL::CheckForBoundary()
     // Minus situation
     else if(xMinusDirChunk == nullptr && zMinusDirChunk != nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - 5, z, normalX, normalZ);
-        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator1);
+        QThreadPool::globalInstance()->start(terrainGenerator2);
+        QThreadPool::globalInstance()->start(terrainGenerator3);
+        QThreadPool::globalInstance()->start(terrainGenerator4);
     }
     else if(xMinusDirChunk != nullptr && zMinusDirChunk == nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z - 5, normalX, normalZ);
-        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator1);
+        QThreadPool::globalInstance()->start(terrainGenerator2);
+        QThreadPool::globalInstance()->start(terrainGenerator3);
+        QThreadPool::globalInstance()->start(terrainGenerator4);
     }
     else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - 5, z - 5, normalX, normalZ);

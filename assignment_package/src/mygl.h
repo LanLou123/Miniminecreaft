@@ -60,6 +60,8 @@ private:
 
     QMutex* chunkMutex;
 
+    QMutex* checkingMutex;
+
     bool drawWater;
 
     bool isCheckingForBoundary;
