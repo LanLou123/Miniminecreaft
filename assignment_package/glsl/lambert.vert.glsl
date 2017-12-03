@@ -22,8 +22,11 @@ const vec4 lightDir = vec4(2,1,1,0);
 
 void main()
 {
+    float deltaU = (u_Time % 625) * 0.0001f;
+    float deltaV = (u_Time % 625) * 0.0001f;
+
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
-    fs_UV = vs_UV + vec2(1.0f, 0.0f) * (u_Time * 0.0001f);
+    fs_UV = vec2(deltaU, deltaV) * vs_FlowVelocity + vs_UV;
 
     mat3 invTranspose = mat3(u_ModelInvTr);
     fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);

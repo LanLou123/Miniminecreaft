@@ -86,8 +86,12 @@ static const glm::vec2 woodTopBot[4] = uvGrid(5, 14).squareUV;
 static const glm::vec2 leaf[4] = uvGrid(5, 12).squareUV;
 static const glm::vec2 sandBottom[4] = uvGrid(2, 14).squareUV;
 static const glm::vec2 ice[4] = uvGrid(3, 11).squareUV;
-static const glm::vec2 water[4] = uvGrid(13, 3).squareUV;
-static const glm::vec2 lava[4] = uvGrid(13, 1).squareUV;
+static const glm::vec2 water[4] = uvGrid(14, 3).squareUV;
+static const glm::vec2 lava[4] = uvGrid(14, 1).squareUV;
+
+static const glm::vec2 flowU = glm::vec2(1.0f, 0.0f);
+static const glm::vec2 flowV = glm::vec2(0.0f, 1.0f);
+static const glm::vec2 flowStatic = glm::vec2(0.0f, 0.0f);
 
 void Chunk::appendUV(const glm::vec2 uvCoords[])
 {
@@ -102,8 +106,13 @@ void Chunk::appendUV(const glm::vec2 uvCoords[])
 
 void Chunk::appendFlow(glm::vec2 speed)
 {
-    flowVelocity.push_back(speed[0]);
-    flowVelocity.push_back(speed[1]);
+    for (unsigned i = 0; i!=4; ++i)
+    {
+        for (unsigned j = 0; j!=2; ++j)
+        {
+            flowVelocity.push_back(speed[j]);
+        }
+    }
 }
 
 void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing)
@@ -138,21 +147,27 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
         {
             appendUV(grassSide);
         }
+        appendFlow(flowStatic);
         break;
     case DIRT:
         appendUV(dirt);
+        appendFlow(flowStatic);
         break;
     case STONE:
         appendUV(stone);
+        appendFlow(flowStatic);
         break;
     case LAVA:
         appendUV(lava);
+        appendFlow(flowU);
         break;
     case WATER:
         appendUV(water);
+        appendFlow(flowU);
         break;
     default:
         appendUV(stone);
+        appendFlow(flowStatic);
         break;
     }
 

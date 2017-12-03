@@ -33,7 +33,7 @@ public:
 
     int unifSamplerSurface;
     int unifSamplerNormal;
-    int unifSamplerGreyScale;
+    int unifSamplerGreyscale;
 
 public:
     ShaderProgram(OpenGLContext* context);

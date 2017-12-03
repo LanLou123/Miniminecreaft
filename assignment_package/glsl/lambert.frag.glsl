@@ -4,7 +4,7 @@ uniform vec4 u_Color;
 
 uniform sampler2D u_Surface;
 uniform sampler2D u_Normal;
-uniform sampler2D u_GreyScale;
+uniform sampler2D u_Greyscale;
 
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
@@ -25,7 +25,4 @@ void main()
     float lightIntensity = diffuseTerm + ambientTerm;
 
     out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
-
-    //Testing only
-    //out_Col = vec4(fs_UV.xy, 0.0f, 1.0f);
 }

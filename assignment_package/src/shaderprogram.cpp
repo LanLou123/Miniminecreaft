@@ -74,7 +74,7 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
 
     unifSamplerSurface = context->glGetUniformLocation(prog, "u_Surface");
     unifSamplerNormal = context->glGetUniformLocation(prog, "u_Normal");
-    unifSamplerGreyScale = context->glGetUniformLocation(prog, "u_GreyScale");
+    unifSamplerGreyscale = context->glGetUniformLocation(prog, "u_Greyscale");
 }
 
 void ShaderProgram::useMe()
@@ -181,7 +181,7 @@ void ShaderProgram::draw(Drawable &d)
 
     if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
     if (unifSamplerNormal != -1) context->glUniform1i(unifSamplerNormal, NORMAL);
-    if (unifSamplerGreyScale != -1) context->glUniform1i(unifSamplerGreyScale, GREYSCALE);
+    if (unifSamplerGreyscale != -1) context->glUniform1i(unifSamplerGreyscale, GREYSCALE);
 
     // Bind the index buffer and then draw shapes from it.
     // This invokes the shader program, which accesses the vertex buffers.

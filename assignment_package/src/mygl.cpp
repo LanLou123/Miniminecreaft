@@ -814,25 +814,27 @@ void MyGL::mousePressEvent(QMouseEvent *me)
                     chunk->destroy();
                     mp_terrain->setBlockAt(x,y,z,EMPTY);
                     chunk->create();
-                    if((x + 1)%16 == 0)
+                    int xRemainder = x - 16 * std::floor(x / 16.0f);
+                    int zRemainder = z - 16 * std::floor(z / 16.0f);
+                    if(xRemainder == 15)
                     {
                         Chunk* chunk2 = mp_terrain->getChunkAt(x + 1, z);
                         chunk2->destroy();
                         chunk2->create();
                     }
-                    if((x + 1)%16 == 1)
+                    if(xRemainder == 0)
                     {
                         Chunk* chunk2 = mp_terrain->getChunkAt(x - 1, z);
                         chunk2->destroy();
                         chunk2->create();
                     }
-                    if((z + 1)%16 == 0)
+                    if(zRemainder == 15)
                     {
                         Chunk* chunk2 = mp_terrain->getChunkAt(x, z + 1);
                         chunk2->destroy();
                         chunk2->create();
                     }
-                    if((z + 1)%16 == 1)
+                    if(zRemainder == 0)
                     {
                         Chunk* chunk2 = mp_terrain->getChunkAt(x, z - 1);
                         chunk2->destroy();

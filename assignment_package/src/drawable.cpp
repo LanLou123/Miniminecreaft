@@ -122,4 +122,5 @@ bool Drawable::bindFlowVelocity()
     if(flowVelocityBound){
         context->glBindBuffer(GL_ARRAY_BUFFER, bufFlowVelocity);
     }
+    return flowVelocityBound;
 }
