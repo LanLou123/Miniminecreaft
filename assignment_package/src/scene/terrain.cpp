@@ -7,12 +7,12 @@
 #include <scene/cube.h>
 
 #include <iostream>
-<<<<<<< HEAD
 
-Terrain::Terrain()
-    : dimensions(64, 256, 64)
-{}
-=======
+
+//Terrain::Terrain()
+//    : dimensions(64, 256, 64)
+//{}
+
 const int seaLevel=129;
 const int river_depth=5;
 const int riverbank_width=10;
@@ -24,7 +24,7 @@ Terrain::Terrain() : dimensions(64, 256, 64)
       river2=River(10,210,2);
       create_riverside();
 }
->>>>>>> b77283b57c59eddfdf7a13b290abeb8e4cf27776
+
 
 Terrain::~Terrain()
 {
@@ -339,6 +339,17 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
         }
     }
 
+    int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
+    river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
+    river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
+    if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+64)||(Z_min1>bottom+64)))&&
+        (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+64)||(Z_min2>bottom+64))))
+    {}
+    else
+    {
+        updateRiver(left , bottom);
+        std::cout<<"river exisit in bound"<<std::endl;
+    }
     for(int i = 0; i < 4; i++)
     {
         for(int j = 0; j < 4 ;j++)
@@ -347,17 +358,7 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
         }
     }
 
-        int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
-        river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
-        river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
-        if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+64)||(Z_min1>bottom+64)))&&
-            (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+64)||(Z_min2>bottom+64))))
-        {}
-        else
-        {
-            updateRiver(left , bottom);
-            std::cout<<"river exisit in bound"<<std::endl;
-        }
+
 
 }
 
