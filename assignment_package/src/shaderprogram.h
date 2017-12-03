@@ -54,6 +54,7 @@ public:
     void setGeometryColor(glm::vec4 color);
     // Draw the given object to our screen using this ShaderProgram's shaders
     void draw(Drawable &d);
+    void drawF(Drawable &d);
     // Utility function used in create()
     char* textFileRead(const char*);
     // Utility function that prints any shader compilation errors to the console

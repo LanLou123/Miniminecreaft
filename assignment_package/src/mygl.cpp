@@ -213,6 +213,10 @@ void MyGL::GLDrawScene()
     {
         mp_progLambert->draw(*pair.second);
     }
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progLambert->drawF(*pair.second);
+    }
 }
 
 //press W, A, S, D to move in four traditional horizontal directions, in the meantime

@@ -134,20 +134,24 @@ private:
 
 
     std::vector<GLfloat> pos;
-
     std::vector<GLfloat> nor;
-
     std::vector<GLfloat> uv;
-
     std::vector<GLfloat> flowVelocity;
-
     std::vector<GLuint> ele;
-
     std::vector<GLfloat> tan;
-
     std::vector<GLfloat> bitan;
-
     std::vector<GLint> buftype;
+
+    std::vector<GLfloat> posF;
+    std::vector<GLfloat> norF;
+    std::vector<GLfloat> uvF;
+    std::vector<GLfloat> flowVelocityF;
+    std::vector<GLuint> eleF;
+    std::vector<GLfloat> tanF;
+    std::vector<GLfloat> bitanF;
+    std::vector<GLint> buftypeF;
+
+
 
     Chunk* getLeftAdjacent();
 
@@ -175,9 +179,9 @@ private:
 
     void fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing);
 
-    void appendUV(const glm::vec2 uvCoords[]);
+    void appendUV(std::vector<GLfloat>* container, const glm::vec2 uvCoords[]);
 
-    void appendFlow(glm::vec2 speed);
+    void appendFlow(std::vector<GLfloat>* container, glm::vec2 speed);
 
     BlockType getBlockType(size_t x, size_t y, size_t z) const;
 

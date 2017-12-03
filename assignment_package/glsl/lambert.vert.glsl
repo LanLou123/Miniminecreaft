@@ -34,8 +34,10 @@ const vec4 lightDir = normalize(vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
 void main()
 {
-    float deltaU = (u_Time % 625) * 0.0001f;
-    float deltaV = (u_Time % 625) * 0.0001f;
+    int timeWarpFactor = 10;
+
+    float deltaU = ((u_Time * timeWarpFactor) % 625) * 0.0001f;
+    float deltaV = ((u_Time * timeWarpFactor) % 625) * 0.0001f;
 
     fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
     fs_UV = vec2(deltaU, deltaV) * vs_FlowVelocity + vs_UV;
@@ -49,7 +51,7 @@ void main()
     flowVelocity = vs_FlowVelocity;
 
     if (vs_BlockType == 8)
-        fs_Alpha = 0.3f;
+        fs_Alpha = 0.6f;
     else
         fs_Alpha = 1.0f;
 
