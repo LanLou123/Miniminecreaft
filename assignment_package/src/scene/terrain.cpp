@@ -270,7 +270,6 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
             float scale = 48.f;
             glm::vec2 st = glm::vec2(x, z) / scale;
             float height = fbm_magnitude * fbm(st);
-
             int heightInt = (int) (height * 128.f);
 
             for(int y = 0; y < 256; ++y)
@@ -304,7 +303,6 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
     else
     {
         updateRiver(left , bottom);
-        std::cout<<"river exisit in bound"<<std::endl;
     }
     for(int i = 0; i < 4; i++)
     {
@@ -534,7 +532,7 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
                     for (int j = z-2;j<=z+2;j++)
                     {
                         std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
-                        if(river1.is_river[pos3]==true)
+                        if(river2.is_river[pos3]==true)
                         {
                             water_weight_count2++;
 
@@ -622,7 +620,7 @@ void Terrain::updateRiver(int origin_x, int origin_z)//called every time when it
                     for (int j = z-2;j<=z+2;j++)
                     {
                         std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
-                        if(river1.is_river[pos3]==true)
+                        if(river2.is_river[pos3]==true)
                         {
                             water_weight_count2++;
 
