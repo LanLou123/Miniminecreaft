@@ -131,6 +131,10 @@ private:
 
     std::vector<GLuint> ele;
 
+    std::vector<GLfloat> tan;
+
+    std::vector<GLfloat> bitan;
+
     Chunk* getLeftAdjacent();
 
     Chunk* getRightAdjacent();

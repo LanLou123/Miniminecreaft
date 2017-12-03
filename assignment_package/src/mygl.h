@@ -43,6 +43,8 @@ private:
     Texture *surfaceMap;
     Texture *normalMap;
     Texture *greyScaleMap;
+    Texture *glossPowerMap;
+    Texture *duplicateMap;
 
 public:
     explicit MyGL(QWidget *parent = 0);

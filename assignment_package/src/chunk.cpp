@@ -132,43 +132,78 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
         }
     }
 
+    glm::vec2 deltaUV1;
+    glm::vec2 deltaUV2;
+
     switch (type)
     {
     case GRASS:
         if (facing == UP)
         {
             appendUV(grassTop);
+            deltaUV1 = grassTop[1] - grassTop[0];
+            deltaUV2 = grassTop[3] - grassTop[0];
         }
         else if (facing == DOWN)
         {
             appendUV(dirt);
+            deltaUV1 = dirt[1] - dirt[0];
+            deltaUV2 = dirt[3] - dirt[0];
         }
         else
         {
             appendUV(grassSide);
+            deltaUV1 = grassSide[1] - grassSide[0];
+            deltaUV2 = grassSide[3] - grassSide[0];
         }
         appendFlow(flowStatic);
         break;
     case DIRT:
         appendUV(dirt);
         appendFlow(flowStatic);
+        deltaUV1 = dirt[1] - dirt[0];
+        deltaUV2 = dirt[3] - dirt[0];
         break;
     case STONE:
         appendUV(stone);
         appendFlow(flowStatic);
+        deltaUV1 = stone[1] - stone[0];
+        deltaUV2 = stone[3] - stone[0];
         break;
     case LAVA:
         appendUV(lava);
         appendFlow(flowU);
+        deltaUV1 = lava[1] - lava[0];
+        deltaUV2 = lava[3] - lava[0];
         break;
     case WATER:
         appendUV(water);
         appendFlow(flowU);
+        deltaUV1 = water[1] - water[0];
+        deltaUV2 = water[3] - water[0];
         break;
     default:
         appendUV(stone);
         appendFlow(flowStatic);
+        deltaUV1 = stone[1] - stone[0];
+        deltaUV2 = stone[3] - stone[0];
         break;
+    }
+
+    glm::vec4 deltaPos1 = positions[1] - positions[0];
+    glm::vec4 deltaPos2 = positions[3] - positions[0];
+    glm::vec4 T = (deltaUV2.y * deltaPos1 - deltaUV1.y * deltaPos2) /
+            (deltaUV1.x*deltaUV2.y - deltaUV2.x*deltaUV1.y);
+    glm::vec4 B = (deltaUV2.x*deltaPos1 - deltaUV1.x*deltaPos2) /
+            (deltaUV1.y*deltaUV2.x - deltaUV2.y*deltaUV1.x);
+
+    for (unsigned i = 0; i!=4; ++i)
+    {
+        for (unsigned j = 0; j!=4; ++j)
+        {
+            tan.push_back(T[j]);
+            bitan.push_back(B[j]);
+        }
     }
 
     size_t indexoffset = ele.size() / 3 * 2;
@@ -313,6 +348,8 @@ void Chunk::create()
     this->uv.clear();
     this->flowVelocity.clear();
     this->ele.clear();
+    this->tan.clear();
+    this->bitan.clear();
     for (size_t x = 0; x != 16; ++x)
     {
         for (size_t z = 0; z != 16; ++z)
@@ -446,4 +483,14 @@ void Chunk::create()
     context->glBindBuffer(GL_ARRAY_BUFFER, bufFlowVelocity);
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * flowVelocity.size(),
                             reinterpret_cast<void*>(flowVelocity.data()), GL_STATIC_DRAW);
+
+    generateTangent();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufTangent);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * tan.size(),
+                            reinterpret_cast<void*>(tan.data()), GL_STATIC_DRAW);
+
+    generateBiTangent();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangent);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * bitan.size(),
+                            reinterpret_cast<void*>(bitan.data()), GL_STATIC_DRAW);
 }

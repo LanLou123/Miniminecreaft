@@ -10,7 +10,8 @@ MyGL::MyGL(QWidget *parent)
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
-      surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this))
+      surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
+      glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -57,6 +58,7 @@ MyGL::~MyGL()
     delete surfaceMap;
     delete normalMap;
     delete greyScaleMap;
+    delete glossPowerMap;
 }
 
 
@@ -130,6 +132,14 @@ void MyGL::initializeGL()
     greyScaleMap->create(":/texture/minecraft_textures_all_grey_grass.png");
     greyScaleMap->load(GREYSCALE);
     greyScaleMap->bind(GREYSCALE);
+
+    glossPowerMap->create(":/texture/minecraft_textures_glosspower.png");
+    glossPowerMap->load(GLOSSINESS);
+    glossPowerMap->bind(GLOSSINESS);
+
+    duplicateMap->create(":/texture/minecraft_textures_glosspower.png");
+    duplicateMap->load(DUPL);
+    duplicateMap->bind(DUPL);
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -181,6 +191,7 @@ void MyGL::paintGL()
     mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
     mp_progLambert->setViewProjMatrix(mp_camera->getViewProj() );
     mp_progLambert->setTimeCount(m_time);
+    mp_progLambert->setLookVector(mp_camera->eye);
 
     GLDrawScene();
 
