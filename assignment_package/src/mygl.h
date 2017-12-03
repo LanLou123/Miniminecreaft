@@ -47,7 +47,11 @@ private:
     int m_time;
 
 
+
     Quad* m_QuadBoard;
+
+    float add_deg;
+
     Texture *surfaceMap;
     Texture *normalMap;
     Texture *greyScaleMap;

@@ -7,6 +7,7 @@
 Camera::Camera():
     Camera(400, 400)
 {
+    add_deg = -53.0f;
     look = glm::vec3(0,0,-1);
     up = glm::vec3(0,1,0);
     right = glm::vec3(1,0,0);
@@ -14,7 +15,7 @@ Camera::Camera():
 
 Camera::Camera(unsigned int w, unsigned int h):
     Camera(w, h, glm::vec3(0,0,10), glm::vec3(0,0,0), glm::vec3(0,1,0))
-{}
+{add_deg = -53.0f;}
 
 Camera::Camera(unsigned int w, unsigned int h, const glm::vec3 &e, const glm::vec3 &r, const glm::vec3 &worldUp):
     fovy(45),
@@ -26,6 +27,7 @@ Camera::Camera(unsigned int w, unsigned int h, const glm::vec3 &e, const glm::ve
     ref(r),
     world_up(worldUp)
 {
+    add_deg = -53.0f;
     RecomputeAttributes();
 }
 
@@ -75,6 +77,9 @@ void Camera::RotateAboutUp(float deg)
 }
 void Camera::RotateAboutRight(float deg)
 {
+    add_deg+=deg;
+    if(abs(add_deg)>89)
+        deg=0;
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(deg), right);
     ref = ref - eye;
     ref = glm::vec3(rotation * glm::vec4(ref, 1));

@@ -31,7 +31,7 @@ MyGL::MyGL(QWidget *parent)
     // Tell the timer to redraw 60 times per second
     timer.start(16);
     setFocusPolicy(Qt::ClickFocus);
-
+    add_deg = 0;
     setMouseTracking(true); // MyGL will track the mouse's movements even if a mouse button is not pressed
     QCursor c = cursor();
     c.setPos(mapToGlobal(QPoint(width()/2 , height() / 2)));
@@ -1134,6 +1134,7 @@ void MyGL::mouseMoveEvent(QMouseEvent *e)
     float UPdeg = m_speed * dx / width();
     float RIGHTdeg = m_speed * dy / height();
     player1.CheckRotateAboutRight(-RIGHTdeg);
+    add_deg += UPdeg;
     player1.CheckRotateAboutUp(-UPdeg);
     c.setPos(mapToGlobal(QPoint(width() / 2 , height() / 2 )));
     c.setShape(Qt::BlankCursor);

@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE QtCreatorProject>
 <<<<<<< HEAD
+<<<<<<< HEAD
 <!-- Written by QtCreator 3.4.1, 2017-12-03T00:25:01. -->
 =======
 <!-- Written by QtCreator 3.4.1, 2017-12-03T00:16:13. -->
@@ -9,6 +10,13 @@
  <data>
   <variable>EnvironmentId</variable>
   <value type="QByteArray">{06c0a8f8-3722-4f78-b641-181f0c453d22}</value>
+=======
+<!-- Written by QtCreator 3.4.1, 2017-12-02T18:11:26. -->
+<qtcreator>
+ <data>
+  <variable>EnvironmentId</variable>
+  <value type="QByteArray">{a54e9c68-0284-40f0-83a0-8100eed3499f}</value>
+>>>>>>> b77283b57c59eddfdf7a13b290abeb8e4cf27776
  </data>
  <data>
   <variable>ProjectExplorer.Project.ActiveTarget</variable>
@@ -69,7 +77,11 @@
    <value type="int" key="ProjectExplorer.Target.ActiveDeployConfiguration">0</value>
    <value type="int" key="ProjectExplorer.Target.ActiveRunConfiguration">0</value>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.0">
+<<<<<<< HEAD
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:/Courses/CIS560/newMaster1/build-miniMinecraft-Desktop_Qt_5_4_2_MinGW_32bit-Debug</value>
+=======
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">D:/final_pro2/final-project-mini-minecraft-lbj/build-miniMinecraft-Desktop_Qt_5_4_2_MinGW_32bit-Debug</value>
+>>>>>>> b77283b57c59eddfdf7a13b290abeb8e4cf27776
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -124,7 +136,11 @@
     <value type="bool" key="Qt4ProjectManager.Qt4BuildConfiguration.UseShadowBuild">true</value>
    </valuemap>
    <valuemap type="QVariantMap" key="ProjectExplorer.Target.BuildConfiguration.1">
+<<<<<<< HEAD
     <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">C:/Courses/CIS560/newMaster1/build-miniMinecraft-Desktop_Qt_5_4_2_MinGW_32bit-Release</value>
+=======
+    <value type="QString" key="ProjectExplorer.BuildConfiguration.BuildDirectory">D:/final_pro2/final-project-mini-minecraft-lbj/build-miniMinecraft-Desktop_Qt_5_4_2_MinGW_32bit-Release</value>
+>>>>>>> b77283b57c59eddfdf7a13b290abeb8e4cf27776
     <valuemap type="QVariantMap" key="ProjectExplorer.BuildConfiguration.BuildStepList.0">
      <valuemap type="QVariantMap" key="ProjectExplorer.BuildStepList.Step.0">
       <value type="bool" key="ProjectExplorer.BuildStep.Enabled">true</value>
@@ -232,7 +248,11 @@
     <valuelist type="QVariantList" key="PE.EnvironmentAspect.Changes"/>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DefaultDisplayName">miniMinecraft</value>
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.DisplayName"></value>
+<<<<<<< HEAD
     <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:C:/Courses/CIS560/newMaster1/assignment_package/miniMinecraft.pro</value>
+=======
+    <value type="QString" key="ProjectExplorer.ProjectConfiguration.Id">Qt4ProjectManager.Qt4RunConfiguration:D:/final_pro2/final-project-mini-minecraft-lbj/assignment_package/miniMinecraft.pro</value>
+>>>>>>> b77283b57c59eddfdf7a13b290abeb8e4cf27776
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.CommandLineArguments"></value>
     <value type="QString" key="Qt4ProjectManager.Qt4RunConfiguration.ProFile">miniMinecraft.pro</value>
     <value type="bool" key="Qt4ProjectManager.Qt4RunConfiguration.UseDyldImageSuffix">false</value>
