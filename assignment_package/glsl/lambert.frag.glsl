@@ -19,6 +19,8 @@ in vec4 fs_BiTangent;
 in vec2 flowVelocity;
 in vec4 hVector;
 
+in float fs_Alpha;
+
 out vec4 out_Col;
 
 void main()
@@ -59,5 +61,5 @@ void main()
 
     vec4 accumulatedResult = diffuseComponent + ambientComponent + specularComponent;
 
-    out_Col = vec4(accumulatedResult.rgb, 1.0f);
+    out_Col = vec4(accumulatedResult.rgb, fs_Alpha);
 }

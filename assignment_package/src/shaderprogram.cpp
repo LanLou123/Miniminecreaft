@@ -69,6 +69,7 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
     attrFlowVelocity = context->glGetAttribLocation(prog, "vs_FlowVelocity");
     attrTangent = context->glGetAttribLocation(prog, "vs_Tangent");
     attrBiTangent = context->glGetAttribLocation(prog, "vs_BiTangent");
+    attrBlockType = context->glGetAttribLocation(prog, "vs_BlockType");
 
     unifModel      = context->glGetUniformLocation(prog, "u_Model");
     unifModelInvTr = context->glGetUniformLocation(prog, "u_ModelInvTr");
@@ -196,6 +197,11 @@ void ShaderProgram::draw(Drawable &d)
         context->glVertexAttribPointer(attrBiTangent, 4, GL_FLOAT, false, 0, NULL);
     }
 
+    if (attrBlockType != -1 && d.bindBlockType()) {
+        context->glEnableVertexAttribArray(attrBlockType);
+        context->glVertexAttribIPointer(attrBlockType, 1, GL_INT, 0, NULL);
+    }
+
     if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
     if (unifSamplerNormal != -1) context->glUniform1i(unifSamplerNormal, NORMAL);
     if (unifSamplerGreyscale != -1) context->glUniform1i(unifSamplerGreyscale, GREYSCALE);
@@ -214,6 +220,7 @@ void ShaderProgram::draw(Drawable &d)
     if (attrFlowVelocity != -1) context->glDisableVertexAttribArray(attrFlowVelocity);
     if (attrTangent != -1) context->glDisableVertexAttribArray(attrTangent);
     if (attrBiTangent != -1) context->glDisableVertexAttribArray(attrBiTangent);
+    if (attrBlockType != -1) context->glDisableVertexAttribArray(attrBlockType);
 
     context->printGLErrorLog();
 }

@@ -489,6 +489,7 @@ void Terrain::create_riverside()
 
 void Terrain::updateFirstRiver()//called when first update river in the first default landscape
 {
+    int water_weight_count1=0;
     int max_bound_x = 64;
     int max_bound_z = 64;
     int min_bound_x = 0;
@@ -501,10 +502,24 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
         {
             std::tuple<int,int> pos2 = std::make_tuple(x,z);
             std::tuple<int,int,int> pos1 = std::make_tuple(x,0,z);
+
             if((river1.is_river[pos1]==true)&&
                     this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
-                for(int i = 0 ;i<river_depth ;i++)
+                water_weight_count1 = 0;
+                for(int i = x-2 ;i<=x+2;i++)
+                {
+                    for (int j = z-2;j<=z+2;j++)
+                    {
+                        std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
+                        if(river1.is_river[pos3]==true)
+                        {
+                            water_weight_count1++;
+
+                        }
+                    }
+                }
+                for(int i = 0 ;i<water_weight_count1/2 ;i++)
                 {
                     this->setBlockAt(x,seaLevel-i,z,WATER);
                 }

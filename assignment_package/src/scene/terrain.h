@@ -147,6 +147,8 @@ private:
 
     std::vector<GLfloat> bitan;
 
+    std::vector<GLint> buftype;
+
     Chunk* getLeftAdjacent();
 
     Chunk* getRightAdjacent();
