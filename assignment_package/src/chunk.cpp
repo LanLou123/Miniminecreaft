@@ -58,13 +58,29 @@ Chunk::Chunk(OpenGLContext *parent, Terrain *terrain, int64_t xz) : Drawable(par
 {
 }
 
+#define BOUNDRYCHECK
+
 BlockType Chunk::getBlockType(size_t x, size_t y, size_t z) const
 {
-    return this->blocks[4096*x + 256*z + y];
+    size_t index = 4096*x + 256*z + y;
+#ifdef BOUNDRYCHECK
+    if (index > 65535)
+    {
+        qWarning("Chunk access overflow");
+    }
+#endif
+    return this->blocks[index];
 }
 
 BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
 {
+    size_t index = 4096*x + 256*z + y;
+#ifdef BOUNDRYCHECK
+    if (index > 65535)
+    {
+        qWarning("Chunk access overflow");
+    }
+#endif
     return this->blocks[4096*x + 256*z + y];
 }
 
@@ -222,6 +238,23 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
 
 void Chunk::fillLeftFace(size_t x, size_t y, size_t z, BlockType type)
 {
+    if (x == 0)
+    {
+        //Check the chunk to its left
+        Chunk* adjNegX = this->getLeftAdjacent();
+        if (adjNegX != nullptr && !adjNegX->shouldFill(15, y, z, type))
+        {
+            return;
+        }
+    }
+    //Check the block to its left
+    else
+    {
+        if (!this->shouldFill(x - 1, y, z, type))
+        {
+            return;
+        }
+    }
     glm::vec4 square[4] =
     {
         glm::vec4(x - cubeHR, y - cubeHR, z - cubeHR, 1.0f),
@@ -243,6 +276,25 @@ void Chunk::fillLeftFace(size_t x, size_t y, size_t z, BlockType type)
 
 void Chunk::fillRightFace(size_t x, size_t y, size_t z, BlockType type)
 {
+    //Check right
+    if (x == 15)
+    {
+        //Checkthe chunk to its right
+        Chunk* adjPosX = this->getRightAdjacent();
+        if (adjPosX != nullptr && !adjPosX->shouldFill(0, y, z, type))
+        {
+            return;
+        }
+    }
+    //Check the block to its right
+    else
+    {
+        if (!this->shouldFill(x + 1, y, z, type))
+        {
+            return;
+        }
+    }
+
     glm::vec4 square[4] =
     {
         glm::vec4(x + cubeHR, y - cubeHR, z - cubeHR, 1.0f),
@@ -264,6 +316,11 @@ void Chunk::fillRightFace(size_t x, size_t y, size_t z, BlockType type)
 
 void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
 {
+    if (y != 255 && !this->shouldFill(x, y + 1, z, type))
+    {
+        return;
+    }
+
     glm::vec4 square[4] =
     {
         glm::vec4(x - cubeHR, y + cubeHR, z - cubeHR, 1.0f),
@@ -285,6 +342,11 @@ void Chunk::fillUpFace(size_t x, size_t y, size_t z, BlockType type)
 
 void Chunk::fillDownFace(size_t x, size_t y, size_t z, BlockType type)
 {
+    if (y != 0 && !this->shouldFill(x, y - 1, z, type))
+    {
+        return;
+    }
+
     glm::vec4 square[4] =
     {
         glm::vec4(x - cubeHR, y - cubeHR, z - cubeHR, 1.0f),
@@ -306,6 +368,25 @@ void Chunk::fillDownFace(size_t x, size_t y, size_t z, BlockType type)
 
 void Chunk::fillFrontFace(size_t x, size_t y, size_t z, BlockType type)
 {
+    //Check front
+    if (z == 15)
+    {
+        //Check the chunk to its front
+        Chunk* adjPosZ = this->getFrontAdjacent();
+        if (adjPosZ != nullptr && !adjPosZ->shouldFill(x, y, 0, type))
+        {
+            return;
+        }
+    }
+    //Check the block to its front
+    else
+    {
+        if (!this->shouldFill(x, y, z + 1, type))
+        {
+            return;
+        }
+    }
+
     glm::vec4 square[4] =
     {
         glm::vec4(x - cubeHR, y - cubeHR, z + cubeHR, 1.0f),
@@ -327,6 +408,25 @@ void Chunk::fillFrontFace(size_t x, size_t y, size_t z, BlockType type)
 
 void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
 {
+    //Check back
+    if (z == 0)
+    {
+        //Check the chunk to its back
+        Chunk* adjNegZ = this->getBackAdjacent();
+        if (adjNegZ != nullptr && !adjNegZ->shouldFill(x, y, 15, type))
+        {
+            return;
+        }
+    }
+    //Check the block to its back
+    else
+    {
+        if (!this->shouldFill(x, y, z - 1, type))
+        {
+            return;
+        }
+    }
+
     glm::vec4 square[4] =
     {
         glm::vec4(x - cubeHR, y - cubeHR, z - cubeHR, 1.0f),
@@ -386,98 +486,12 @@ void Chunk::create()
                     continue;
                 }
 
-                //Check left
-                if (x == 0)
-                {
-                    //Check the chunk to its left
-                    Chunk* adjNegX = this->getLeftAdjacent();
-                    if (adjNegX == nullptr || adjNegX->shouldFill(15, y, z, currentBlock))
-                    {
-                        fillLeftFace(x, y, z, this->getBlockType(x, y, z));
-                    }
-                }
-                //Check the block to its left
-                else
-                {
-                    if (this->shouldFill(x - 1, y, z, currentBlock))
-                    {
-                        fillLeftFace(x, y, z, this->getBlockType(x, y, z));
-                    }
-                }
-
-
-                //Check right
-                if (x == 15)
-                {
-                    //Checkthe chunk to its right
-                    Chunk* adjPosX = this->getRightAdjacent();
-                    if (adjPosX == nullptr || adjPosX->shouldFill(0, y, z, currentBlock))
-                    {
-                        fillRightFace(x, y, z, this->getBlockType(x, y, z));
-                    }
-                }
-                //Check the block to its right
-                else
-                {
-                    if (this->shouldFill(x + 1, y, z, currentBlock))
-                    {
-                        fillRightFace(x, y, z, this->getBlockType(x, y, z));
-                    }
-                }
-
-
-                //Check back
-                if (z == 0)
-                {
-                    //Check the chunk to its back
-                    Chunk* adjNegZ = this->getBackAdjacent();
-                    if (adjNegZ == nullptr || adjNegZ->shouldFill(x, y, 15, currentBlock))
-                    {
-                        fillBackFace(x, y, z, this->getBlockType(x, y, z));
-                    }
-                }
-                //Check the block to its back
-                else
-                {
-                    if (this->shouldFill(x, y, z - 1, currentBlock))
-                    {
-                        fillBackFace(x, y, z, this->getBlockType(x, y, z));
-                    }
-                }
-
-
-                //Check front
-                if (z == 15)
-                {
-                    //Check the chunk to its front
-                    Chunk* adjPosZ = this->getFrontAdjacent();
-                    if (adjPosZ == nullptr || adjPosZ->shouldFill(x, y, 0, currentBlock))
-                    {
-                        fillFrontFace(x, y, z, this->getBlockType(x, y, z));
-                    }
-                }
-                //Check the block to its front
-                else
-                {
-                    if (this->shouldFill(x, y, z + 1, currentBlock))
-                    {
-                        fillFrontFace(x, y, z, this->getBlockType(x, y, z));
-                    }
-                }
-
-                //Check up
-                //Check the block above it
-                if (y == 255 || this->shouldFill(x, y + 1, z, currentBlock))
-                {
-                    fillUpFace(x, y, z, this->getBlockType(x, y, z));
-                }
-
-                //Check down
-                //Check the block below it
-                if (y == 0 || this->shouldFill(x, y - 1, z, currentBlock))
-                {
-                    fillDownFace(x, y, z, this->getBlockType(x, y, z));
-                }
+                fillLeftFace(x, y, z, this->getBlockType(x, y, z));
+                fillRightFace(x, y, z, this->getBlockType(x, y, z));
+                fillBackFace(x, y, z, this->getBlockType(x, y, z));
+                fillFrontFace(x, y, z, this->getBlockType(x, y, z));
+                fillUpFace(x, y, z, this->getBlockType(x, y, z));
+                fillDownFace(x, y, z, this->getBlockType(x, y, z));
             }
         }
     }
