@@ -206,6 +206,11 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
         }
     }
 
+    for (unsigned i = 0; i!=4; ++i)
+    {
+        buftype.push_back(type);
+    }
+
     size_t indexoffset = ele.size() / 3 * 2;
     ele.push_back(indexoffset);
     ele.push_back(indexoffset + 1);
@@ -341,10 +346,15 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
     this->fillFace(square, normal, type, BACK);
 }
 
-bool Chunk::shouldFill(size_t x, size_t y, size_t z)
+bool Chunk::shouldFill(size_t x, size_t y, size_t z, BlockType currentBlock)
 {
-    BlockType type = this->getBlockType(x, y, z);
-    if (type == EMPTY || type == LAVA || type == WATER)
+    BlockType probingBlock = this->getBlockType(x, y, z);
+    if ((currentBlock == LAVA || currentBlock == WATER)
+            && currentBlock == probingBlock)
+    {
+        return false;
+    }
+    if (probingBlock == EMPTY || probingBlock == LAVA || probingBlock == WATER)
     {
         return true;
     }
@@ -363,13 +373,15 @@ void Chunk::create()
     this->ele.clear();
     this->tan.clear();
     this->bitan.clear();
+    this->buftype.clear();
     for (size_t x = 0; x != 16; ++x)
     {
         for (size_t z = 0; z != 16; ++z)
         {
             for (size_t y = 0; y != 256; ++y)
             {
-                if (this->getBlockType(x, y, z) == EMPTY)
+                BlockType currentBlock = this->getBlockType(x, y, z);
+                if (currentBlock == EMPTY)
                 {
                     continue;
                 }
@@ -379,7 +391,7 @@ void Chunk::create()
                 {
                     //Check the chunk to its left
                     Chunk* adjNegX = this->getLeftAdjacent();
-                    if (adjNegX == nullptr || adjNegX->shouldFill(15, y, z))
+                    if (adjNegX == nullptr || adjNegX->shouldFill(15, y, z, currentBlock))
                     {
                         fillLeftFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -387,7 +399,7 @@ void Chunk::create()
                 //Check the block to its left
                 else
                 {
-                    if (this->shouldFill(x - 1, y, z))
+                    if (this->shouldFill(x - 1, y, z, currentBlock))
                     {
                         fillLeftFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -399,7 +411,7 @@ void Chunk::create()
                 {
                     //Checkthe chunk to its right
                     Chunk* adjPosX = this->getRightAdjacent();
-                    if (adjPosX == nullptr || adjPosX->shouldFill(0, y, z))
+                    if (adjPosX == nullptr || adjPosX->shouldFill(0, y, z, currentBlock))
                     {
                         fillRightFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -407,7 +419,7 @@ void Chunk::create()
                 //Check the block to its right
                 else
                 {
-                    if (this->shouldFill(x + 1, y, z))
+                    if (this->shouldFill(x + 1, y, z, currentBlock))
                     {
                         fillRightFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -419,7 +431,7 @@ void Chunk::create()
                 {
                     //Check the chunk to its back
                     Chunk* adjNegZ = this->getBackAdjacent();
-                    if (adjNegZ == nullptr || adjNegZ->shouldFill(x, y, 15))
+                    if (adjNegZ == nullptr || adjNegZ->shouldFill(x, y, 15, currentBlock))
                     {
                         fillBackFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -427,7 +439,7 @@ void Chunk::create()
                 //Check the block to its back
                 else
                 {
-                    if (this->shouldFill(x, y, z - 1))
+                    if (this->shouldFill(x, y, z - 1, currentBlock))
                     {
                         fillBackFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -439,7 +451,7 @@ void Chunk::create()
                 {
                     //Check the chunk to its front
                     Chunk* adjPosZ = this->getFrontAdjacent();
-                    if (adjPosZ == nullptr || adjPosZ->shouldFill(x, y, 0))
+                    if (adjPosZ == nullptr || adjPosZ->shouldFill(x, y, 0, currentBlock))
                     {
                         fillFrontFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -447,7 +459,7 @@ void Chunk::create()
                 //Check the block to its front
                 else
                 {
-                    if (this->shouldFill(x, y, z + 1))
+                    if (this->shouldFill(x, y, z + 1, currentBlock))
                     {
                         fillFrontFace(x, y, z, this->getBlockType(x, y, z));
                     }
@@ -455,14 +467,14 @@ void Chunk::create()
 
                 //Check up
                 //Check the block above it
-                if (y == 255 || this->shouldFill(x, y + 1, z))
+                if (y == 255 || this->shouldFill(x, y + 1, z, currentBlock))
                 {
                     fillUpFace(x, y, z, this->getBlockType(x, y, z));
                 }
 
                 //Check down
                 //Check the block below it
-                if (y == 0 || this->shouldFill(x, y - 1, z))
+                if (y == 0 || this->shouldFill(x, y - 1, z, currentBlock))
                 {
                     fillDownFace(x, y, z, this->getBlockType(x, y, z));
                 }
@@ -506,4 +518,9 @@ void Chunk::create()
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangent);
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * bitan.size(),
                             reinterpret_cast<void*>(bitan.data()), GL_STATIC_DRAW);
+
+    generateBlockType();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockType);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftype.size(),
+                            reinterpret_cast<void*>(buftype.data()), GL_STATIC_DRAW);
 }

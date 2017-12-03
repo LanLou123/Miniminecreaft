@@ -25,6 +25,7 @@ public:
     int attrFlowVelocity; // A handle for the flowing speed
     int attrTangent;
     int attrBiTangent;
+    int attrBlockType;
 
     int unifModel; // A handle for the "uniform" mat4 representing model matrix in the vertex shader
     int unifModelInvTr; // A handle for the "uniform" mat4 representing inverse transpose of the model matrix in the vertex shader

@@ -147,6 +147,8 @@ private:
 
     std::vector<GLfloat> bitan;
 
+    std::vector<GLint> buftype;
+
     Chunk* getLeftAdjacent();
 
     Chunk* getRightAdjacent();
@@ -181,7 +183,7 @@ private:
 
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
 
-    bool shouldFill(size_t x, size_t y, size_t z);
+    bool shouldFill(size_t x, size_t y, size_t z, BlockType currentBlock);
 
 public:
 
