@@ -16,7 +16,7 @@ in vec4 fs_Col;
 in vec2 fs_UV;
 in vec4 fs_Tangent;
 in vec4 fs_BiTangent;
-
+in vec2 flowVelocity;
 in vec4 hVector;
 
 out vec4 out_Col;
@@ -29,9 +29,18 @@ void main()
                     vec4(0.0f, 0.0f, 0.0f, 1.0f));
     vec4 normalSample = texture(u_Normal, fs_UV);
     normalSample = normalize(TBN * normalSample);
+    vec4 normal = vec4(0.0f);
+    if (length(flowVelocity) > 0.1f)
+    {
+        normal = fs_Nor;
+    }
+    else
+    {
+        normal = normalSample;
+    }
 
     vec4 diffuseColor = texture(u_Surface, fs_UV);
-    float diffuseIntensity = dot(normalSample, fs_LightVec);
+    float diffuseIntensity = dot(normal, fs_LightVec);
     diffuseIntensity = clamp(diffuseIntensity, 0, 1);
     vec4 diffuseComponent = diffuseIntensity * diffuseColor;
 
@@ -40,15 +49,15 @@ void main()
     vec4 ambientComponent = ambientIntensity * ambientColor;
 
     vec4 specularColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
-    float specularBase = max(0.0f, dot(hVector, normalSample));
+    float specularBase = max(0.0f, dot(hVector, normal));
     vec4 powerTexel = texture(u_Surface, fs_UV);
     float specularPower = 0.21f * powerTexel.r + 0.72f * powerTexel.g + 0.07 * powerTexel.b;
-    specularPower = specularPower * 128.0f;
+    specularPower = specularPower * 18.0f;
 
     float specularIntensity = max(0.0f, pow(specularBase, specularPower));
     vec4 specularComponent = specularIntensity * specularColor;
 
     vec4 accumulatedResult = diffuseComponent + ambientComponent + specularComponent;
 
-    out_Col = accumulatedResult;
+    out_Col = vec4(accumulatedResult.rgb, 1.0f);
 }

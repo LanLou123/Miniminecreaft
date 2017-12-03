@@ -137,9 +137,12 @@ void MyGL::initializeGL()
     glossPowerMap->load(GLOSSINESS);
     glossPowerMap->bind(GLOSSINESS);
 
-    duplicateMap->create(":/texture/minecraft_textures_glosspower.png");
+    duplicateMap->create(":/texture/minecraft_normals_mod.png");
     duplicateMap->load(DUPL);
     duplicateMap->bind(DUPL);
+
+    glEnable(GL_BLEND);
+    glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 }
 
 void MyGL::resizeGL(int w, int h)

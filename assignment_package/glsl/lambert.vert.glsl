@@ -24,7 +24,9 @@ out vec4 fs_Tangent;
 out vec4 fs_BiTangent;
 out vec4 hVector;
 
-const vec4 lightDir = normalize(vec4(1.0f, 0.0f, 1.0f, 0.0f));
+out vec2 flowVelocity;
+
+const vec4 lightDir = normalize(vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
 void main()
 {
@@ -40,6 +42,7 @@ void main()
     fs_Tangent = vs_Tangent;
     fs_BiTangent = vs_BiTangent;
     fs_LightVec = lightDir;
+    flowVelocity = vs_FlowVelocity;
 
     vec4 modelposition = u_Model * vs_Pos;
     hVector = normalize(normalize(vec4(u_LookVector, 1.0f) - modelposition) + lightDir);

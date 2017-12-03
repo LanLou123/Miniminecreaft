@@ -169,6 +169,8 @@ private:
 
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
 
+    bool shouldFill(size_t x, size_t y, size_t z);
+
 public:
 
     Chunk(OpenGLContext* parent, Terrain *terrain, int64_t xz);
