@@ -25,6 +25,8 @@ public:
     bool jump_tri = false;
     float external_force_a = 0;
 
+    bool swimming;
+
     player();
     void Jump();
     void Fall();
@@ -40,6 +42,9 @@ public:
     void CheckRotateAboutUp(float deg);
     void CheckRotateAboutRight(float deg);
     void get_terrain(Terrain* t);
+
+    void Swim();
+    void StopSwim();
 };
 #endif // PLAYER
 
