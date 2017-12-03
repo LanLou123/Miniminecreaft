@@ -51,6 +51,8 @@ private:
     Texture *surfaceMap;
     Texture *normalMap;
     Texture *greyScaleMap;
+    Texture *glossPowerMap;
+    Texture *duplicateMap;
 
     QMutex* chunkMutex;
 

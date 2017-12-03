@@ -16,6 +16,8 @@ protected:
                    // Instead, we use a uniform vec4 in the shader to set an overall color for the geometry
     GLuint bufUV; //UV buffer
     GLuint bufFlowVelocity; //Flag buffer indicating the flowing speed
+    GLuint bufTangent;
+    GLuint bufBiTangent;
 
     bool idxBound; // Set to TRUE by generateIdx(), returned by bindIdx().
     bool posBound;
@@ -23,6 +25,8 @@ protected:
     bool colBound;
     bool uvBound;
     bool flowVelocityBound;
+    bool tangentBound;
+    bool bitangentBound;
 
     OpenGLContext* context; // Since Qt's OpenGL support is done through classes like QOpenGLFunctions_3_2_Core,
                           // we need to pass our OpenGL context to the Drawable in order to call GL functions
@@ -48,6 +52,8 @@ public:
     void generateCol();
     void generateUV();
     void generateFlowVelocity();
+    void generateTangent();
+    void generateBiTangent();
 
     bool bindIdx();
     bool bindPos();
@@ -55,4 +61,6 @@ public:
     bool bindCol();
     bool bindUV();
     bool bindFlowVelocity();
+    bool bindTangent();
+    bool bindBiTangent();
 };

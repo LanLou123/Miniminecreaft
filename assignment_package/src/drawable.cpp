@@ -19,6 +19,8 @@ void Drawable::destroy()
     context->glDeleteBuffers(1, &bufCol);
     context->glDeleteBuffers(1, &bufUV);
     context->glDeleteBuffers(1, &bufFlowVelocity);
+    context->glDeleteBuffers(1, &bufTangent);
+    context->glDeleteBuffers(1, &bufBiTangent);
 }
 
 GLenum Drawable::drawMode()
@@ -77,6 +79,18 @@ void Drawable::generateFlowVelocity()
     context->glGenBuffers(1, &bufFlowVelocity);
 }
 
+void Drawable::generateTangent()
+{
+    tangentBound = true;
+    context->glGenBuffers(1, &bufTangent);
+}
+
+void Drawable::generateBiTangent()
+{
+    bitangentBound = true;
+    context->glGenBuffers(1, &bufBiTangent);
+}
+
 bool Drawable::bindIdx()
 {
     if(idxBound) {
@@ -122,4 +136,21 @@ bool Drawable::bindFlowVelocity()
     if(flowVelocityBound){
         context->glBindBuffer(GL_ARRAY_BUFFER, bufFlowVelocity);
     }
+    return flowVelocityBound;
+}
+
+bool Drawable::bindTangent()
+{
+    if(tangentBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufTangent);
+    }
+    return tangentBound;
+}
+
+bool Drawable::bindBiTangent()
+{
+    if(bitangentBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangent);
+    }
+    return bitangentBound;
 }

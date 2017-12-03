@@ -103,6 +103,10 @@ private:
 
     std::vector<GLuint> ele;
 
+    std::vector<GLfloat> tan;
+
+    std::vector<GLfloat> bitan;
+
     Chunk* getLeftAdjacent();
     Chunk* getRightAdjacent();
     Chunk* getBackAdjacent();
@@ -125,6 +129,8 @@ private:
     BlockType getBlockType(size_t x, size_t y, size_t z) const;
 
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
+
+    bool shouldFill(size_t x, size_t y, size_t z);
 
 public:
 
