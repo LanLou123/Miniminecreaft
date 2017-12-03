@@ -18,13 +18,13 @@ MyGL::MyGL(QWidget *parent)
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
-<<<<<<< HEAD
-      chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), drawWater(false),
-      isCheckingForBoundary(false)
 
-=======
+      chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), drawWater(false),
+      isCheckingForBoundary(false),
+
+
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
->>>>>>> 395a35cecff832246d7dbee5cd617e7f7bf04185
+
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -74,11 +74,9 @@ MyGL::~MyGL()
     delete surfaceMap;
     delete normalMap;
     delete greyScaleMap;
-<<<<<<< HEAD
 
-=======
     delete glossPowerMap;
->>>>>>> 395a35cecff832246d7dbee5cd617e7f7bf04185
+
 }
 
 
