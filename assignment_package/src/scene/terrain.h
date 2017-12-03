@@ -75,8 +75,9 @@ public:
 
     Chunk* getChunkAt(int64_t x, int64_t z) const;
 
-    void addChunkAt(OpenGLContext* parent, int x, int z);
-
+    //void addChunkAt(OpenGLContext* parent, int x, int z);
+    Chunk* newChunkAt(OpenGLContext* parent, int x, int z);
+    void addChunk2Map(Chunk* chunk);
 
 
     std::unordered_map<int64_t, Chunk*> ChunkTable;
@@ -119,7 +120,7 @@ struct xzCoords
 class Chunk : public Drawable
 
 {
-
+friend class Terrain;
 private:
 
     BlockType blocks[65536];
@@ -138,11 +139,13 @@ private:
 
     std::vector<GLfloat> uv;
 
-    std::vector<GLint> flowFlag;
+    std::vector<GLfloat> flowVelocity;
 
     std::vector<GLuint> ele;
 
+    std::vector<GLfloat> tan;
 
+    std::vector<GLfloat> bitan;
 
     Chunk* getLeftAdjacent();
 
@@ -170,17 +173,22 @@ private:
 
     void fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing);
 
+    void appendUV(const glm::vec2 uvCoords[]);
 
-
-public:
-
-    Chunk(OpenGLContext* parent, Terrain *terrain, int64_t xz);
+    void appendFlow(glm::vec2 speed);
 
     BlockType getBlockType(size_t x, size_t y, size_t z) const;
 
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
 
+    bool shouldFill(size_t x, size_t y, size_t z);
 
+public:
+
+    Chunk(OpenGLContext* parent, Terrain *terrain, int64_t xz);
+
+
+    int64_t getXZGlobalPositions();
 
     static xzCoords getXZCoordUnpacked(int64_t p)
 
@@ -192,7 +200,7 @@ public:
 
     }
 
-
+    BlockType& accessBlockTypeGlobalCoords(int x, int y, int z);
 
     static int64_t getXZCoordPacked(xzCoords c)
 

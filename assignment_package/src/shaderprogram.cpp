@@ -7,8 +7,10 @@
 
 ShaderProgram::ShaderProgram(OpenGLContext *context)
     : vertShader(), fragShader(), prog(),
-      attrPos(-1), attrNor(-1), /*attrCol(-1),*/ attrUV(-1), attrFlow(-1),
+      attrPos(-1), attrNor(-1), attrCol(-1), attrUV(-1), attrFlowVelocity(-1),
+      attrTangent(-1), attrBiTangent(-1),
       unifModel(-1), unifModelInvTr(-1), unifViewProj(-1), unifColor(-1),
+      unifLookVector(-1),
       context(context)
 {}
 
@@ -62,19 +64,24 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
 
     attrPos = context->glGetAttribLocation(prog, "vs_Pos");
     attrNor = context->glGetAttribLocation(prog, "vs_Nor");
-    //attrCol = context->glGetAttribLocation(prog, "vs_Col");
+    attrCol = context->glGetAttribLocation(prog, "vs_Col");
     attrUV = context->glGetAttribLocation(prog, "vs_UV");
-    attrFlow = context->glGetAttribLocation(prog, "vs_FlowFlag");
+    attrFlowVelocity = context->glGetAttribLocation(prog, "vs_FlowVelocity");
+    attrTangent = context->glGetAttribLocation(prog, "vs_Tangent");
+    attrBiTangent = context->glGetAttribLocation(prog, "vs_BiTangent");
 
     unifModel      = context->glGetUniformLocation(prog, "u_Model");
     unifModelInvTr = context->glGetUniformLocation(prog, "u_ModelInvTr");
     unifViewProj   = context->glGetUniformLocation(prog, "u_ViewProj");
     unifColor      = context->glGetUniformLocation(prog, "u_Color");
     unifTime       = context->glGetUniformLocation(prog, "u_Time");
+    unifLookVector = context->glGetUniformLocation(prog, "u_LookVector");
 
     unifSamplerSurface = context->glGetUniformLocation(prog, "u_Surface");
     unifSamplerNormal = context->glGetUniformLocation(prog, "u_Normal");
-    unifSamplerGreyScale = context->glGetUniformLocation(prog, "u_GreyScale");
+    unifSamplerGreyscale = context->glGetUniformLocation(prog, "u_Greyscale");
+    unifSamplerGloss = context->glGetUniformLocation(prog, "u_GlossPower");
+    unifSamplerDuplicate = context->glGetUniformLocation(prog, "u_Duplicate");
 }
 
 void ShaderProgram::useMe()
@@ -164,24 +171,36 @@ void ShaderProgram::draw(Drawable &d)
         context->glVertexAttribPointer(attrNor, 4, GL_FLOAT, false, 0, NULL);
     }
 
-    /*if (attrCol != -1 && d.bindCol()) {
+    if (attrCol != -1 && d.bindCol()) {
         context->glEnableVertexAttribArray(attrCol);
         context->glVertexAttribPointer(attrCol, 4, GL_FLOAT, false, 0, NULL);
-    }*/
+    }
 
     if (attrUV != -1 && d.bindUV()) {
         context->glEnableVertexAttribArray(attrUV);
         context->glVertexAttribPointer(attrUV, 2, GL_FLOAT, false, 0, NULL);
     }
 
-    if (attrFlow != -1 && d.bindFlow()) {
-        context->glEnableVertexAttribArray(attrFlow);
-        context->glVertexAttribIPointer(attrFlow, 1, GL_INT, 0, NULL);
+    if (attrFlowVelocity != -1 && d.bindFlowVelocity()) {
+        context->glEnableVertexAttribArray(attrFlowVelocity);
+        context->glVertexAttribPointer(attrFlowVelocity, 2, GL_FLOAT, false, 0, NULL);
+    }
+
+    if (attrTangent != -1 && d.bindTangent()) {
+        context->glEnableVertexAttribArray(attrTangent);
+        context->glVertexAttribPointer(attrTangent, 4, GL_FLOAT, false, 0, NULL);
+    }
+
+    if (attrBiTangent != -1 && d.bindBiTangent()) {
+        context->glEnableVertexAttribArray(attrBiTangent);
+        context->glVertexAttribPointer(attrBiTangent, 4, GL_FLOAT, false, 0, NULL);
     }
 
     if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
     if (unifSamplerNormal != -1) context->glUniform1i(unifSamplerNormal, NORMAL);
-    if (unifSamplerGreyScale != -1) context->glUniform1i(unifSamplerGreyScale, GREYSCALE);
+    if (unifSamplerGreyscale != -1) context->glUniform1i(unifSamplerGreyscale, GREYSCALE);
+    if (unifSamplerGloss != -1) context->glUniform1i(unifSamplerGloss, GLOSSINESS);
+    if (unifSamplerDuplicate != -1) context->glUniform1i(unifSamplerDuplicate, DUPL);
 
     // Bind the index buffer and then draw shapes from it.
     // This invokes the shader program, which accesses the vertex buffers.
@@ -190,9 +209,11 @@ void ShaderProgram::draw(Drawable &d)
 
     if (attrPos != -1) context->glDisableVertexAttribArray(attrPos);
     if (attrNor != -1) context->glDisableVertexAttribArray(attrNor);
-    //if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
+    if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
     if (attrUV != -1) context->glDisableVertexAttribArray(attrUV);
-    if (attrFlow != -1) context->glDisableVertexAttribArray(attrFlow);
+    if (attrFlowVelocity != -1) context->glDisableVertexAttribArray(attrFlowVelocity);
+    if (attrTangent != -1) context->glDisableVertexAttribArray(attrTangent);
+    if (attrBiTangent != -1) context->glDisableVertexAttribArray(attrBiTangent);
 
     context->printGLErrorLog();
 }
@@ -272,11 +293,22 @@ void ShaderProgram::printLinkInfoLog(int prog)
         delete [] infoLog;
     }
 }
+
 void ShaderProgram::setTimeCount(int time)
 {
     useMe();
     if(unifTime != -1)
     {
         context->glUniform1i(unifTime, time);
+    }
+}
+
+void ShaderProgram::setLookVector(glm::vec3 look)
+{
+    useMe();
+    //glm::vec4 lookExtended = glm::vec4(look, 0.0f);
+    if(unifLookVector != -1)
+    {
+        context->glUniform3fv(unifLookVector, 1, &look[0]);
     }
 }

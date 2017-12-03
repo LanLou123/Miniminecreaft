@@ -2,7 +2,7 @@
 #include <la.h>
 
 Drawable::Drawable(OpenGLContext* context)
-    : bufIdx(), bufPos(), bufNor(), bufCol(), bufUV(), bufFlow(),
+    : bufIdx(), bufPos(), bufNor(), bufCol(), bufUV(), bufFlowVelocity(),
       idxBound(false), posBound(false), norBound(false), colBound(false),
       context(context)
 {}
@@ -18,7 +18,9 @@ void Drawable::destroy()
     context->glDeleteBuffers(1, &bufNor);
     context->glDeleteBuffers(1, &bufCol);
     context->glDeleteBuffers(1, &bufUV);
-    context->glDeleteBuffers(1, &bufFlow);
+    context->glDeleteBuffers(1, &bufFlowVelocity);
+    context->glDeleteBuffers(1, &bufTangent);
+    context->glDeleteBuffers(1, &bufBiTangent);
 }
 
 GLenum Drawable::drawMode()
@@ -71,10 +73,22 @@ void Drawable::generateUV()
     context->glGenBuffers(1, &bufUV);
 }
 
-void Drawable::generateFlow()
+void Drawable::generateFlowVelocity()
 {
-    flowBound = true;
-    context->glGenBuffers(1, &bufFlow);
+    flowVelocityBound = true;
+    context->glGenBuffers(1, &bufFlowVelocity);
+}
+
+void Drawable::generateTangent()
+{
+    tangentBound = true;
+    context->glGenBuffers(1, &bufTangent);
+}
+
+void Drawable::generateBiTangent()
+{
+    bitangentBound = true;
+    context->glGenBuffers(1, &bufBiTangent);
 }
 
 bool Drawable::bindIdx()
@@ -117,9 +131,26 @@ bool Drawable::bindUV()
     return uvBound;
 }
 
-bool Drawable::bindFlow()
+bool Drawable::bindFlowVelocity()
 {
-    if(flowBound){
-        context->glBindBuffer(GL_ARRAY_BUFFER, bufFlow);
+    if(flowVelocityBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufFlowVelocity);
     }
+    return flowVelocityBound;
+}
+
+bool Drawable::bindTangent()
+{
+    if(tangentBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufTangent);
+    }
+    return tangentBound;
+}
+
+bool Drawable::bindBiTangent()
+{
+    if(bitangentBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangent);
+    }
+    return bitangentBound;
 }
