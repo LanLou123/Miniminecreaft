@@ -304,7 +304,6 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
     else
     {
         updateRiver(left , bottom);
-        std::cout<<"river exisit in bound"<<std::endl;
     }
     for(int i = 0; i < 4; i++)
     {
@@ -385,7 +384,7 @@ void Terrain::Calculate_corner_Riverside(int x, int y, int z)//invoked when need
 
 void Terrain::create_riverside()
 {
-    std::cout<<"generating river side................"<<std::endl;
+    std::cout<<"Generating river side................"<<std::endl;
     bool coner = false ;
     int river1_minx = 0; int river2_minx = 0;
     int river1_maxx = 0; int river2_maxx = 0;
@@ -484,7 +483,7 @@ void Terrain::create_riverside()
             }
         }
     }
-      std::cout<<"riverside generation completed!!"<<std::endl;
+    std::cout<<"Riverside generation completed!!"<<std::endl;
 }
 
 void Terrain::updateFirstRiver()//called when first update river in the first default landscape

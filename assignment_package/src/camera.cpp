@@ -1,8 +1,6 @@
 #include "camera.h"
 
 #include <la.h>
-#include <iostream>
-
 
 Camera::Camera():
     Camera(400, 400)
