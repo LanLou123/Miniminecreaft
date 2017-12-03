@@ -75,13 +75,13 @@ void Camera::RotateAboutUp(float deg)
 }
 void Camera::RotateAboutRight(float deg)
 {
-    float temp = deg;
-    add_deg+=deg;
-    if(abs(add_deg)>=90)
-    {
-        deg=0;
-        add_deg = add_deg>0?90:-90;
-    }
+//    float temp = deg;
+//    add_deg+=deg;
+//    if(abs(add_deg)>=90)
+//    {
+//        deg=0;
+//        add_deg = add_deg>0?90:-90;
+//    }
     glm::mat4 rotation = glm::rotate(glm::mat4(1.0f), glm::radians(deg), right);
     ref = ref - eye;
     ref = glm::vec3(rotation * glm::vec4(ref, 1));
