@@ -9,12 +9,12 @@
 #define BLOCKEDGE_ERROR 0.02f
 const float G = 9.8f / 60.0f;
 const float time_step = 1.0f / 15.0f;
-const float gravity_acceleration = -30.0f;
+const float gravity_acceleration = -10.0f;
 
 class player : public Camera
 {
 public:
-
+    float add_deg;
     Camera *cam;
     float vertical_velocity;
     bool DisableFlyingCollision;
@@ -29,6 +29,7 @@ public:
     void Jump();
     void Fall();
     bool bottom_test();
+    bool roof_test();
     void ChangeMode();
     void refresh(Camera *Maincam);
     void CheckTranslateAlongLook(float amt);

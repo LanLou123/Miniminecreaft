@@ -1,19 +1,17 @@
 
 #include "player.h"
-#include "iostream"
+
 player::player():cam(nullptr),vertical_velocity(0),DisableFlyingCollision(0),upAngle(0),grounded(false)
 {
-
+    add_deg = 0;
 }
 
 void player::CheckRotateAboutRight(float deg)
 {
+//    add_deg+=deg;
+//    std::cout<<add_deg<<std::endl;
+    float temp = deg;
 
-    float temp = upAngle + deg;
-    if (temp > 90)
-        deg = 89.99 - upAngle;
-    else if (temp < -90)
-        deg = -89.99 - upAngle;
     cam->RotateAboutRight(deg);
     refresh(cam);
 }
@@ -25,6 +23,8 @@ void player::SetMainCamera(Camera *in)
 }
 void player::CheckRotateAboutUp(float deg)
 {
+
+
     glm::mat4 rot = glm::rotate(glm::mat4(1.0f), glm::radians(deg),up);
     ref = glm::vec3(rot * glm::vec4(ref - eye,1));
     ref = ref + eye;
@@ -80,6 +80,42 @@ void player::CheckTranslateAlongLook(float amt)
             refresh(cam);
     }
     }
+
+bool player::roof_test()
+{
+    refresh(cam);
+    glm::vec3 character_size = glm::vec3(0.6,2,0.6);
+    if(vertical_velocity == 0)
+        return false;
+    glm::vec3 forward_v = glm::normalize(glm::vec3(look[0],0,look[2]));
+    glm::vec3 pos5,pos6,pos7,pos8;
+    pos5=eye+glm::vec3(0,(0.35f+BODYEDGE_ERROR)*character_size[1],0)+(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
+            -(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+    pos6=eye+glm::vec3(0,(0.35f+BODYEDGE_ERROR)*character_size[1],0)+(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
+            +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+    pos7=eye+glm::vec3(0,(0.35f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
+            -(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+    pos8=eye+glm::vec3(0,(0.35f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
+            +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+    if(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))!= EMPTY)
+    {
+        return true;
+
+    }
+    else if(input_terrain->getBlockAt(round(pos6[0]),round(pos6[1]),round(pos6[2]))!=EMPTY)
+    {
+        return true;
+    }
+    else if(input_terrain->getBlockAt(round(pos7[0]),round(pos7[1]),round(pos7[2]))!= EMPTY)
+    {
+        return true;
+    }
+    else if(input_terrain->getBlockAt(round(pos8[0]),round(pos8[1]),round(pos8[2]))!= EMPTY)
+    {
+        return true;
+    }
+}
+
 bool player::bottom_test()
 {
     refresh(cam);
@@ -96,6 +132,7 @@ bool player::bottom_test()
                -(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
        pos4=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
                +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+
        if(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))!= EMPTY)
        {
            cam->TranslateAlongWorldY(round(pos1[1])+2 -cam->eye[1]);
@@ -172,15 +209,12 @@ void player::Jump()
 //    {
 //    external_force_a = 0;
     if(vertical_velocity == 0)
-        vertical_velocity = 9.0f;
+        vertical_velocity = 10.0f;
 //    }
 }
 
 void player::Fall()
 {
-
-
-
     refresh(cam);
     if(DisableFlyingCollision)
     {
@@ -188,6 +222,11 @@ void player::Fall()
     }
     else
     {
+        if(roof_test())
+        {
+            if(vertical_velocity>=0)
+                vertical_velocity=0;
+        }
     float dis = vertical_velocity * time_step + 0.5 * (gravity_acceleration/*+external_force_a*/)*time_step*time_step;
     dis = dis>1?1:dis;
     dis = dis<-1?-1:dis;//consider wind resistance force
@@ -199,6 +238,7 @@ void player::Fall()
         vertical_velocity=0;
 //        external_force_a=-gravity_acceleration;
     }
+
     else
     {
         vertical_velocity+=gravity_acceleration*time_step;

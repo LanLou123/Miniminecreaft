@@ -1,43 +1,65 @@
 #version 150
-// ^ Change this to version 130 if you have compatibility issues
 
-// This is a fragment shader. If you've opened this file first, please
-// open and read lambert.vert.glsl before reading on.
-// Unlike the vertex shader, the fragment shader actually does compute
-// the shading of geometry. For every pixel in your program's output
-// screen, the fragment shader is run for every bit of geometry that
-// particular pixel overlaps. By implicitly interpolating the position
-// data passed into the fragment shader by the vertex shader, the fragment shader
-// can compute what color to apply to its pixel based on things like vertex
-// position, light position, and vertex color.
+uniform vec4 u_Color;
 
-uniform vec4 u_Color; // The color with which to render this instance of geometry.
+//uniform vec4 u_LookVector;
 
-// These are the interpolated values out of the rasterizer, so you can't know
-// their specific values without knowing the vertices that contributed to them
+uniform sampler2D u_Surface;
+uniform sampler2D u_Normal;
+uniform sampler2D u_Greyscale;
+uniform sampler2D u_GlossPower;
+uniform sampler2D u_Duplicate;
+
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
+in vec2 fs_UV;
+in vec4 fs_Tangent;
+in vec4 fs_BiTangent;
+in vec2 flowVelocity;
+in vec4 hVector;
 
-out vec4 out_Col; // This is the final output color that you will see on your
-                  // screen for the pixel that is currently being processed.
+in float fs_Alpha;
+
+out vec4 out_Col;
 
 void main()
 {
-    // Material base color (before shading)
-        vec4 diffuseColor = fs_Col;
+    mat4 TBN = mat4(normalize(fs_Tangent),
+                    normalize(fs_BiTangent),
+                    normalize(fs_Nor),
+                    vec4(0.0f, 0.0f, 0.0f, 1.0f));
+    vec4 normalSample = texture(u_Normal, fs_UV);
+    normalSample = normalize(TBN * normalSample);
+    vec4 normal = vec4(0.0f);
+    if (length(flowVelocity) > 0.1f)
+    {
+        normal = fs_Nor;
+    }
+    else
+    {
+        normal = normalSample;
+    }
 
-        // Calculate the diffuse term for Lambert shading
-        float diffuseTerm = dot(normalize(fs_Nor), normalize(fs_LightVec));
-        // Avoid negative lighting values
-        diffuseTerm = clamp(diffuseTerm, 0, 1);
+    vec4 diffuseColor = texture(u_Surface, fs_UV);
+    float diffuseIntensity = dot(normal, fs_LightVec);
+    diffuseIntensity = clamp(diffuseIntensity, 0, 1);
+    vec4 diffuseComponent = diffuseIntensity * diffuseColor;
 
-        float ambientTerm = 0.2;
+    vec4 ambientColor = diffuseColor;
+    float ambientIntensity = 0.2f;
+    vec4 ambientComponent = ambientIntensity * ambientColor;
 
-        float lightIntensity = diffuseTerm + ambientTerm;   //Add a small float value to the color multiplier
-                                                            //to simulate ambient lighting. This ensures that faces that are not
-                                                            //lit by our point light are not completely black.
+    vec4 specularColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
+    float specularBase = max(0.0f, dot(hVector, normal));
+    vec4 powerTexel = texture(u_Surface, fs_UV);
+    float specularPower = 0.21f * powerTexel.r + 0.72f * powerTexel.g + 0.07 * powerTexel.b;
+    specularPower = specularPower * 18.0f;
 
-        // Compute final shaded color
-        out_Col = vec4(diffuseColor.rgb * lightIntensity, diffuseColor.a);
+    float specularIntensity = max(0.0f, pow(specularBase, specularPower));
+    vec4 specularComponent = specularIntensity * specularColor;
+
+    vec4 accumulatedResult = diffuseComponent + ambientComponent + specularComponent;
+
+    out_Col = vec4(accumulatedResult.rgb, fs_Alpha);
 }

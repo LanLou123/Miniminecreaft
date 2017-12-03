@@ -1,56 +1,62 @@
 #version 150
-// ^ Change this to version 130 if you have compatibility issues
 
-//This is a vertex shader. While it is called a "shader" due to outdated conventions, this file
-//is used to apply matrix transformations to the arrays of vertex data passed to it.
-//Since this code is run on your GPU, each vertex is transformed simultaneously.
-//If it were run on your CPU, each vertex would have to be processed in a FOR loop, one at a time.
-//This simultaneous transformation allows your program to run much faster, especially when rendering
-//geometry with millions of vertices.
+uniform mat4 u_Model;
+uniform mat4 u_ModelInvTr;
+uniform mat4 u_ViewProj;
+uniform vec4 u_Color;
+uniform vec3 u_LookVector;
 
-uniform mat4 u_Model;       // The matrix that defines the transformation of the
-                            // object we're rendering. In this assignment,
-                            // this will be the result of traversing your scene graph.
+uniform int u_Time;
 
-uniform mat4 u_ModelInvTr;  // The inverse transpose of the model matrix.
-                            // This allows us to transform the object's normals properly
-                            // if the object has been non-uniformly scaled.
+in vec4 vs_Pos;
+in vec4 vs_Nor;
+in vec4 vs_Col;
+in vec2 vs_UV;
+in vec2 vs_FlowVelocity;
+in vec4 vs_Tangent;
+in vec4 vs_BiTangent;
 
-uniform mat4 u_ViewProj;    // The matrix that defines the camera's transformation.
-                            // We've written a static matrix for you to use for HW2,
-                            // but in HW3 you'll have to generate one yourself
+in int vs_BlockType;
 
-uniform vec4 u_Color;       // When drawing the cube instance, we'll set our uniform color to represent different block types.
+out vec4 fs_Nor;
+out vec4 fs_LightVec;
+out vec4 fs_Col;
+out vec2 fs_UV;
+out vec4 fs_Tangent;
+out vec4 fs_BiTangent;
+out vec4 hVector;
 
-in vec4 vs_Pos;             // The array of vertex positions passed to the shader
+out float fs_Alpha;
 
-in vec4 vs_Nor;             // The array of vertex normals passed to the shader
+out vec2 flowVelocity;
 
-in vec4 vs_Col;             // The array of vertex colors passed to the shader.
-
-out vec4 fs_Nor;            // The array of normals that has been transformed by u_ModelInvTr. This is implicitly passed to the fragment shader.
-out vec4 fs_LightVec;       // The direction in which our virtual light lies, relative to each vertex. This is implicitly passed to the fragment shader.
-out vec4 fs_Col;            // The color of each vertex. This is implicitly passed to the fragment shader.
-
-const vec4 lightDir = vec4(1,1,1,0);  // The direction of our virtual light, which is used to compute the shading of
-                                        // the geometry in the fragment shader.
+const vec4 lightDir = normalize(vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
 void main()
 {
-    fs_Col = u_Color;                         // Pass the vertex colors to the fragment shader for interpolation
+    int timeWarpFactor = 10;
+
+    float deltaU = ((u_Time * timeWarpFactor) % 625) * 0.0001f;
+    float deltaV = ((u_Time * timeWarpFactor) % 625) * 0.0001f;
+
+    fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
+    fs_UV = vec2(deltaU, deltaV) * vs_FlowVelocity + vs_UV;
 
     mat3 invTranspose = mat3(u_ModelInvTr);
-    fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);          // Pass the vertex normals to the fragment shader for interpolation.
-                                                            // Transform the geometry's normals by the inverse transpose of the
-                                                            // model matrix. This is necessary to ensure the normals remain
-                                                            // perpendicular to the surface after the surface is transformed by
-                                                            // the model matrix.
+    fs_Nor = vec4(invTranspose * vec3(vs_Nor), 0);
 
+    fs_Tangent = vs_Tangent;
+    fs_BiTangent = vs_BiTangent;
+    fs_LightVec = lightDir;
+    flowVelocity = vs_FlowVelocity;
 
-    vec4 modelposition = u_Model * vs_Pos;   // Temporarily store the transformed vertex positions for use below
+    if (vs_BlockType == 8)
+        fs_Alpha = 0.6f;
+    else
+        fs_Alpha = 1.0f;
 
-    fs_LightVec = (lightDir);  // Compute the direction in which the light source lies
+    vec4 modelposition = u_Model * vs_Pos;
+    hVector = normalize(normalize(vec4(u_LookVector, 1.0f) - modelposition) + lightDir);
 
-    gl_Position = u_ViewProj * modelposition;// gl_Position is a built-in variable of OpenGL which is
-                                             // used to render the final positions of the geometry's vertices
+    gl_Position = u_ViewProj * modelposition;
 }

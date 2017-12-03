@@ -7,8 +7,10 @@
 
 ShaderProgram::ShaderProgram(OpenGLContext *context)
     : vertShader(), fragShader(), prog(),
-      attrPos(-1), attrNor(-1), attrCol(-1),
+      attrPos(-1), attrNor(-1), attrCol(-1), attrUV(-1), attrFlowVelocity(-1),
+      attrTangent(-1), attrBiTangent(-1),
       unifModel(-1), unifModelInvTr(-1), unifViewProj(-1), unifColor(-1),
+      unifLookVector(-1),
       context(context)
 {}
 
@@ -63,11 +65,24 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
     attrPos = context->glGetAttribLocation(prog, "vs_Pos");
     attrNor = context->glGetAttribLocation(prog, "vs_Nor");
     attrCol = context->glGetAttribLocation(prog, "vs_Col");
+    attrUV = context->glGetAttribLocation(prog, "vs_UV");
+    attrFlowVelocity = context->glGetAttribLocation(prog, "vs_FlowVelocity");
+    attrTangent = context->glGetAttribLocation(prog, "vs_Tangent");
+    attrBiTangent = context->glGetAttribLocation(prog, "vs_BiTangent");
+    attrBlockType = context->glGetAttribLocation(prog, "vs_BlockType");
 
     unifModel      = context->glGetUniformLocation(prog, "u_Model");
     unifModelInvTr = context->glGetUniformLocation(prog, "u_ModelInvTr");
     unifViewProj   = context->glGetUniformLocation(prog, "u_ViewProj");
     unifColor      = context->glGetUniformLocation(prog, "u_Color");
+    unifTime       = context->glGetUniformLocation(prog, "u_Time");
+    unifLookVector = context->glGetUniformLocation(prog, "u_LookVector");
+
+    unifSamplerSurface = context->glGetUniformLocation(prog, "u_Surface");
+    unifSamplerNormal = context->glGetUniformLocation(prog, "u_Normal");
+    unifSamplerGreyscale = context->glGetUniformLocation(prog, "u_Greyscale");
+    unifSamplerGloss = context->glGetUniformLocation(prog, "u_GlossPower");
+    unifSamplerDuplicate = context->glGetUniformLocation(prog, "u_Duplicate");
 }
 
 void ShaderProgram::useMe()
@@ -136,40 +151,112 @@ void ShaderProgram::setGeometryColor(glm::vec4 color)
 //This function, as its name implies, uses the passed in GL widget
 void ShaderProgram::draw(Drawable &d)
 {
-        useMe();
+    useMe();
 
-    // Each of the following blocks checks that:
-    //   * This shader has this attribute, and
-    //   * This Drawable has a vertex buffer for this attribute.
-    // If so, it binds the appropriate buffers to each attribute.
-
-        // Remember, by calling bindPos(), we call
-        // glBindBuffer on the Drawable's VBO for vertex position,
-        // meaning that glVertexAttribPointer associates vs_Pos
-        // (referred to by attrPos) with that VBO
     if (attrPos != -1 && d.bindPos()) {
         context->glEnableVertexAttribArray(attrPos);
         context->glVertexAttribPointer(attrPos, 4, GL_FLOAT, false, 0, NULL);
     }
-
     if (attrNor != -1 && d.bindNor()) {
         context->glEnableVertexAttribArray(attrNor);
         context->glVertexAttribPointer(attrNor, 4, GL_FLOAT, false, 0, NULL);
     }
-
     if (attrCol != -1 && d.bindCol()) {
         context->glEnableVertexAttribArray(attrCol);
         context->glVertexAttribPointer(attrCol, 4, GL_FLOAT, false, 0, NULL);
     }
+    if (attrUV != -1 && d.bindUV()) {
+        context->glEnableVertexAttribArray(attrUV);
+        context->glVertexAttribPointer(attrUV, 2, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrFlowVelocity != -1 && d.bindFlowVelocity()) {
+        context->glEnableVertexAttribArray(attrFlowVelocity);
+        context->glVertexAttribPointer(attrFlowVelocity, 2, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrTangent != -1 && d.bindTangent()) {
+        context->glEnableVertexAttribArray(attrTangent);
+        context->glVertexAttribPointer(attrTangent, 4, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrBiTangent != -1 && d.bindBiTangent()) {
+        context->glEnableVertexAttribArray(attrBiTangent);
+        context->glVertexAttribPointer(attrBiTangent, 4, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrBlockType != -1 && d.bindBlockType()) {
+        context->glEnableVertexAttribArray(attrBlockType);
+        context->glVertexAttribIPointer(attrBlockType, 1, GL_INT, 0, NULL);
+    }
+    if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
+    if (unifSamplerNormal != -1) context->glUniform1i(unifSamplerNormal, NORMAL);
+    if (unifSamplerGreyscale != -1) context->glUniform1i(unifSamplerGreyscale, GREYSCALE);
+    if (unifSamplerGloss != -1) context->glUniform1i(unifSamplerGloss, GLOSSINESS);
+    if (unifSamplerDuplicate != -1) context->glUniform1i(unifSamplerDuplicate, DUPL);
 
-    // Bind the index buffer and then draw shapes from it.
-    // This invokes the shader program, which accesses the vertex buffers.
     d.bindIdx();
     context->glDrawElements(d.drawMode(), d.elemCount(), GL_UNSIGNED_INT, 0);
 
     if (attrPos != -1) context->glDisableVertexAttribArray(attrPos);
     if (attrNor != -1) context->glDisableVertexAttribArray(attrNor);
     if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
+    if (attrUV != -1) context->glDisableVertexAttribArray(attrUV);
+    if (attrFlowVelocity != -1) context->glDisableVertexAttribArray(attrFlowVelocity);
+    if (attrTangent != -1) context->glDisableVertexAttribArray(attrTangent);
+    if (attrBiTangent != -1) context->glDisableVertexAttribArray(attrBiTangent);
+    if (attrBlockType != -1) context->glDisableVertexAttribArray(attrBlockType);
+
+    context->printGLErrorLog();
+}
+
+void ShaderProgram::drawF(Drawable &d)
+{
+    if (attrPos != -1 && d.bindPosF()) {
+        context->glEnableVertexAttribArray(attrPos);
+        context->glVertexAttribPointer(attrPos, 4, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrNor != -1 && d.bindNorF()) {
+        context->glEnableVertexAttribArray(attrNor);
+        context->glVertexAttribPointer(attrNor, 4, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrCol != -1 && d.bindColF()) {
+        context->glEnableVertexAttribArray(attrCol);
+        context->glVertexAttribPointer(attrCol, 4, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrUV != -1 && d.bindUVF()) {
+        context->glEnableVertexAttribArray(attrUV);
+        context->glVertexAttribPointer(attrUV, 2, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrFlowVelocity != -1 && d.bindFlowVelocityF()) {
+        context->glEnableVertexAttribArray(attrFlowVelocity);
+        context->glVertexAttribPointer(attrFlowVelocity, 2, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrTangent != -1 && d.bindTangentF()) {
+        context->glEnableVertexAttribArray(attrTangent);
+        context->glVertexAttribPointer(attrTangent, 4, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrBiTangent != -1 && d.bindBiTangentF()) {
+        context->glEnableVertexAttribArray(attrBiTangent);
+        context->glVertexAttribPointer(attrBiTangent, 4, GL_FLOAT, false, 0, NULL);
+    }
+    if (attrBlockType != -1 && d.bindBlockTypeF()) {
+        context->glEnableVertexAttribArray(attrBlockType);
+        context->glVertexAttribIPointer(attrBlockType, 1, GL_INT, 0, NULL);
+    }
+    if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
+    if (unifSamplerNormal != -1) context->glUniform1i(unifSamplerNormal, NORMAL);
+    if (unifSamplerGreyscale != -1) context->glUniform1i(unifSamplerGreyscale, GREYSCALE);
+    if (unifSamplerGloss != -1) context->glUniform1i(unifSamplerGloss, GLOSSINESS);
+    if (unifSamplerDuplicate != -1) context->glUniform1i(unifSamplerDuplicate, DUPL);
+
+    d.bindIdxF();
+    context->glDrawElements(d.drawMode(), d.elemCountF(), GL_UNSIGNED_INT, 0);
+
+    if (attrPos != -1) context->glDisableVertexAttribArray(attrPos);
+    if (attrNor != -1) context->glDisableVertexAttribArray(attrNor);
+    if (attrCol != -1) context->glDisableVertexAttribArray(attrCol);
+    if (attrUV != -1) context->glDisableVertexAttribArray(attrUV);
+    if (attrFlowVelocity != -1) context->glDisableVertexAttribArray(attrFlowVelocity);
+    if (attrTangent != -1) context->glDisableVertexAttribArray(attrTangent);
+    if (attrBiTangent != -1) context->glDisableVertexAttribArray(attrBiTangent);
+    if (attrBlockType != -1) context->glDisableVertexAttribArray(attrBlockType);
 
     context->printGLErrorLog();
 }
@@ -249,8 +336,22 @@ void ShaderProgram::printLinkInfoLog(int prog)
         delete [] infoLog;
     }
 }
+
 void ShaderProgram::setTimeCount(int time)
 {
-//    useMe();
-//    if(unift)
+    useMe();
+    if(unifTime != -1)
+    {
+        context->glUniform1i(unifTime, time);
+    }
+}
+
+void ShaderProgram::setLookVector(glm::vec3 look)
+{
+    useMe();
+    //glm::vec4 lookExtended = glm::vec4(look, 0.0f);
+    if(unifLookVector != -1)
+    {
+        context->glUniform3fv(unifLookVector, 1, &look[0]);
+    }
 }

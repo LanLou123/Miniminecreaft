@@ -11,6 +11,7 @@
 #include"player.h"
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
+#include <texture.h>
 
 
 class MyGL : public OpenGLContext
@@ -37,7 +38,13 @@ private:
     void MoveMouseToCenter(); // Forces the mouse position to the screen's center. You should call this
                               // from within a mouse move event after reading the mouse movement so that
                               // your mouse stays within the screen bounds and is always read.
-
+    int m_time;
+    float add_deg;
+    Texture *surfaceMap;
+    Texture *normalMap;
+    Texture *greyScaleMap;
+    Texture *glossPowerMap;
+    Texture *duplicateMap;
 
 public:
     explicit MyGL(QWidget *parent = 0);
@@ -52,6 +59,18 @@ public:
 protected:
     void keyPressEvent(QKeyEvent *e);
 
+
+    void mousePressEvent(QMouseEvent *me);
+
+    void RayCubeIntersection(glm::vec3 cubeCenter, float& tNear, float& tFar);
+
+    glm::ivec3 CubeToRemove(bool &valid);
+
+    glm::ivec3 CubeToAdd(bool &valid);
+
+    void CheckForBoundary();
+
+
     bool flag_moving_forward;
     bool flag_moving_backward;
     bool flag_moving_right;
@@ -65,12 +84,13 @@ protected:
     bool flag_moving_down;
     float speed;
     void keyReleaseEvent(QKeyEvent *e);
-    void mousePressEvent(QMouseEvent *e);
+
     void mouseMoveEvent(QMouseEvent *e);
     void wheelEvent(QWheelEvent *e);
     void walk_begin();
     void walk_end();
     void moving();
+
 private slots:
     /// Slot that gets called ~60 times per second
     void timerUpdate();
