@@ -1,7 +1,7 @@
 
 #include "player.h"
 #include "iostream"
-player::player():cam(nullptr),vertical_velocity(0),DisableFlyingCollision(0),upAngle(0),grounded(false)
+player::player():cam(nullptr),vertical_velocity(0),DisableFlyingCollision(0),upAngle(0),grounded(false),swimming(false)
 {
 
 }
@@ -37,16 +37,27 @@ void player::ChangeMode()
     DisableFlyingCollision ^= 1;
 }
 
+void player::Swim()
+{
+    swimming = true;
+}
+
+void player::StopSwim()
+{
+    swimming = false;
+}
+
 void player::CheckTranslateAlongLook(float amt)
 {
-//    if(DisableFlyingCollision)
-//    {
-//        std::cout<<"w";
-////        cam->TranslateAlongLook(amt);
-//        cam->Translate_X_Y(amt);
-//        refresh(cam);
-//        return;
-//    }
+    if(swimming)
+    {
+        std::cout<<"w";
+//        cam->TranslateAlongLook(amt);
+        cam->Translate_X_Y(amt);
+
+        refresh(cam);
+        return;
+    }
     refresh(cam);
     glm::vec3 character_size=glm::vec3(0.6,2,0.6);
     glm::vec3 pos1,pos2,pos3,pos4,pos5,pos6,p1,p2;
@@ -124,11 +135,11 @@ void player::get_terrain(Terrain *t)
 }
 void player::CheckTranslateAlongRight(float amt)
 {
-//    if(DisableFlyingCollision)
-//    {
-//        cam->TranslateAlongRight(amt);
-//        refresh(cam);
-//    }
+    if(swimming)
+    {
+        cam->TranslateAlongRight(amt);
+        refresh(cam);
+    }
     refresh(cam);
     glm::vec3 pos1,pos2,pos3,pos4,pos5,pos6,p1,p2;
     glm::vec3 character_size=glm::vec3(0.6,2,0.6);
@@ -164,6 +175,11 @@ void player::Jump()
     jump_tri = true;
     grounded = false;
     if(DisableFlyingCollision)
+    {
+        CheckTranslateAlongUp(0.1);
+        return;
+    }
+    if(swimming)
     {
         CheckTranslateAlongUp(0.1);
         return;

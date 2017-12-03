@@ -18,7 +18,7 @@ MyGL::MyGL(QWidget *parent)
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
-      chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()),
+      chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), drawWater(false),
       isCheckingForBoundary(false)
 
 {
@@ -227,7 +227,10 @@ void MyGL::paintGL()
     mp_progFlat->draw(*mp_worldAxes);
     glEnable(GL_DEPTH_TEST);
 
-    mp_progLiquid->draw(*m_QuadBoard);
+    if(drawWater)
+    {
+        mp_progLiquid->draw(*m_QuadBoard);
+    }
 }
 
 void MyGL::GLDrawScene()
@@ -307,11 +310,35 @@ void MyGL::keyPressEvent(QKeyEvent *e)
 }
 void MyGL::moving()
 {
+    bool touch = false;
+    bool inside = false;
+    bool eye = false;
+    BlockType liquid = EMPTY;
+    CheckforLiquid(touch, inside, eye, liquid);
+
+    if(inside || touch)
+    {
+        speed *= 2.0 / 3.0;
+        player1.Swim();
+    }
+
+    else
+    {
+        if(player1.swimming)
+        {
+            player1.StopSwim();
+        }
+    }
+    std::cout<<player1.swimming<<std::endl;
+
+    drawWater = eye;
+
+    // drawLava = ?
+
     if(flag_moving_backward&&flag_moving_forward)
     {}
     else if(flag_moving_forward)
     {
-
         player1.CheckTranslateAlongLook(speed);
     }
     else if(flag_moving_backward)
@@ -1096,32 +1123,67 @@ void MyGL::mouseMoveEvent(QMouseEvent *e)
 void MyGL::wheelEvent(QWheelEvent *e)
 {}
 
-void MyGL::CheckforLiquid(bool &touch, bool &inside, BlockType &liquidType)
+bool isLiquid(BlockType b)
+{
+    if(b == WATER || b == LAVA)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
+void MyGL::CheckforLiquid(bool &touch, bool &inside, bool &eyeGlass, BlockType &liquidType)
 {
 
     glm::vec3 eyePos = mp_camera->eye;
-    if(!inside)
+
+    glm::vec3 look = glm::normalize(glm::vec3(mp_camera->look[0], 0.f, mp_camera->look[2]));
+    glm::vec3 right = glm::normalize(glm::vec3(mp_camera->right[0], 0.f, mp_camera->right[2]));
+    // four foot corners
+    glm::vec3 frontleft = eyePos + glm::vec3(0.f, -1.f, 0.f) + 0.8f * look - 0.4f * right;
+    glm::vec3 frontright = eyePos + glm::vec3(0.f, -1.f, 0.f) + 0.8f * look + 0.4f * right;
+
+    glm::vec3 backleft = eyePos + glm::vec3(-0.5f, -1.f, -0.5f);
+    glm::vec3 backright = eyePos + glm::vec3(-0.5f, -1.f, 0.5f);
+    BlockType flBlock = mp_terrain->getBlockAt(frontleft[0], frontleft[1], frontleft[2]);
+    BlockType frBlock = mp_terrain->getBlockAt(frontright[0], frontright[1], frontright[2]);
+    BlockType blBlock = mp_terrain->getBlockAt(backleft[0], backleft[1], backleft[2]);
+    BlockType brBlock = mp_terrain->getBlockAt(backright[0], backright[1], backright[2]);
+    // ground under foot
+    glm::vec3 footBottom = eyePos - glm::vec3(0.f, 1.5001f, 0.f);
+    BlockType groundBlock = mp_terrain->getBlockAt(footBottom[0], footBottom[1], footBottom[2]);
+    if(groundBlock == LAVA || groundBlock == WATER)
     {
-        // foot
-        glm::vec3 footBottom = eyePos - glm::vec3(0.f, 1.5001f, 0.f);
-        BlockType footBlock = mp_terrain->getBlockAt(footBottom[0], footBottom[1], footBottom[2]);
-        if(footBlock == LAVA)
-        {
-            touch = true;
-        }
-        // front and back
-        // foot
-        glm::vec3 front = eyePos + glm::vec3(0.5001f, 0.f, 0.f);
-        BlockType frontBlock = mp_terrain->getBlockAt(front[0], front[1], front[2]);
-        if(frontBlock == LAVA)
-        {
-            touch = true;
-        }
+        touch = true;
     }
-    BlockType eyeBlock = mp_terrain->getBlockAt(eyePos[0], eyePos[1], eyePos[2]);
-    if(eyeBlock == LAVA)
+    // front and back
+
+    if(isLiquid(frBlock) || isLiquid(flBlock) || isLiquid(blBlock) || isLiquid(brBlock))
+    {
+        touch = true;
+    }
+
+    // right and left
+
+
+    // foot position
+    glm::vec3 foot = eyePos - glm::vec3(0.f, 1.5001f, 0.f);
+    BlockType footBlock = mp_terrain->getBlockAt(foot[0], foot[1], foot[2]);
+    if(footBlock == LAVA || footBlock == WATER)
     {
         inside = true;
+        touch = true;
+    }
+
+    BlockType eyeBlock = mp_terrain->getBlockAt(eyePos[0], eyePos[1], eyePos[2]);
+    if(eyeBlock == LAVA || eyeBlock == WATER)
+    {
+        eyeGlass = true;
+        inside = true;
+        touch = true;
         liquidType = eyeBlock;
     }
 }

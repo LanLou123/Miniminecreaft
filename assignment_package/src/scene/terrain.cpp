@@ -284,7 +284,7 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
                 }
             }
             this->addChunk2Map(newChunk);
-            this->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
+            newChunk->create();
         }
     }
 //    for(int x = left; x < left + 64; ++x)

@@ -54,6 +54,8 @@ private:
 
     QMutex* chunkMutex;
 
+    bool drawWater;
+
     bool isCheckingForBoundary;
 public:
     explicit MyGL(QWidget *parent = 0);
@@ -103,7 +105,7 @@ protected:
     void walk_end();
     void moving();
 
-    void CheckforLiquid(bool& touch, bool& inside, BlockType& liquidType);
+    void CheckforLiquid(bool& touch, bool& inside, bool &eyeGlass, BlockType& liquidType);
 
 private slots:
     /// Slot that gets called ~60 times per second
