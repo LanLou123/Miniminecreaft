@@ -13,6 +13,9 @@
 #include <QOpenGLShaderProgram>
 #include <texture.h>
 
+#include <scene/quad.h>
+
+#include <QMutex>
 
 class MyGL : public OpenGLContext
 {
@@ -22,6 +25,9 @@ private:
     WorldAxes* mp_worldAxes; // A wireframe representation of the world axes. It is hard-coded to sit centered at (32, 128, 32).
     ShaderProgram* mp_progLambert;// A shader program that uses lambertian reflection
     ShaderProgram* mp_progFlat;// A shader program that uses "flat" reflection (no shadowing at all)
+
+    ShaderProgram* mp_progLiquid;
+
     int timecount;
     GLuint vao; // A handle for our vertex array object. This will store the VBOs created in our geometry classes.
                 // Don't worry too much about this. Just know it is necessary in order to render geometry.
@@ -39,13 +45,26 @@ private:
                               // from within a mouse move event after reading the mouse movement so that
                               // your mouse stays within the screen bounds and is always read.
     int m_time;
+
+
+
+    Quad* m_QuadBoard;
+
     float add_deg;
+
     Texture *surfaceMap;
     Texture *normalMap;
     Texture *greyScaleMap;
     Texture *glossPowerMap;
     Texture *duplicateMap;
 
+    QMutex* chunkMutex;
+
+    QMutex* checkingMutex;
+
+    bool drawWater;
+
+    bool isCheckingForBoundary;
 public:
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();
@@ -55,6 +74,9 @@ public:
     void paintGL();
 
     void GLDrawScene();
+
+    // For multi-Threading
+    std::vector<Chunk*> *chunkToAdd;
 
 protected:
     void keyPressEvent(QKeyEvent *e);
@@ -90,6 +112,8 @@ protected:
     void walk_begin();
     void walk_end();
     void moving();
+
+    void CheckforLiquid(bool& touch, bool& inside, bool &eyeGlass, BlockType& liquidType);
 
 private slots:
     /// Slot that gets called ~60 times per second

@@ -1,7 +1,7 @@
 
 #include "player.h"
-
-player::player():cam(nullptr),vertical_velocity(0),DisableFlyingCollision(0),upAngle(0),grounded(false)
+#include "iostream"
+player::player():cam(nullptr),vertical_velocity(0),DisableFlyingCollision(0),upAngle(0),grounded(false),swimming(false)
 {
     add_deg = 0;
 }
@@ -37,13 +37,38 @@ void player::ChangeMode()
     DisableFlyingCollision ^= 1;
 }
 
+void player::Swim()
+{
+    swimming = true;
+    external_force_a = - 2.0 /3.0 * gravity_acceleration;
+}
+
+void player::StopSwim()
+{
+    swimming = false;
+    external_force_a = 0.f;
+}
+
+bool isThroughable(BlockType b)
+{
+    if(b == EMPTY || b == WATER || b == LAVA)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
+
 void player::CheckTranslateAlongLook(float amt)
 {
-//    if(DisableFlyingCollision)
+//    if(swimming)
 //    {
 //        std::cout<<"w";
 ////        cam->TranslateAlongLook(amt);
 //        cam->Translate_X_Y(amt);
+
 //        refresh(cam);
 //        return;
 //    }
@@ -67,12 +92,31 @@ void player::CheckTranslateAlongLook(float amt)
     pos4=p2-0.25f*character_size[1]*world_up;
     pos5=p1-(0.75f-BODYEDGE_ERROR)*character_size[1]*world_up;
     pos6=p2-(0.75f-BODYEDGE_ERROR)*character_size[1]*world_up;
+
+
     if((input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))!= EMPTY)|| (input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))!=EMPTY)\
         ||(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))!= EMPTY)||(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))!= EMPTY)\
             ||(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))!= EMPTY)||(input_terrain->getBlockAt(round(pos6[0]),round(pos6[1]),round(pos6[2]))!= EMPTY))
     {
 
+        if(isThroughable(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))) &&
+                isThroughable(input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))) &&
+                isThroughable(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))) &&
+                                isThroughable(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))) &&
+                isThroughable(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))) &&
+                                isThroughable(input_terrain->getBlockAt(round(pos6[0]),round(pos6[1]),round(pos6[2])))  )
+        {
+            cam->Translate_X_Y(amt);
+            //        cam->TranslateAlongLook(amt);
+                    refresh(cam);
+                    return;
+        }
+        else
+        {
+
+        }
     }
+
     else
     {
     cam->Translate_X_Y(amt);
@@ -97,6 +141,15 @@ bool player::roof_test()
             -(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
     pos8=eye+glm::vec3(0,(0.35f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
             +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+
+    if(isThroughable(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))) &&
+            isThroughable(input_terrain->getBlockAt(round(pos6[0]),round(pos6[1]),round(pos6[2]))) &&
+            isThroughable(input_terrain->getBlockAt(round(pos7[0]),round(pos7[1]),round(pos7[2]))) &&
+            isThroughable(input_terrain->getBlockAt(round(pos8[0]),round(pos8[1]),round(pos8[2]))))
+    {
+        return false;
+    }
+
     if(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))!= EMPTY)
     {
         return true;
@@ -133,6 +186,14 @@ bool player::bottom_test()
        pos4=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
                +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
 
+       if(isThroughable(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))) &&
+               isThroughable(input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))) &&
+               isThroughable(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))) &&
+               isThroughable(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))))
+       {
+           return false;
+       }
+
        if(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))!= EMPTY)
        {
            cam->TranslateAlongWorldY(round(pos1[1])+2 -cam->eye[1]);
@@ -161,7 +222,7 @@ void player::get_terrain(Terrain *t)
 }
 void player::CheckTranslateAlongRight(float amt)
 {
-//    if(DisableFlyingCollision)
+//    if(swimming)
 //    {
 //        cam->TranslateAlongRight(amt);
 //        refresh(cam);
@@ -186,10 +247,28 @@ void player::CheckTranslateAlongRight(float amt)
     pos4=p2-0.25f*character_size[1]*world_up;
     pos5=p1-(0.75f-BODYEDGE_ERROR)*character_size[1]*world_up;
     pos6=p2-(0.75f-BODYEDGE_ERROR)*character_size[1]*world_up;
+
     if((input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))!= EMPTY)|| (input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))!=EMPTY)\
         ||(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))!= EMPTY)||(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))!= EMPTY)\
             ||(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))!= EMPTY)||(input_terrain->getBlockAt(round(pos6[0]),round(pos6[1]),round(pos6[2]))!= EMPTY))
-    {}
+    {
+        if(isThroughable(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))) &&
+                isThroughable(input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))) &&
+                isThroughable(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))) &&
+                                isThroughable(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))) &&
+                isThroughable(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))) &&
+                                isThroughable(input_terrain->getBlockAt(round(pos6[0]),round(pos6[1]),round(pos6[2])))  )
+        {
+            cam->TranslateAlongRight(amt);
+            //        cam->TranslateAlongLook(amt);
+                    refresh(cam);
+                    return;
+        }
+        else
+        {
+
+        }
+    }
     else{
         cam->TranslateAlongRight(amt);
         refresh(cam);
@@ -205,11 +284,21 @@ void player::Jump()
         CheckTranslateAlongUp(0.1);
         return;
     }
+    if(swimming)
+    {
+        std::cout<<"inside" <<std::endl;
+        std::cout<<swimming <<std::endl;
+        vertical_velocity = 5.0f * 2.0f / 3.0f;
+        return;
+    }
 //    if(fabs(-vertical_velocity) < 1e - 7)
 //    {
 //    external_force_a = 0;
     if(vertical_velocity == 0)
-        vertical_velocity = 10.0f;
+    {
+        std::cout<<"ooo"<<std::endl;
+        vertical_velocity = 5.0f;
+    }
 //    }
 }
 
@@ -227,23 +316,23 @@ void player::Fall()
             if(vertical_velocity>=0)
                 vertical_velocity=0;
         }
-    float dis = vertical_velocity * time_step + 0.5 * (gravity_acceleration/*+external_force_a*/)*time_step*time_step;
+    float dis = vertical_velocity * time_step + 0.5 * (gravity_acceleration + external_force_a)*time_step*time_step;
     dis = dis>1?1:dis;
     dis = dis<-1?-1:dis;//consider wind resistance force
     cam->TranslateAlongWorldY(dis);
 
-    if(bottom_test())
-    {
-        if(vertical_velocity<=0)
-        vertical_velocity=0;
-//        external_force_a=-gravity_acceleration;
-    }
+        if(bottom_test())
+        {
+            if(vertical_velocity<=0)
+            vertical_velocity=0;
+    //        external_force_a=-gravity_acceleration;
+        }
 
-    else
-    {
-        vertical_velocity+=gravity_acceleration*time_step;
-//        external_force_a=0;
-    }
+        else
+        {
+            vertical_velocity+=gravity_acceleration*time_step;
+    //        external_force_a=0;
+        }
     }
 }
 

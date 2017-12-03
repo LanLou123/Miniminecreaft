@@ -3,14 +3,28 @@
 #include <QDateTime>
 #include <QApplication>
 #include <QKeyEvent>
+#include <QThreadPool>
+#include <QRunnable>
+#include <QString>
+#include <QMutex>
 
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
+
+      m_QuadBoard(new Quad(this)),
+      mp_progLiquid(new ShaderProgram(this)),
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
+
+      chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
+      drawWater(false),
+      isCheckingForBoundary(false),
+
+
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
+
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -54,10 +68,15 @@ MyGL::~MyGL()
     delete mp_camera;
     delete mp_terrain;
 
+
+    delete m_QuadBoard;
+
     delete surfaceMap;
     delete normalMap;
     delete greyScaleMap;
+
     delete glossPowerMap;
+
 }
 
 
@@ -94,10 +113,15 @@ void MyGL::initializeGL()
     mp_geomCube->create();
     mp_worldAxes->create();
 
+    m_QuadBoard->create();
+
     // Create and set up the diffuse shader
     mp_progLambert->create(":/glsl/lambert.vert.glsl", ":/glsl/lambert.frag.glsl");
     // Create and set up the flat lighting shader
     mp_progFlat->create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
+
+    // Create a new shader program, to show the water effect
+    mp_progLiquid->create(":/glsl/water.vert.glsl", ":/glsl/water.frag.glsl");
 
     // Set a color with which to draw geometry since you won't have one
     // defined until you implement the Node classes.
@@ -177,8 +201,32 @@ void MyGL::timerUpdate()
 
     int64_t delta = m - msec;
     this->Time_elapsed = delta / 1000.0f;//time(sec) elapsed since last update
+
+    // Try to get the lock
+    //bool occupied = chunkMutex->tryLock();
+    // If the mutex is not locked by other threads
+    if(chunkMutex->tryLock())
+    {
+        int chunkNum = chunkToAdd->size();
+        if(chunkNum == 0)
+        {
+            chunkMutex->unlock();
+        }
+        else
+        {
+            for(int index = chunkNum-1; index >= 0; index--)
+            {
+                mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+                ((*chunkToAdd)[index])->create();
+                chunkToAdd->pop_back();
+            }
+            chunkMutex->unlock();
+        }
+    }
+
     update();
     moving();
+
     player1.Fall();
 }
 
@@ -203,6 +251,11 @@ void MyGL::paintGL()
     mp_progFlat->setModelMatrix(glm::mat4());
     mp_progFlat->draw(*mp_worldAxes);
     glEnable(GL_DEPTH_TEST);
+
+    if(drawWater)
+    {
+        mp_progLiquid->draw(*m_QuadBoard);
+    }
 }
 
 void MyGL::GLDrawScene()
@@ -286,11 +339,36 @@ void MyGL::keyPressEvent(QKeyEvent *e)
 }
 void MyGL::moving()
 {
+    bool touch = false;
+    bool inside = false;
+    bool eye = false;
+    BlockType liquid = EMPTY;
+    CheckforLiquid(touch, inside, eye, liquid);
+
+
+    if(inside)
+    {
+        speed == speed * (2.0f / 3.0f);
+        player1.Swim();
+    }
+
+    else
+    {
+        if(player1.swimming)
+        {
+            player1.StopSwim();
+        }
+    }
+
+
+    drawWater = eye;
+
+    // drawLava = ?
+
     if(flag_moving_backward&&flag_moving_forward)
     {}
     else if(flag_moving_forward)
     {
-
         player1.CheckTranslateAlongLook(speed);
     }
     else if(flag_moving_backward)
@@ -317,8 +395,11 @@ void MyGL::moving()
     {
         player1.CheckTranslateAlongUp(-speed);
     }
-    CheckForBoundary();
 
+    if(isCheckingForBoundary == false)
+    {
+        CheckForBoundary();
+    }
 }
 void MyGL::walk_begin()
 {
@@ -925,6 +1006,11 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 
 void MyGL::CheckForBoundary()
 {
+    //std::cout<<isCheckingForBoundary<<std::endl;
+    if(isCheckingForBoundary)
+    {
+        return;
+    }
     glm::vec3 gridLoc = glm::floor(mp_camera->eye);
 
     // check if there exist a chunk at x direction and z direction
@@ -938,21 +1024,43 @@ void MyGL::CheckForBoundary()
     Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
     if(xDirChunk == nullptr && zDirChunk != nullptr)
     {
+        isCheckingForBoundary = true;
+
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + 5, z, normalX, normalZ);
-        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 
+        TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator1);
+        QThreadPool::globalInstance()->start(terrainGenerator2);
+        QThreadPool::globalInstance()->start(terrainGenerator3);
+        QThreadPool::globalInstance()->start(terrainGenerator4);
+        //isCheckingForBoundary = false;
     }
     else if(xDirChunk != nullptr && zDirChunk == nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z + 5, normalX, normalZ);
-        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator1);
+        QThreadPool::globalInstance()->start(terrainGenerator2);
+        QThreadPool::globalInstance()->start(terrainGenerator3);
+        QThreadPool::globalInstance()->start(terrainGenerator4);
+        //isCheckingForBoundary = false;
     }
     else if(xDirChunk == nullptr && zDirChunk == nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z + 5, normalX, normalZ);
@@ -965,20 +1073,39 @@ void MyGL::CheckForBoundary()
     // Minus situation
     else if(xMinusDirChunk == nullptr && zMinusDirChunk != nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - 5, z, normalX, normalZ);
-        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator1);
+        QThreadPool::globalInstance()->start(terrainGenerator2);
+        QThreadPool::globalInstance()->start(terrainGenerator3);
+        QThreadPool::globalInstance()->start(terrainGenerator4);
     }
     else if(xMinusDirChunk != nullptr && zMinusDirChunk == nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z - 5, normalX, normalZ);
-        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
+        TerrainAtBoundary* terrainGenerator1 = new TerrainAtBoundary(normalX, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator2 = new TerrainAtBoundary(normalX + 32, normalZ,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator3 = new TerrainAtBoundary(normalX, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        TerrainAtBoundary* terrainGenerator4 = new TerrainAtBoundary(normalX + 32, normalZ + 32,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+        QThreadPool::globalInstance()->start(terrainGenerator1);
+        QThreadPool::globalInstance()->start(terrainGenerator2);
+        QThreadPool::globalInstance()->start(terrainGenerator3);
+        QThreadPool::globalInstance()->start(terrainGenerator4);
     }
     else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
     {
+        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - 5, z - 5, normalX, normalZ);
@@ -988,7 +1115,7 @@ void MyGL::CheckForBoundary()
         NormalizeXZ(x - 5, z - 5, normalX, normalZ);
         mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
     }
-    update();
+    //update();
 }
 
 void MyGL::keyReleaseEvent(QKeyEvent *e)
@@ -1068,5 +1195,70 @@ void MyGL::mouseMoveEvent(QMouseEvent *e)
 void MyGL::wheelEvent(QWheelEvent *e)
 {}
 
+bool isLiquid(BlockType b)
+{
+    if(b == WATER || b == LAVA)
+    {
+        return true;
+    }
+    else
+    {
+        return false;
+    }
+}
 
+void MyGL::CheckforLiquid(bool &touch, bool &inside, bool &eyeGlass, BlockType &liquidType)
+{
+
+    glm::vec3 eyePos = mp_camera->eye;
+
+//    glm::vec3 look = glm::normalize(glm::vec3(mp_camera->look[0], 0.f, mp_camera->look[2]));
+//    glm::vec3 right = glm::normalize(glm::vec3(mp_camera->right[0], 0.f, mp_camera->right[2]));
+//    // four foot corners
+//    glm::vec3 frontleft = eyePos + glm::vec3(0.f, -1.f, 0.f) + 0.8f * look - 0.4f * right;
+//    glm::vec3 frontright = eyePos + glm::vec3(0.f, -1.f, 0.f) + 0.8f * look + 0.4f * right;
+
+//    glm::vec3 backleft = eyePos + glm::vec3(-0.5f, -1.f, -0.5f);
+//    glm::vec3 backright = eyePos + glm::vec3(-0.5f, -1.f, 0.5f);
+//    BlockType flBlock = mp_terrain->getBlockAt(frontleft[0], frontleft[1], frontleft[2]);
+//    BlockType frBlock = mp_terrain->getBlockAt(frontright[0], frontright[1], frontright[2]);
+//    BlockType blBlock = mp_terrain->getBlockAt(backleft[0], backleft[1], backleft[2]);
+//    BlockType brBlock = mp_terrain->getBlockAt(backright[0], backright[1], backright[2]);
+//    // ground under foot
+//    glm::vec3 footBottom = eyePos - glm::vec3(0.f, 1.5001f, 0.f);
+//    BlockType groundBlock = mp_terrain->getBlockAt(footBottom[0], footBottom[1], footBottom[2]);
+//    if(groundBlock == LAVA || groundBlock == WATER)
+//    {
+//        touch = true;
+//    }
+//    // front and back
+
+//    if(isLiquid(frBlock) || isLiquid(flBlock) || isLiquid(blBlock) || isLiquid(brBlock))
+//    {
+//        touch = true;
+//    }
+
+    // right and left
+
+
+    // foot position
+    glm::vec3 footFloat = eyePos - glm::vec3(0.f, 1.f, 0.f);
+    glm::vec3 foot = glm::floor(footFloat);
+    BlockType footBlock = mp_terrain->getBlockAt(foot[0], foot[1], foot[2]);
+    if(footBlock == LAVA || footBlock == WATER)
+    {
+        inside = true;
+        touch = true;
+    }
+
+    glm::vec3 eyePosInt = glm::floor(eyePos);
+    BlockType eyeBlock = mp_terrain->getBlockAt(eyePosInt[0], eyePosInt[1], eyePosInt[2]);
+    if(eyeBlock == LAVA || eyeBlock == WATER)
+    {
+        eyeGlass = true;
+        inside = true;
+        touch = true;
+        liquidType = eyeBlock;
+    }
+}
 

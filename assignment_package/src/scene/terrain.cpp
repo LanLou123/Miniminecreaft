@@ -7,6 +7,12 @@
 #include <scene/cube.h>
 
 #include <iostream>
+
+
+//Terrain::Terrain()
+//    : dimensions(64, 256, 64)
+//{}
+
 const int seaLevel=129;
 const int river_depth=5;
 const int riverbank_width=10;
@@ -18,6 +24,7 @@ Terrain::Terrain() : dimensions(64, 256, 64)
       river2=River(10,210,2);
       create_riverside();
 }
+
 
 Terrain::~Terrain()
 {
@@ -259,60 +266,202 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
     {
         for(int j = 0; j < 4 ;j++)
         {
+
             Chunk* newChunk = this->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
-            this->addChunk2Map(newChunk);
-        }
-    }
-    for(int x = left; x < left + 64; ++x)
-    {
-        for(int z = bottom; z < bottom + 64; ++z)
-        {
-            float scale = 48.f;
-            glm::vec2 st = glm::vec2(x, z) / scale;
-            float height = fbm_magnitude * fbm(st);
-
-            int heightInt = (int) (height * 128.f);
-
-            for(int y = 0; y < 256; ++y)
+            for(int x = left + i * 16; x < left + (i+1) * 16; ++x)
             {
-                if(y < 129)
+                for(int z = bottom + j *16; z < bottom + (j+1) *16; ++z)
                 {
-                    this->setBlockAt(x,y,z,STONE);
-                }
-                else if(y < 129 + heightInt - 1 && y >= 129)
-                {
-                    this->setBlockAt(x,y,z,DIRT);
-                }
-                else if(y == 129 + heightInt - 1 && y >= 129)
-                {
-                    this->setBlockAt(x,y,z,GRASS);
-                }
-                else
-                {
-                    this->setBlockAt(x,y,z,EMPTY);
-                }
+                    float scale = 48.f;
+                    glm::vec2 st = glm::vec2(x, z) / scale;
+                    float height = 0.2f * fbm(st);
 
+                    int heightInt = (int) (height * 128.f);
+
+                    for(int y = 0; y < 256; ++y)
+                    {
+                        if(y < 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
+                        }
+                        else if(y < 129 + heightInt - 1 && y >= 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
+                        }
+                        else if(y == 129 + heightInt - 1 && y >= 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
+                        }
+                        else
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
+                        }
+
+                    }
+                }
             }
-        }
-    }
-    int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
-    river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
-    river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
-    if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+64)||(Z_min1>bottom+64)))&&
-        (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+64)||(Z_min2>bottom+64))))
-    {}
-    else
-    {
-        updateRiver(left , bottom);
-    }
-    for(int i = 0; i < 4; i++)
-    {
-        for(int j = 0; j < 4 ;j++)
-        {
-            this->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
+            this->addChunk2Map(newChunk);
+            newChunk->create();
         }
     }
 
+
+//    for(int x = left; x < left + 64; ++x)
+//    {
+//        for(int z = bottom; z < bottom + 64; ++z)
+//        {
+//            float scale = 48.f;
+//            glm::vec2 st = glm::vec2(x, z) / scale;
+//            float height = 0.2f * fbm(st);
+
+//            int heightInt = (int) (height * 128.f);
+
+//            for(int y = 0; y < 256; ++y)
+//            {
+//                if(y < 129)
+//                {
+//                    this->setBlockAt(x,y,z,STONE);
+//                }
+//                else if(y < 129 + heightInt - 1 && y >= 129)
+//                {
+//                    this->setBlockAt(x,y,z,DIRT);
+//                }
+//                else if(y == 129 + heightInt - 1 && y >= 129)
+//                {
+//                    this->setBlockAt(x,y,z,GRASS);
+//                }
+//                else
+//                {
+//                    this->setBlockAt(x,y,z,EMPTY);
+//                }
+
+//            }
+//        }
+//    }
+
+//    int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
+//    river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
+//    river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
+//    if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+64)||(Z_min1>bottom+64)))&&
+//        (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+64)||(Z_min2>bottom+64))))
+//    {}
+//    else
+//    {
+//        updateRiver(left , bottom);
+//        std::cout<<"river exisit in bound"<<std::endl;
+//    }
+//    for(int i = 0; i < 4; i++)
+//    {
+//        for(int j = 0; j < 4 ;j++)
+//        {
+//            this->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
+//        }
+//    }
+
+
+
+}
+
+TerrainAtBoundary::TerrainAtBoundary(int cornerX,
+                                     int cornerZ,
+                                     QMutex* m, QMutex *m1,
+                                     std::vector<Chunk*> *chunkToAdd,
+                                     Terrain* currentTerrain,
+                                     OpenGLContext *parent,
+                                     bool *isCheckingForBoundary)
+    :left(cornerX), bottom(cornerZ),
+      chunkMutex(m),
+      checkingMutex(m1),
+      chunkToAdd(chunkToAdd),
+      currentTerrain(currentTerrain),
+      parent(parent),
+      isCheckingForBoundary(isCheckingForBoundary)
+{
+
+}
+
+void TerrainAtBoundary::run()
+{
+//    // normalize x and z coord
+    int normalX = left;
+    int normalZ = bottom;
+//    if(left >= 0)
+//    {
+//        normalX = left / 16;
+//        normalX *= 16;
+//    }
+//    else
+//    {
+//        normalX = (- left - 1) / 16 + 1;
+//        normalX *= -16;
+//    }
+//    if(bottom >= 0)
+//    {
+//        normalZ = bottom / 16;
+//        normalZ *= 16;
+//    }
+//    else
+
+//    {
+//        normalZ = (- bottom - 1) / 16 + 1;
+//        normalZ *= -16;
+//    }
+//std::cout<<"OK here0" <<std::endl;
+
+
+
+    for(int i = 0; i < 2; i++)
+    {
+        for(int j = 0; j < 2 ;j++)
+        {
+            std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
+            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
+            // Populate this chunk
+            for(int x = left + i * 16 ; x < left +  (i+1) * 16; ++x)
+            {
+                for(int z = bottom + j * 16; z < bottom + (j+1) * 16; ++z)
+                {
+                    float scale = 48.f;
+                    glm::vec2 st = glm::vec2(x, z) / scale;
+                    float height = 0.2f * fbm(st);
+
+                    int heightInt = (int) (height * 128.f);
+
+                    for(int y = 0; y < 256; ++y)
+                    {
+                        if(y < 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
+                        }
+                        else if(y < 129 + heightInt - 1 && y >= 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
+                        }
+                        else if(y == 129 + heightInt - 1 && y >= 129)
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
+                        }
+                        else
+                        {
+                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
+                        }
+
+                    }
+                }
+            }
+
+            //currentTerrain->addChunk2Map(newChunk);
+            //newChunk->create();
+            chunkMutex->lock();
+            chunkToAdd->push_back(newChunk);
+            chunkMutex->unlock();
+    }
+
+//std::cout<<"OK here1" <<std::endl;
+    checkingMutex->lock();
+    *isCheckingForBoundary = false;
+    checkingMutex->unlock();
+//std::cout<<"OK here2" <<std::endl;
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()
