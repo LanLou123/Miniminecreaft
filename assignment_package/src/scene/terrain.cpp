@@ -490,6 +490,7 @@ void Terrain::create_riverside()
 void Terrain::updateFirstRiver()//called when first update river in the first default landscape
 {
     int water_weight_count1=0;
+    int water_weight_count2=0;
     int max_bound_x = 64;
     int max_bound_z = 64;
     int min_bound_x = 0;
@@ -519,7 +520,7 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
                         }
                     }
                 }
-                for(int i = 0 ;i<water_weight_count1/2 ;i++)
+                for(int i = 0 ;i<water_weight_count1/4 ;i++)
                 {
                     this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
@@ -527,7 +528,20 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
             if((river2.is_river[pos1]==true)&&
                     this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
-                for(int i = 0 ;i<river_depth ;i++)
+                water_weight_count2 = 0;
+                for(int i = x-2 ;i<=x+2;i++)
+                {
+                    for (int j = z-2;j<=z+2;j++)
+                    {
+                        std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
+                        if(river1.is_river[pos3]==true)
+                        {
+                            water_weight_count2++;
+
+                        }
+                    }
+                }
+                for(int i = 0 ;i<water_weight_count2/4 ;i++)
                 {
                     this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
@@ -564,6 +578,8 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
 
 void Terrain::updateRiver(int origin_x, int origin_z)//called every time when it is requested to generate new terrain from a certain origin
 {
+    int water_weight_count1=0;
+    int water_weight_count2=0;
     int max_bound_x = origin_x + 64;
     int max_bound_z = origin_z + 64;
     int min_bound_x = origin_x;
@@ -579,7 +595,20 @@ void Terrain::updateRiver(int origin_x, int origin_z)//called every time when it
             if((river1.is_river[pos1]==true)&&
                     this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
-                for(int i = 0 ;i<river_depth ;i++)
+                water_weight_count1 = 0;
+                for(int i = x-2 ;i<=x+2;i++)
+                {
+                    for (int j = z-2;j<=z+2;j++)
+                    {
+                        std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
+                        if(river1.is_river[pos3]==true)
+                        {
+                            water_weight_count1++;
+
+                        }
+                    }
+                }
+                for(int i = 0 ;i<water_weight_count1/4 ;i++)
                 {
                     this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
@@ -587,7 +616,20 @@ void Terrain::updateRiver(int origin_x, int origin_z)//called every time when it
             if((river2.is_river[pos1]==true)&&
                     this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
-                for(int i = 0 ;i<river_depth ;i++)
+                water_weight_count2 = 0;
+                for(int i = x-2 ;i<=x+2;i++)
+                {
+                    for (int j = z-2;j<=z+2;j++)
+                    {
+                        std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
+                        if(river1.is_river[pos3]==true)
+                        {
+                            water_weight_count2++;
+
+                        }
+                    }
+                }
+                for(int i = 0 ;i<water_weight_count2/4 ;i++)
                 {
                     this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
