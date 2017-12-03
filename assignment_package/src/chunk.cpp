@@ -341,10 +341,15 @@ void Chunk::fillBackFace(size_t x, size_t y, size_t z, BlockType type)
     this->fillFace(square, normal, type, BACK);
 }
 
-bool Chunk::shouldFill(size_t x, size_t y, size_t z)
+bool Chunk::shouldFill(size_t x, size_t y, size_t z, BlockType currentBlock)
 {
-    BlockType type = this->getBlockType(x, y, z);
-    if (type == EMPTY || type == LAVA || type == WATER)
+    BlockType probingBlock = this->getBlockType(x, y, z);
+    if ((currentBlock == LAVA || currentBlock == WATER)
+            && currentBlock == probingBlock)
+    {
+        return false;
+    }
+    if (probingBlock == EMPTY || probingBlock == LAVA || probingBlock == WATER)
     {
         return true;
     }
