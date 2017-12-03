@@ -4,6 +4,7 @@
 Drawable::Drawable(OpenGLContext* context)
     : bufIdx(), bufPos(), bufNor(), bufCol(), bufUV(), bufFlowVelocity(),
       idxBound(false), posBound(false), norBound(false), colBound(false),
+      tangentBound(false), bitangentBound(false), blockTypeBound(false),
       context(context)
 {}
 
@@ -21,6 +22,7 @@ void Drawable::destroy()
     context->glDeleteBuffers(1, &bufFlowVelocity);
     context->glDeleteBuffers(1, &bufTangent);
     context->glDeleteBuffers(1, &bufBiTangent);
+    context->glDeleteBuffers(1, &bufBlockType);
 }
 
 GLenum Drawable::drawMode()
@@ -91,6 +93,12 @@ void Drawable::generateBiTangent()
     context->glGenBuffers(1, &bufBiTangent);
 }
 
+void Drawable::generateBlockType()
+{
+    blockTypeBound = true;
+    context->glGenBuffers(1, &bufBlockType);
+}
+
 bool Drawable::bindIdx()
 {
     if(idxBound) {
@@ -153,4 +161,12 @@ bool Drawable::bindBiTangent()
         context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangent);
     }
     return bitangentBound;
+}
+
+bool Drawable::bindBlockType()
+{
+    if(blockTypeBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockType);
+    }
+    return blockTypeBound;
 }

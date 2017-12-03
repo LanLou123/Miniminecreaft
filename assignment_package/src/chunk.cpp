@@ -206,6 +206,11 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
         }
     }
 
+    for (unsigned i = 0; i!=4; ++i)
+    {
+        buftype.push_back(type);
+    }
+
     size_t indexoffset = ele.size() / 3 * 2;
     ele.push_back(indexoffset);
     ele.push_back(indexoffset + 1);
@@ -368,6 +373,7 @@ void Chunk::create()
     this->ele.clear();
     this->tan.clear();
     this->bitan.clear();
+    this->buftype.clear();
     for (size_t x = 0; x != 16; ++x)
     {
         for (size_t z = 0; z != 16; ++z)
@@ -512,4 +518,9 @@ void Chunk::create()
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangent);
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * bitan.size(),
                             reinterpret_cast<void*>(bitan.data()), GL_STATIC_DRAW);
+
+    generateBlockType();
+    context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockType);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftype.size(),
+                            reinterpret_cast<void*>(buftype.data()), GL_STATIC_DRAW);
 }

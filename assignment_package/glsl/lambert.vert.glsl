@@ -16,6 +16,8 @@ in vec2 vs_FlowVelocity;
 in vec4 vs_Tangent;
 in vec4 vs_BiTangent;
 
+in int vs_BlockType;
+
 out vec4 fs_Nor;
 out vec4 fs_LightVec;
 out vec4 fs_Col;
@@ -23,6 +25,8 @@ out vec2 fs_UV;
 out vec4 fs_Tangent;
 out vec4 fs_BiTangent;
 out vec4 hVector;
+
+out float fs_Alpha;
 
 out vec2 flowVelocity;
 
@@ -43,6 +47,11 @@ void main()
     fs_BiTangent = vs_BiTangent;
     fs_LightVec = lightDir;
     flowVelocity = vs_FlowVelocity;
+
+    if (vs_BlockType == 8)
+        fs_Alpha = 0.3f;
+    else
+        fs_Alpha = 1.0f;
 
     vec4 modelposition = u_Model * vs_Pos;
     hVector = normalize(normalize(vec4(u_LookVector, 1.0f) - modelposition) + lightDir);
