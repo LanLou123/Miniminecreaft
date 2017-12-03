@@ -58,13 +58,29 @@ Chunk::Chunk(OpenGLContext *parent, Terrain *terrain, int64_t xz) : Drawable(par
 {
 }
 
+#define BOUNDRYCHECK
+
 BlockType Chunk::getBlockType(size_t x, size_t y, size_t z) const
 {
-    return this->blocks[4096*x + 256*z + y];
+    size_t index = 4096*x + 256*z + y;
+#ifdef BOUNDRYCHECK
+    if (index > 65535)
+    {
+        qWarning("Chunk access overflow");
+    }
+#endif
+    return this->blocks[index];
 }
 
 BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
 {
+    size_t index = 4096*x + 256*z + y;
+#ifdef BOUNDRYCHECK
+    if (index > 65535)
+    {
+        qWarning("Chunk access overflow");
+    }
+#endif
     return this->blocks[4096*x + 256*z + y];
 }
 
