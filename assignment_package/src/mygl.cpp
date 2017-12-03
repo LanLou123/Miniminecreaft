@@ -1,7 +1,6 @@
 #include "mygl.h"
 #include <la.h>
 #include <QDateTime>
-#include <iostream>
 #include <QApplication>
 #include <QKeyEvent>
 

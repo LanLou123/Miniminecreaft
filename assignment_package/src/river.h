@@ -2,7 +2,6 @@
 #define RIVER_H
 #include <la.h>
 #include <tuple>
-#include <iostream>
 #include <map>
 #include <vector>
 enum Turtle_type{Fwd ,
