@@ -24,7 +24,7 @@ MyGL::MyGL(QWidget *parent)
     c.setPos(mapToGlobal(QPoint(width()/2 , height() / 2)));
     setCursor(c); // Make the cursor invisible
     showmouse=true;
-    speed = 8.0 / 60.0;
+    speed = 4.0 / 60.0;
     flag_moving_forward = 0;
     flag_moving_backward = 0;
     flag_moving_right = 0;
@@ -213,6 +213,10 @@ void MyGL::GLDrawScene()
     {
         mp_progLambert->draw(*pair.second);
     }
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progLambert->drawF(*pair.second);
+    }
 }
 
 //press W, A, S, D to move in four traditional horizontal directions, in the meantime
@@ -226,7 +230,7 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
-        speed = 55.0/60.0;//the default speed for running
+        speed = 8.0/60.0;//the default speed for running
     }
     // http://doc.qt.io/qt-5/qt.html#Key-enum
     // This could all be much more efficient if a switch
@@ -992,7 +996,7 @@ void MyGL::keyReleaseEvent(QKeyEvent *e)
 {
     if(e->key() == Qt::Key_Shift)
     {
-        speed = 15.0/60.0;
+        speed = 4.0/60.0;
     }
     else if (e->key() == Qt::Key_W)
     {
