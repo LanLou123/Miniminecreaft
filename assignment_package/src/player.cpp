@@ -67,7 +67,7 @@ void player::CheckTranslateAlongLook(float amt)
 {
     if(DisableFlyingCollision)
     {
-        std::cout<<"w";
+        //std::cout<<"w";
 //        cam->TranslateAlongLook(amt);
         cam->Translate_X_Y(amt);
 
@@ -288,8 +288,8 @@ void player::Jump()
     }
     if(swimming)
     {
-        std::cout<<"inside" <<std::endl;
-        std::cout<<swimming <<std::endl;
+        //std::cout<<"inside" <<std::endl;
+        //std::cout<<swimming <<std::endl;
         vertical_velocity = 5.0f * 2.0f / 3.0f;
         return;
     }
@@ -298,7 +298,7 @@ void player::Jump()
 //    external_force_a = 0;
     if(vertical_velocity == 0)
     {
-        std::cout<<"ooo"<<std::endl;
+        //std::cout<<"ooo"<<std::endl;
         vertical_velocity = 5.0f;
     }
 //    }
