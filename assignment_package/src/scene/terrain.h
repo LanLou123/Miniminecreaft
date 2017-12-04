@@ -203,6 +203,7 @@ private:
     Terrain* currentTerrain;
     //bool* isCheckingForBoundary;
     //int *numOfThreads;
+
 public:
     int left;
     int bottom;

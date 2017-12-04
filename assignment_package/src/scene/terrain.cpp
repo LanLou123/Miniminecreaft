@@ -423,31 +423,19 @@ void TerrainAtBoundary::run()
             {
                 for(int z = bottom + loopChunkZ * 16 ; z < bottom + loopChunkZ * 16 + 16; ++z)
                 {
-                    float scale = 48.f;
-                    glm::vec2 st = glm::vec2(x, z) / scale;
-                    float height = 0.2f * fbm(st);
-
-                    int heightInt = (int) (height * 128.f);
-
-                    for(int y = 0; y < 256; ++y)
-                    {
-                        if(y < 129)
-                        {
-                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
-                        }
-                        else if(y < 129 + heightInt - 1 && y >= 129)
-                        {
-                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
-                        }
-                        else if(y == 129 + heightInt - 1 && y >= 129)
-                        {
-                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
-                        }
-                        else
-                        {
-                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
-                        }
-                    }
+                    newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
+                }
+                else if(y < 129 + heightInt - 1 && y >= 129)
+                {
+                    newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
+                }
+                else if(y == 129 + heightInt - 1 && y >= 129)
+                {
+                    newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
+                }
+                else
+                {
+                    newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
                 }
             }
             currentTerrain->updateRiver(left, bottom + loopChunkZ * 16, newChunk);
@@ -456,6 +444,10 @@ void TerrainAtBoundary::run()
             chunkMutex->unlock();
         }
 //    }
+    currentTerrain->updateRiver(left, bottom, newChunk);
+    chunkMutex->lock();
+    chunkToAdd->push_back(newChunk);
+    chunkMutex->unlock();
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()
