@@ -384,15 +384,16 @@ TerrainAtBoundary::TerrainAtBoundary(int cornerX,
                                      QMutex* m, QMutex *m1,
                                      std::vector<Chunk*> *chunkToAdd,
                                      Terrain* currentTerrain,
-                                     OpenGLContext *parent,
-                                     bool *isCheckingForBoundary)
+                                     OpenGLContext *parent
+                                     )
     :left(cornerX), bottom(cornerZ),
       chunkMutex(m),
       checkingMutex(m1),
       chunkToAdd(chunkToAdd),
       currentTerrain(currentTerrain),
-      parent(parent),
-      isCheckingForBoundary(isCheckingForBoundary)
+      parent(parent)
+      //isCheckingForBoundary(numOfThreads)
+      //numOfThreads(numOfThreads)
 {
 
 }
@@ -405,44 +406,22 @@ void TerrainAtBoundary::setLeftBottom(int newLeft, int newBottom)
 
 void TerrainAtBoundary::run()
 {
-//    // normalize x and z coord
     int normalX = left;
     int normalZ = bottom;
-//    if(left >= 0)
-//    {
-//        normalX = left / 16;
-//        normalX *= 16;
-//    }
-//    else
-//    {
-//        normalX = (- left - 1) / 16 + 1;
-//        normalX *= -16;
-//    }
-//    if(bottom >= 0)
-//    {
-//        normalZ = bottom / 16;
-//        normalZ *= 16;
-//    }
-//    else
+    if (chunkToAdd->size() >= 16)
+        return;
 
-//    {
-//        normalZ = (- bottom - 1) / 16 + 1;
-//        normalZ *= -16;
-//    }
-//std::cout<<"OK here0" <<std::endl;
-
-
-
-//    for(int i = 0; i < 1; i++)
-//    {
-//        for(int j = 0; j < 2 ;j++)
-//        {
-            //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
-            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX, normalZ);
-            // Populate this chunk
-            for(int x = left; x < left + 16; ++x)
+    //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
+    // Populate this chunk
+    for (unsigned loopChunkX = 0; loopChunkX != 2; ++loopChunkX)
+    {
+        for (unsigned loopChunkZ = 0; loopChunkZ != 2; ++loopChunkZ)
+        {
+            Chunk* newChunk = currentTerrain->newChunkAt
+                    (parent, normalX + loopChunkX * 16, normalZ + loopChunkZ * 16);
+            for(int x = left + loopChunkX * 16; x < left + 16 + loopChunkX * 16; ++x)
             {
-                for(int z = bottom ; z < bottom + 16; ++z)
+                for(int z = bottom + loopChunkZ * 16 ; z < bottom + loopChunkZ * 16 + 16; ++z)
                 {
                     float scale = 48.f;
                     glm::vec2 st = glm::vec2(x, z) / scale;
@@ -471,30 +450,12 @@ void TerrainAtBoundary::run()
                     }
                 }
             }
+            //currentTerrain->updateRiver(left, bottom + loopChunk * 16, newChunk);
             chunkMutex->lock();
-//            int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
-//            currentTerrain->river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
-//            currentTerrain->river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
-//            if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+16)||(Z_min1>bottom+16)))&&
-//                (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+16)||(Z_min2>bottom+16))))
-//            {}
-//            else
-//            {
-//                   currentTerrain->updateRiver(left, bottom);
-//            }
-            //currentTerrain->addChunk2Map(newChunk);
-            //newChunk->create();
-            //chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
-//        }
-//    }
-
-//std::cout<<"OK here1" <<std::endl;
-//    checkingMutex->lock();
-//    *isCheckingForBoundary = false;
-//    checkingMutex->unlock();
-//std::cout<<"OK here2" <<std::endl;
+        }
+    }
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()
@@ -763,14 +724,14 @@ void Terrain::updateRiver(int origin_x, int origin_z, Chunk *locatedChunk)//call
     int water_weight_count2=0;
 
     int max_bound_x = origin_x + 16;
-    int max_bound_z = origin_z + 16;
+    int max_bound_z = origin_z + 32;
     int min_bound_x = origin_x;
     int min_bound_z = origin_z;
     int min_bound_y = 0;
     int max_bound_y = 256;
-    for( int x = min_bound_x ; x< max_bound_x ; x++)
+    for( int x = min_bound_x ; x < max_bound_x ; x++)
     {
-        for (int z = min_bound_z ; z< max_bound_z ; z++)
+        for (int z = min_bound_z ; z < max_bound_z ; z++)
         {
             std::tuple<int,int,int> pos1 = std::make_tuple(x,0,z);
             std::tuple<int,int> pos2 = std::make_tuple(x,z);
