@@ -201,7 +201,8 @@ private:
     std::vector<Chunk*> *chunkToAdd;
     OpenGLContext *parent;
     Terrain* currentTerrain;
-    bool* isCheckingForBoundary;
+    //bool* isCheckingForBoundary;
+    int *numOfThreads;
 public:
     int left;
     int bottom;
@@ -213,7 +214,8 @@ public:
                       std::vector<Chunk*> *chunkToAdd,
                       Terrain* currentTerrain,
                       OpenGLContext *parent,
-                      bool* isCheckingForBoundary);
+                      //bool* isCheckingForBoundary
+                      int* numOfThreads);
     void setLeftBottom(int newLeft, int newBottom);
 
     void run() override;

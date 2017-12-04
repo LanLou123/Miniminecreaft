@@ -385,14 +385,15 @@ TerrainAtBoundary::TerrainAtBoundary(int cornerX,
                                      std::vector<Chunk*> *chunkToAdd,
                                      Terrain* currentTerrain,
                                      OpenGLContext *parent,
-                                     bool *isCheckingForBoundary)
+                                     int *numOfThreads)
     :left(cornerX), bottom(cornerZ),
       chunkMutex(m),
       checkingMutex(m1),
       chunkToAdd(chunkToAdd),
       currentTerrain(currentTerrain),
       parent(parent),
-      isCheckingForBoundary(isCheckingForBoundary)
+      //isCheckingForBoundary(numOfThreads)
+      numOfThreads(numOfThreads)
 {
 
 }
@@ -405,6 +406,10 @@ void TerrainAtBoundary::setLeftBottom(int newLeft, int newBottom)
 
 void TerrainAtBoundary::run()
 {
+    checkingMutex->lock();
+    *numOfThreads++;
+    checkingMutex->unlock();
+
 //    // normalize x and z coord
     int normalX = left;
     int normalZ = bottom;
