@@ -220,8 +220,6 @@ void MyGL::timerUpdate()
         }
         else
         {
-           std::cout<<chunkNum <<std::endl;
-
             int index = chunkNum-1;
             mp_terrain->addChunk2Map((*chunkToAdd)[index]);
             ((*chunkToAdd)[index])->create();
@@ -235,22 +233,23 @@ void MyGL::timerUpdate()
     moving();
     std::cout<<"num"<<numOfThreads<<std::endl;
     checkingMutex->lock();
-    glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
-    float moveDis = glm::length(moveSinceCheck);
-    if(numOfThreads == 0 && moveDis >= 1.f)
+    //glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
+    //float moveDis = glm::length(moveSinceCheck);
+    //if(numOfThreads == 0 && moveDis >= 1.f)
+    if(numOfThreads == 0)
     {
 
         checkingMutex->unlock();
         std::cout<<"checkfor boundary?"<<std::endl;
-        bool xminus = true;
-        bool xplus = true;
-        bool zminus = true;
-        bool zplus = true;
+        bool xminus = false;
+        bool xplus = false;
+        bool zminus = false;
+        bool zplus = false;
         checkBoundBool(xminus, xplus, zminus, zplus);
         if(xminus || xplus|| zminus||zplus)
         {
-            checkX = mp_camera->eye[0];
-            checkZ = mp_camera->eye[2];
+           // checkX = mp_camera->eye[0];
+           // checkZ = mp_camera->eye[2];
             ExtendBoundary(xminus, xplus, zminus, zplus);
         }
     }
@@ -1116,38 +1115,42 @@ void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
     int z = gridLoc[2];
 
 // How to use getChunkAt
-    for(int xInd = 0; xInd < 4; xInd++)
-    {
-        for(int zInd = 0; zInd < 4; zInd ++)
-        {
-            Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 + xInd*16, z);
-            Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 - xInd*16, z);
-            Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 + zInd*16);
-            Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 - zInd*16);
-            if(xDirChunk != nullptr)
+//    for(int xInd = 0; xInd < 4; xInd++)
+//    {
+//        for(int zInd = 0; zInd < 4; zInd ++)
+//        {
+//            Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 + xInd*16, z);
+//            Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 - xInd*16, z);
+//            Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 + zInd*16);
+//            Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 - zInd*16);
+    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 , z);
+    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 , z);
+    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 );
+    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 );
+            if(xDirChunk == nullptr)
             {
-                xplus = false;
+                xplus = true;
             }
-            if(zDirChunk != nullptr)
+            if(zDirChunk == nullptr)
             {
-                zplus = false;
+                zplus = true;
             }
 
-            if(xMinusDirChunk != nullptr)
+            if(xMinusDirChunk == nullptr)
             {
-                xminus = false;
+                xminus = true;
             }
-            if( zMinusDirChunk != nullptr)
+            if( zMinusDirChunk == nullptr)
             {
-                zminus = false;
+                zminus = true;
             }
 //                if(xminus || xplus || zminus|| zplus)
 
 //                {
 //                    return;
 //                }
-        }
-    }
+//        }
+//    }
 
 
 }

@@ -409,30 +409,6 @@ void TerrainAtBoundary::run()
 //    // normalize x and z coord
     int normalX = left;
     int normalZ = bottom;
-//    if(left >= 0)
-//    {
-//        normalX = left / 16;
-//        normalX *= 16;
-//    }
-//    else
-//    {
-//        normalX = (- left - 1) / 16 + 1;
-//        normalX *= -16;
-//    }
-//    if(bottom >= 0)
-//    {
-//        normalZ = bottom / 16;
-//        normalZ *= 16;
-//    }
-//    else
-
-//    {
-//        normalZ = (- bottom - 1) / 16 + 1;
-//        normalZ *= -16;
-//    }
-//std::cout<<"OK here0" <<std::endl;
-
-
 
 //    for(int i = 0; i < 1; i++)
 //    {
@@ -443,7 +419,7 @@ void TerrainAtBoundary::run()
             // Populate this chunk
             for(int x = left; x < left + 16; ++x)
             {
-                for(int z = bottom + j*16 ; z < bottom + 16 + j*16; ++z)
+                for(int z = bottom + j * 16 ; z < bottom + 16 + j*16; ++z)
                 {
                     float scale = 48.f;
                     glm::vec2 st = glm::vec2(x, z) / scale;
@@ -473,7 +449,7 @@ void TerrainAtBoundary::run()
                     }
                 }
             }
-            currentTerrain->updateRiver(left, bottom + j*16, newChunk);
+            currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
             chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
@@ -722,7 +698,7 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
 void Terrain::updateRiver(int origin_x, int origin_z, Chunk *locatedChunk)//called every time when it is requested to generate new terrain from a certain origin
 {
     int max_bound_x = origin_x + 16;
-    int max_bound_z = origin_z + 32;
+    int max_bound_z = origin_z + 16;
     int min_bound_x = origin_x;
     int min_bound_z = origin_z;
     int min_bound_y = 0;
