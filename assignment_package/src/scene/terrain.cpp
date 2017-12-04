@@ -406,10 +406,6 @@ void TerrainAtBoundary::setLeftBottom(int newLeft, int newBottom)
 
 void TerrainAtBoundary::run()
 {
-    checkingMutex->lock();
-    *numOfThreads++;
-    checkingMutex->unlock();
-
 //    // normalize x and z coord
     int normalX = left;
     int normalZ = bottom;
@@ -500,6 +496,11 @@ void TerrainAtBoundary::run()
 //std::cout<<"OK here1" <<std::endl;
 
 //std::cout<<"OK here2" <<std::endl;
+
+      checkingMutex->lock();
+      //isCheckingForBoundary = false;
+      (*numOfThreads)--;
+      checkingMutex->unlock();
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()

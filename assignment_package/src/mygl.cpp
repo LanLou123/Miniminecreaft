@@ -214,19 +214,22 @@ void MyGL::timerUpdate()
     // If the mutex is not locked by other threads
  //   if(m_time%2 == 0)
  //   {
-    std::cout<< " checking" << isCheckingForBoundary<<std::endl;
+    //std::cout<< " checking" << isCheckingForBoundary<<std::endl;
 
         if(chunkMutex->tryLock())
         {
             int chunkNum = chunkToAdd->size();
             if(chunkNum == 0)
             {
+//                if(numOfThreads > 0)
+//                {
 
-                checkingMutex->lock();
-                //isCheckingForBoundary = false;
-                numOfThreads = 0;
-                checkingMutex->unlock();
+//                    checkingMutex->lock();
+//                    //isCheckingForBoundary = false;
+//                    numOfThreads = 0;
+//                    checkingMutex->unlock();
 
+//                }
                 chunkMutex->unlock();
             }
             else
@@ -245,7 +248,29 @@ void MyGL::timerUpdate()
 
     update();
     moving();
+    std::cout<<"num"<<numOfThreads<<std::endl;
+    checkingMutex->lock();
+    if(numOfThreads == 0)
+    //if(isCheckingForBoundary == false)
+    {
 
+        checkingMutex->unlock();
+        std::cout<<"checkfor boundary?"<<std::endl;
+        bool xminus = false;
+        bool xplus = false;
+        bool zminus = false;
+        bool zplus = false;
+        checkBoundBool(xminus, xplus, zminus, zplus);
+        if(xminus || xplus|| zminus||zplus)
+        {
+           // isCheckingForBoundary = true;
+            ExtendBoundary(xminus, xplus, zminus, zplus);
+        }
+    }
+    else
+    {
+        checkingMutex->unlock();
+    }
     player1.Fall();
 }
 
@@ -411,19 +436,6 @@ void MyGL::moving()
         player1.CheckTranslateAlongUp(-speed);
     }
 
-    if(isCheckingForBoundary == false)
-    {
-        bool xminus = false;
-        bool xplus = false;
-        bool zminus = false;
-        bool zplus = false;
-        checkBoundBool(xminus, xplus, zminus, zplus);
-        if(xminus || xplus|| zminus||zplus)
-        {
-            isCheckingForBoundary = true;
-            ExtendBoundary(xminus, xplus, zminus, zplus);
-        }
-    }
 }
 void MyGL::walk_begin()
 {
@@ -1031,6 +1043,21 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 void MyGL::startThreads(int normalX, int normalZ)
 {
 
+    std::cout<<"start threadss"<<std::endl;
+
+    checkingMutex->lock();
+    if(numOfThreads > 0)
+    {
+        checkingMutex->unlock();
+        return;
+    }
+    checkingMutex->unlock();
+
+    checkingMutex->lock();
+    numOfThreads += 16;
+    checkingMutex->unlock();
+    std::cout<<"end of start"<<std::endl;
+
     terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
     terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
     terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
@@ -1086,6 +1113,7 @@ void MyGL::startThreads(int normalX, int normalZ)
     QThreadPool::globalInstance()->start(terrainGenerator14);
     QThreadPool::globalInstance()->start(terrainGenerator15);
     QThreadPool::globalInstance()->start(terrainGenerator16);
+
 }
 
 void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
