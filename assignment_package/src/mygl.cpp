@@ -209,48 +209,31 @@ void MyGL::timerUpdate()
     int64_t delta = m - msec;
     this->Time_elapsed = delta / 1000.0f;//time(sec) elapsed since last update
 
-    // Try to get the lock
-    //bool occupied = chunkMutex->tryLock();
-    // If the mutex is not locked by other threads
- //   if(m_time%2 == 0)
- //   {
-    //std::cout<< " checking" << isCheckingForBoundary<<std::endl;
-
-        if(chunkMutex->tryLock())
+    if(chunkMutex->tryLock())
+    {
+        int chunkNum = chunkToAdd->size();
+        if(chunkNum == 0)
         {
-            int chunkNum = chunkToAdd->size();
-            if(chunkNum == 0)
-            {
-//                if(numOfThreads > 0)
-//                {
-
-//                    checkingMutex->lock();
-//                    //isCheckingForBoundary = false;
-//                    numOfThreads = 0;
-//                    checkingMutex->unlock();
-
-//                }
-                chunkMutex->unlock();
-            }
-            else
-            {
-               std::cout<<chunkNum <<std::endl;
-
-                int index = chunkNum-1;
-                mp_terrain->addChunk2Map((*chunkToAdd)[index]);
-                ((*chunkToAdd)[index])->create();
-                chunkToAdd->pop_back();
-
-                chunkMutex->unlock();
-            }
+            chunkMutex->unlock();
         }
-  //  }
+        else
+        {
+           std::cout<<chunkNum <<std::endl;
+
+            int index = chunkNum-1;
+            mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+            ((*chunkToAdd)[index])->create();
+            chunkToAdd->pop_back();
+
+            chunkMutex->unlock();
+        }
+    }
 
     update();
     moving();
     std::cout<<"num"<<numOfThreads<<std::endl;
     checkingMutex->lock();
-    if(numOfThreads == 0)
+    if(numOfThreads == 0 || m_time % 15 == 0)
     //if(isCheckingForBoundary == false)
     {
 
@@ -1129,10 +1112,10 @@ void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
     int z = gridLoc[2];
 
 // How to use getChunkAt
-    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5, z);
-    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5, z);
-    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5);
-    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
+    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 8, z);
+    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 8, z);
+    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 8);
+    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 8);
     if(xDirChunk == nullptr)
     {
         xplus = true;
@@ -1176,7 +1159,7 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
 
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x + 5, z, normalX, normalZ);
+        NormalizeXZ(x + 8, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
     }
@@ -1184,7 +1167,7 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x, z + 5, normalX, normalZ);
+        NormalizeXZ(x, z + 8, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
     }
@@ -1205,7 +1188,7 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x - 5, z, normalX, normalZ);
+        NormalizeXZ(x - 8, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
     }
@@ -1213,7 +1196,7 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x, z - 5, normalX, normalZ);
+        NormalizeXZ(x, z - 8, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
     }
