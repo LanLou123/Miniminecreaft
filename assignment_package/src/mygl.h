@@ -65,6 +65,24 @@ private:
     bool drawWater;
 
     bool isCheckingForBoundary;
+
+    TerrainAtBoundary* terrainGenerator1;
+    TerrainAtBoundary* terrainGenerator2;
+    TerrainAtBoundary* terrainGenerator3;
+    TerrainAtBoundary* terrainGenerator4;
+    TerrainAtBoundary* terrainGenerator5;
+    TerrainAtBoundary* terrainGenerator6;
+    TerrainAtBoundary* terrainGenerator7;
+    TerrainAtBoundary* terrainGenerator8;
+    TerrainAtBoundary* terrainGenerator9;
+    TerrainAtBoundary* terrainGenerator10;
+    TerrainAtBoundary* terrainGenerator11;
+    TerrainAtBoundary* terrainGenerator12;
+    TerrainAtBoundary* terrainGenerator13;
+    TerrainAtBoundary* terrainGenerator14;
+    TerrainAtBoundary* terrainGenerator15;
+    TerrainAtBoundary* terrainGenerator16;
+
 public:
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();
@@ -78,6 +96,10 @@ public:
     // For multi-Threading
     std::vector<Chunk*> *chunkToAdd;
 
+    void startThreads(int normalX, int normalZ);
+
+    void checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus);
+
 protected:
     void keyPressEvent(QKeyEvent *e);
 
@@ -90,7 +112,7 @@ protected:
 
     glm::ivec3 CubeToAdd(bool &valid);
 
-    void CheckForBoundary();
+    void ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus);
 
 
     bool flag_moving_forward;
