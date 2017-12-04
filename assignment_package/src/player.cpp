@@ -67,10 +67,7 @@ void player::CheckTranslateAlongLook(float amt)
 {
     if(DisableFlyingCollision)
     {
-        std::cout<<"w";
-//        cam->TranslateAlongLook(amt);
         cam->Translate_X_Y(amt);
-
         refresh(cam);
         return;
     }
