@@ -21,8 +21,8 @@ MyGL::MyGL(QWidget *parent)
 
       chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
       drawWater(false),
-      isCheckingForBoundary(false),
-
+      //isCheckingForBoundary(false),
+      numOfThreads(0),
 
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
 
@@ -145,25 +145,6 @@ void MyGL::initializeGL()
     //mp_terrain->GenerateTerrainAt(0,0,this);
 
     //
-    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-
-    terrainGenerator9 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator10 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator11 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator12 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator13 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator14 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator15 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator16 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-
-
     //
     mp_terrain->GenerateFirstTerrain(this);
 
@@ -233,17 +214,25 @@ void MyGL::timerUpdate()
     // If the mutex is not locked by other threads
  //   if(m_time%2 == 0)
  //   {
+    std::cout<< " checking" << isCheckingForBoundary<<std::endl;
+
         if(chunkMutex->tryLock())
         {
             int chunkNum = chunkToAdd->size();
             if(chunkNum == 0)
             {
-                isCheckingForBoundary = false;
+
+                checkingMutex->lock();
+                //isCheckingForBoundary = false;
+                numOfThreads = 0;
+                checkingMutex->unlock();
+
                 chunkMutex->unlock();
             }
             else
             {
                std::cout<<chunkNum <<std::endl;
+
                 int index = chunkNum-1;
                 mp_terrain->addChunk2Map((*chunkToAdd)[index]);
                 ((*chunkToAdd)[index])->create();
@@ -431,6 +420,7 @@ void MyGL::moving()
         checkBoundBool(xminus, xplus, zminus, zplus);
         if(xminus || xplus|| zminus||zplus)
         {
+            isCheckingForBoundary = true;
             ExtendBoundary(xminus, xplus, zminus, zplus);
         }
     }
@@ -1040,6 +1030,26 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 
 void MyGL::startThreads(int normalX, int normalZ)
 {
+
+    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+
+    terrainGenerator9 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this, &numOfThreads);
+    terrainGenerator10 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator11 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator12 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator13 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator14 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator15 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator16 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+
+
     terrainGenerator1->setLeftBottom(normalX, normalZ);
     terrainGenerator2->setLeftBottom(normalX + 16, normalZ);
     terrainGenerator3->setLeftBottom(normalX + 32, normalZ);
@@ -1080,7 +1090,7 @@ void MyGL::startThreads(int normalX, int normalZ)
 
 void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
 {
-    if(isCheckingForBoundary)
+    if(numOfThreads >= 16)
     {
         return;
     }
@@ -1135,9 +1145,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
 //    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
     if(xplus)
     {
-        checkingMutex->lock();
-        isCheckingForBoundary = true;
-        checkingMutex->unlock();
 
         int normalX = 0;
         int normalZ = 0;
@@ -1147,7 +1154,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
     }
     else if(zplus)
     {
-        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z + 5, normalX, normalZ);
@@ -1169,7 +1175,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
     // Minus situation
     else if(xminus)
     {
-        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - 5, z, normalX, normalZ);
@@ -1178,7 +1183,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
     }
     else if(zminus)
     {
-        isCheckingForBoundary = true;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x, z - 5, normalX, normalZ);

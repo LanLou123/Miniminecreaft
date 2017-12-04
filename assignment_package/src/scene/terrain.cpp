@@ -385,14 +385,15 @@ TerrainAtBoundary::TerrainAtBoundary(int cornerX,
                                      std::vector<Chunk*> *chunkToAdd,
                                      Terrain* currentTerrain,
                                      OpenGLContext *parent,
-                                     bool *isCheckingForBoundary)
+                                     int *numOfThreads)
     :left(cornerX), bottom(cornerZ),
       chunkMutex(m),
       checkingMutex(m1),
       chunkToAdd(chunkToAdd),
       currentTerrain(currentTerrain),
       parent(parent),
-      isCheckingForBoundary(isCheckingForBoundary)
+      //isCheckingForBoundary(numOfThreads)
+      numOfThreads(numOfThreads)
 {
 
 }
@@ -405,6 +406,10 @@ void TerrainAtBoundary::setLeftBottom(int newLeft, int newBottom)
 
 void TerrainAtBoundary::run()
 {
+    checkingMutex->lock();
+    *numOfThreads++;
+    checkingMutex->unlock();
+
 //    // normalize x and z coord
     int normalX = left;
     int normalZ = bottom;
@@ -472,6 +477,7 @@ void TerrainAtBoundary::run()
                     }
                 }
             }
+            currentTerrain->updateRiver(left, bottom, newChunk);
             chunkMutex->lock();
 //            int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
 //            currentTerrain->river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
@@ -492,9 +498,7 @@ void TerrainAtBoundary::run()
 //    }
 
 //std::cout<<"OK here1" <<std::endl;
-//    checkingMutex->lock();
-//    *isCheckingForBoundary = false;
-//    checkingMutex->unlock();
+
 //std::cout<<"OK here2" <<std::endl;
 }
 //*******************************L-river part implemented by lan lou

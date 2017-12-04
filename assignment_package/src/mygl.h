@@ -64,7 +64,8 @@ private:
 
     bool drawWater;
 
-    bool isCheckingForBoundary;
+   // bool isCheckingForBoundary;
+    int numOfThreads;
 
     TerrainAtBoundary* terrainGenerator1;
     TerrainAtBoundary* terrainGenerator2;
