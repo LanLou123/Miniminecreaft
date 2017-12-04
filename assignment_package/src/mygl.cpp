@@ -232,6 +232,7 @@ void MyGL::timerUpdate()
 
     update();
     moving();
+
     checkingMutex->lock();
 
     int threads = QThreadPool::globalInstance()->activeThreadCount();
@@ -246,7 +247,6 @@ void MyGL::timerUpdate()
         checkBoundBool(xminus, xplus, zminus, zplus);
         if(xminus || xplus|| zminus||zplus)
         {
-           // isCheckingForBoundary = true;
             ExtendBoundary(xminus, xplus, zminus, zplus);
         }
     }
@@ -1033,10 +1033,10 @@ void MyGL::startThreads(int normalX, int normalZ)
     terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
     terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
     terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    /*terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
+    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
     terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
     terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);*/
+    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
 
     /*terrainGenerator9 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
     terrainGenerator10 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
@@ -1049,13 +1049,13 @@ void MyGL::startThreads(int normalX, int normalZ)
 
 
     terrainGenerator1->setLeftBottom(normalX, normalZ);
-    terrainGenerator2->setLeftBottom(normalX + 32, normalZ);
-    terrainGenerator3->setLeftBottom(normalX, normalZ + 32);
-    terrainGenerator4->setLeftBottom(normalX + 32, normalZ + 32);
-    /*terrainGenerator5->setLeftBottom(normalX, normalZ + 32);
+    terrainGenerator2->setLeftBottom(normalX + 16, normalZ);
+    terrainGenerator3->setLeftBottom(normalX + 32, normalZ);
+    terrainGenerator4->setLeftBottom(normalX + 48, normalZ);
+    terrainGenerator5->setLeftBottom(normalX, normalZ + 32);
     terrainGenerator6->setLeftBottom(normalX + 16, normalZ + 32);
     terrainGenerator7->setLeftBottom(normalX + 32, normalZ + 32);
-    terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);*/
+    terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);
 
     /*terrainGenerator9->setLeftBottom(normalX, normalZ + 32);
     terrainGenerator10->setLeftBottom(normalX + 16, normalZ + 32);
@@ -1089,10 +1089,10 @@ void MyGL::startThreads(int normalX, int normalZ)
     QThreadPool::globalInstance()->start(terrainGenerator2);
     QThreadPool::globalInstance()->start(terrainGenerator3);
     QThreadPool::globalInstance()->start(terrainGenerator4);
-    /*QThreadPool::globalInstance()->start(terrainGenerator5);
+    QThreadPool::globalInstance()->start(terrainGenerator5);
     QThreadPool::globalInstance()->start(terrainGenerator6);
     QThreadPool::globalInstance()->start(terrainGenerator7);
-    QThreadPool::globalInstance()->start(terrainGenerator8);*/
+    QThreadPool::globalInstance()->start(terrainGenerator8);
 
     /*QThreadPool::globalInstance()->start(terrainGenerator9);
     QThreadPool::globalInstance()->start(terrainGenerator10);

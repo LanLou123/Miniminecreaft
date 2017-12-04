@@ -413,13 +413,13 @@ void TerrainAtBoundary::run()
 
     //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
     // Populate this chunk
-    for (unsigned loopChunkX = 0; loopChunkX != 2; ++loopChunkX)
-    {
+//    for (unsigned loopChunkX = 0; loopChunkX != 2; ++loopChunkX)
+//    {
         for (unsigned loopChunkZ = 0; loopChunkZ != 2; ++loopChunkZ)
         {
             Chunk* newChunk = currentTerrain->newChunkAt
-                    (parent, normalX + loopChunkX * 16, normalZ + loopChunkZ * 16);
-            for(int x = left + loopChunkX * 16; x < left + 16 + loopChunkX * 16; ++x)
+                    (parent, normalX , normalZ + loopChunkZ * 16);
+            for(int x = left;  x < left + 16; ++x)
             {
                 for(int z = bottom + loopChunkZ * 16 ; z < bottom + loopChunkZ * 16 + 16; ++z)
                 {
@@ -450,12 +450,12 @@ void TerrainAtBoundary::run()
                     }
                 }
             }
-            //currentTerrain->updateRiver(left, bottom + loopChunk * 16, newChunk);
+            currentTerrain->updateRiver(left, bottom + loopChunkZ * 16, newChunk);
             chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
         }
-    }
+//    }
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()
@@ -724,7 +724,7 @@ void Terrain::updateRiver(int origin_x, int origin_z, Chunk *locatedChunk)//call
     int water_weight_count2=0;
 
     int max_bound_x = origin_x + 16;
-    int max_bound_z = origin_z + 32;
+    int max_bound_z = origin_z + 16;
     int min_bound_x = origin_x;
     int min_bound_z = origin_z;
     int min_bound_y = 0;
