@@ -67,6 +67,10 @@ private:
    // bool isCheckingForBoundary;
     int numOfThreads;
 
+    float checkX;
+    float checkZ;
+
+
     TerrainAtBoundary* terrainGenerator1;
     TerrainAtBoundary* terrainGenerator2;
     TerrainAtBoundary* terrainGenerator3;
@@ -75,14 +79,14 @@ private:
     TerrainAtBoundary* terrainGenerator6;
     TerrainAtBoundary* terrainGenerator7;
     TerrainAtBoundary* terrainGenerator8;
-    TerrainAtBoundary* terrainGenerator9;
-    TerrainAtBoundary* terrainGenerator10;
-    TerrainAtBoundary* terrainGenerator11;
-    TerrainAtBoundary* terrainGenerator12;
-    TerrainAtBoundary* terrainGenerator13;
-    TerrainAtBoundary* terrainGenerator14;
-    TerrainAtBoundary* terrainGenerator15;
-    TerrainAtBoundary* terrainGenerator16;
+//    TerrainAtBoundary* terrainGenerator9;
+//    TerrainAtBoundary* terrainGenerator10;
+//    TerrainAtBoundary* terrainGenerator11;
+//    TerrainAtBoundary* terrainGenerator12;
+//    TerrainAtBoundary* terrainGenerator13;
+//    TerrainAtBoundary* terrainGenerator14;
+//    TerrainAtBoundary* terrainGenerator15;
+//    TerrainAtBoundary* terrainGenerator16;
 
 public:
     explicit MyGL(QWidget *parent = 0);

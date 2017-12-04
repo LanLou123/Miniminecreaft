@@ -436,7 +436,7 @@ void TerrainAtBoundary::run()
 
 //    for(int i = 0; i < 1; i++)
 //    {
-        for(int j = 0; j < 2 ;j++)
+        for(int j = 0; j < 4 ;j++)
         {
             //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
             Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX, normalZ + j * 16);
