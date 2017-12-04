@@ -298,9 +298,24 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
                         }
 
                     }
+
                 }
             }
+//            int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
+//            river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
+//            river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
+//            if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+ + (i+1) *16)||(Z_min1>bottom+ (j+1) *16)))&&
+//                (((X_max2<left)||(Z_max2<bottom))||((X_min2>left + (i+1) * 16)||(Z_min2>bottom+ (j+1) * 16))))
+//            {}
+//            else
+//            {
+
+//            }
+            updateRiver(left + i* 16 , bottom + j*16, newChunk);
             this->addChunk2Map(newChunk);
+
+            //std::cout<<"river exisit in bound"<<std::endl;
+
             newChunk->create();
         }
     }
@@ -342,14 +357,16 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
 //    int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
 //    river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
 //    river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
-//    if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+64)||(Z_min1>bottom+64)))&&
-//        (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+64)||(Z_min2>bottom+64))))
+//    if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+16)||(Z_min1>bottom+16)))&&
+//        (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+16)||(Z_min2>bottom+16))))
 //    {}
 //    else
 //    {
 //        updateRiver(left , bottom);
 //        std::cout<<"river exisit in bound"<<std::endl;
 //    }
+
+
 //    for(int i = 0; i < 4; i++)
 //    {
 //        for(int j = 0; j < 4 ;j++)
@@ -378,6 +395,12 @@ TerrainAtBoundary::TerrainAtBoundary(int cornerX,
       isCheckingForBoundary(isCheckingForBoundary)
 {
 
+}
+
+void TerrainAtBoundary::setLeftBottom(int newLeft, int newBottom)
+{
+    this->left = newLeft;
+    this->bottom = newBottom;
 }
 
 void TerrainAtBoundary::run()
@@ -449,18 +472,29 @@ void TerrainAtBoundary::run()
                     }
                 }
             }
+            chunkMutex->lock();
+//            int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
+//            currentTerrain->river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
+//            currentTerrain->river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
+//            if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+16)||(Z_min1>bottom+16)))&&
+//                (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+16)||(Z_min2>bottom+16))))
+//            {}
+//            else
+//            {
+//                   currentTerrain->updateRiver(left, bottom);
+//            }
             //currentTerrain->addChunk2Map(newChunk);
             //newChunk->create();
-            chunkMutex->lock();
+            //chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
 //        }
 //    }
 
 //std::cout<<"OK here1" <<std::endl;
-    checkingMutex->lock();
-    *isCheckingForBoundary = false;
-    checkingMutex->unlock();
+//    checkingMutex->lock();
+//    *isCheckingForBoundary = false;
+//    checkingMutex->unlock();
 //std::cout<<"OK here2" <<std::endl;
 }
 //*******************************L-river part implemented by lan lou
@@ -695,10 +729,10 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
     }
 }
 
-void Terrain::updateRiver(int origin_x, int origin_z)//called every time when it is requested to generate new terrain from a certain origin
+void Terrain::updateRiver(int origin_x, int origin_z, Chunk *locatedChunk)//called every time when it is requested to generate new terrain from a certain origin
 {
-    int max_bound_x = origin_x + 64;
-    int max_bound_z = origin_z + 64;
+    int max_bound_x = origin_x + 16;
+    int max_bound_z = origin_z + 16;
     int min_bound_x = origin_x;
     int min_bound_z = origin_z;
     int min_bound_y = 0;
@@ -710,44 +744,56 @@ void Terrain::updateRiver(int origin_x, int origin_z)//called every time when it
             std::tuple<int,int,int> pos1 = std::make_tuple(x,0,z);
             std::tuple<int,int> pos2 = std::make_tuple(x,z);
             if((river1.is_river[pos1]==true)&&
-                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
+                    locatedChunk->accessBlockTypeGlobalCoords(x,0,z) != EMPTY &&
+                    locatedChunk->accessBlockTypeGlobalCoords(x,0,z) != WATER)
+                    //this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
                 for(int i = 0 ;i<river_depth ;i++)
                 {
-                    this->setBlockAt(x,seaLevel-i,z,WATER);
+                    locatedChunk->accessBlockTypeGlobalCoords(x,seaLevel-i,z) = WATER;
+                    //this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
             }
             if((river2.is_river[pos1]==true)&&
-                    this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
+                    locatedChunk->accessBlockTypeGlobalCoords(x,0,z) != EMPTY &&
+                    locatedChunk->accessBlockTypeGlobalCoords(x,0,z) != WATER)
+                    //this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
                 for(int i = 0 ;i<river_depth ;i++)
                 {
-                    this->setBlockAt(x,seaLevel-i,z,WATER);
+                    locatedChunk->accessBlockTypeGlobalCoords(x,seaLevel-i,z) = WATER;
+                    //this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
             }
             for( int y = min_bound_y ;y<max_bound_y ; y++)
             {
                 if((y>0+seaLevel)&&(river1.is_river[pos1]==true))
                 {
-                    this->setBlockAt(x,y,z,EMPTY);
+                    locatedChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
+                    //this->setBlockAt(x,y,z,EMPTY);
                 }
                 if((y>0+seaLevel)&&(river2.is_river[pos1]==true))
                 {
-                    this->setBlockAt(x,y,z,EMPTY);
+                    locatedChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
+                    //this->setBlockAt(x,y,z,EMPTY);
                 }
             }
             int pos_height = riverbank_height[pos2];
             if((river1.is_river[pos1]==false)&&(river2.is_river[pos1]==false)&&(pos_height<256)&&(pos_height>0))
             {
 
-                if(this->getBlockAt(x,pos_height,z)!=EMPTY)
+                if(locatedChunk->accessBlockTypeGlobalCoords(x,pos_height,z) != EMPTY)
+                        //this->getBlockAt(x,pos_height,z)!=EMPTY)
                 {
                     for(int i = riverbank_height[pos2];i<max_bound_y;i++)
                     {
-                        this->setBlockAt(x,i,z,EMPTY);
+                        locatedChunk->accessBlockTypeGlobalCoords(x,i,z) = EMPTY;
+                        //this->setBlockAt(x,i,z,EMPTY);
                     }
 //                    if(this->getBlockAt(x,pos_height-1,z)!=nullptr)
-                    this->setBlockAt(x,pos_height-1,z,GRASS);
+
+                    //this->setBlockAt(x,pos_height-1,z,GRASS);
+                    locatedChunk->accessBlockTypeGlobalCoords(x,pos_height-1,z) = GRASS;
                 }
             }
 

@@ -82,7 +82,7 @@ public:
     void update_riverbank();
     void updateFirstRiver();
     void riverside_curvature(int &height,  int &i);
-    void updateRiver(int origin_x, int origin_z);
+    void updateRiver(int origin_x, int origin_z, Chunk* locatedChunk);
     void Calculate_corner_Riverside(int x, int y, int z);
     void create_riverside();
 //**********************end
@@ -188,8 +188,7 @@ public:
 class TerrainAtBoundary : public QRunnable
 {
 private:
-    int left;
-    int bottom;
+
     QMutex* chunkMutex;
     QMutex* checkingMutex;
     std::vector<Chunk*> *chunkToAdd;
@@ -197,6 +196,9 @@ private:
     Terrain* currentTerrain;
     bool* isCheckingForBoundary;
 public:
+    int left;
+    int bottom;
+
     TerrainAtBoundary(int cornerX,
                       int cornerZ,
                       QMutex* m,
@@ -205,5 +207,7 @@ public:
                       Terrain* currentTerrain,
                       OpenGLContext *parent,
                       bool* isCheckingForBoundary);
+    void setLeftBottom(int newLeft, int newBottom);
+
     void run() override;
 };
