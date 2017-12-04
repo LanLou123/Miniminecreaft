@@ -49,11 +49,12 @@ void River::Generate_Lsys_two()
     T_lst.push_back(Turn);
     T_lst.push_back(Branching);
     T_lst.push_back(Fwd);
-    T_lst.push_back(Fwd);
     T_lst.push_back(Return_to_here);
     T_lst.push_back(Turn);
     T_lst.push_back(Branching);
     T_lst.push_back(now_return);
+    T_lst.push_back(Turn);
+    T_lst.push_back(Return_to_here);
     T_lst.push_back(Branching);
     T_lst.push_back(Turn);
     T_lst.push_back(Turn);
