@@ -21,10 +21,6 @@ MyGL::MyGL(QWidget *parent)
 
       chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
       drawWater(false),
-      //isCheckingForBoundary(false),
-      numOfThreads(0),
-      checkX(0.f),checkZ(0.f),
-
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
 
 {
@@ -236,7 +232,8 @@ void MyGL::timerUpdate()
     //glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
     //float moveDis = glm::length(moveSinceCheck);
     //if(numOfThreads == 0 && moveDis >= 1.f)
-    if(numOfThreads == 0)
+    int threads = QThreadPool::globalInstance()->activeThreadCount();
+    if(threads == 0)
     {
 
         checkingMutex->unlock();
@@ -308,7 +305,7 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
-        speed = 55.0/60.0;//the default speed for running
+        speed = 4.0/60.0;//the default speed for running
     }
     // http://doc.qt.io/qt-5/qt.html#Key-enum
     // This could all be much more efficient if a switch
@@ -1029,29 +1026,29 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 void MyGL::startThreads(int normalX, int normalZ)
 {
 
-    std::cout<<"start threadss"<<std::endl;
+//    std::cout<<"start threadss"<<std::endl;
 
-    checkingMutex->lock();
-    if(numOfThreads > 0)
-    {
-        checkingMutex->unlock();
-        return;
-    }
-    checkingMutex->unlock();
+//    checkingMutex->lock();
+//    if(numOfThreads > 0)
+//    {
+//        checkingMutex->unlock();
+//        return;
+//    }
+//    checkingMutex->unlock();
 
-    checkingMutex->lock();
-    numOfThreads += 8;
-    checkingMutex->unlock();
-    std::cout<<"end of start"<<std::endl;
+//    checkingMutex->lock();
+//    numOfThreads += 8;
+//    checkingMutex->unlock();
+//    std::cout<<"end of start"<<std::endl;
 
-    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
 
 //    terrainGenerator9 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this, &numOfThreads);
 //    terrainGenerator10 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);

@@ -458,10 +458,10 @@ void TerrainAtBoundary::run()
 
 
 
-      checkingMutex->lock();
-      //isCheckingForBoundary = false;
-      (*numOfThreads)--;
-      checkingMutex->unlock();
+//      checkingMutex->lock();
+//      //isCheckingForBoundary = false;
+//      (*numOfThreads)--;
+//      checkingMutex->unlock();
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()
