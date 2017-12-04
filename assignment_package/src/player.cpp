@@ -285,8 +285,6 @@ void player::Jump()
     }
     if(swimming)
     {
-        std::cout<<"inside" <<std::endl;
-        std::cout<<swimming <<std::endl;
         vertical_velocity = 5.0f * 2.0f / 3.0f;
         return;
     }
@@ -295,7 +293,6 @@ void player::Jump()
 //    external_force_a = 0;
     if(vertical_velocity == 0)
     {
-        std::cout<<"ooo"<<std::endl;
         vertical_velocity = 5.0f;
     }
 //    }

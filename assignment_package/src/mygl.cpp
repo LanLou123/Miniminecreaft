@@ -1122,8 +1122,6 @@ void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
 
 void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
 {
-    //std::cout<<isCheckingForBoundary<<std::endl;
-
     glm::vec3 gridLoc = glm::floor(mp_camera->eye);
 
     // check if there exist a chunk at x direction and z direction
