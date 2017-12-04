@@ -194,8 +194,6 @@ private:
     std::vector<Chunk*> *chunkToAdd;
     OpenGLContext *parent;
     Terrain* currentTerrain;
-    //bool* isCheckingForBoundary;
-    int *numOfThreads;
 public:
     int left;
     int bottom;
@@ -206,9 +204,7 @@ public:
                       QMutex* m1,
                       std::vector<Chunk*> *chunkToAdd,
                       Terrain* currentTerrain,
-                      OpenGLContext *parent,
-                      //bool* isCheckingForBoundary
-                      int* numOfThreads);
+                      OpenGLContext *parent);
     void setLeftBottom(int newLeft, int newBottom);
 
     void run() override;

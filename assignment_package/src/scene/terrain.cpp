@@ -313,69 +313,9 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
 //            }
             updateRiver(left + i* 16 , bottom + j*16, newChunk);
             this->addChunk2Map(newChunk);
-
-            //std::cout<<"river exisit in bound"<<std::endl;
-
             newChunk->create();
         }
     }
-
-
-//    for(int x = left; x < left + 64; ++x)
-//    {
-//        for(int z = bottom; z < bottom + 64; ++z)
-//        {
-//            float scale = 48.f;
-//            glm::vec2 st = glm::vec2(x, z) / scale;
-//            float height = 0.2f * fbm(st);
-
-//            int heightInt = (int) (height * 128.f);
-
-//            for(int y = 0; y < 256; ++y)
-//            {
-//                if(y < 129)
-//                {
-//                    this->setBlockAt(x,y,z,STONE);
-//                }
-//                else if(y < 129 + heightInt - 1 && y >= 129)
-//                {
-//                    this->setBlockAt(x,y,z,DIRT);
-//                }
-//                else if(y == 129 + heightInt - 1 && y >= 129)
-//                {
-//                    this->setBlockAt(x,y,z,GRASS);
-//                }
-//                else
-//                {
-//                    this->setBlockAt(x,y,z,EMPTY);
-//                }
-
-//            }
-//        }
-//    }
-
-//    int X_max1,X_min1,Z_max1,Z_min1,X_max2,X_min2,Z_max2,Z_min2;
-//    river1.Get_river_bound(X_min1,X_max1,Z_min1,Z_max1);
-//    river2.Get_river_bound(X_min2,X_max2,Z_min2,Z_max2);
-//    if((((X_max1<left)||(Z_max1<bottom))||((X_min1>left+16)||(Z_min1>bottom+16)))&&
-//        (((X_max2<left)||(Z_max2<bottom))||((X_min2>left+16)||(Z_min2>bottom+16))))
-//    {}
-//    else
-//    {
-//        updateRiver(left , bottom);
-//        std::cout<<"river exisit in bound"<<std::endl;
-//    }
-
-
-//    for(int i = 0; i < 4; i++)
-//    {
-//        for(int j = 0; j < 4 ;j++)
-//        {
-//            this->getChunkAt(normalX + i * 16, normalZ + j * 16)->create();
-//        }
-//    }
-
-
 
 }
 
@@ -384,16 +324,13 @@ TerrainAtBoundary::TerrainAtBoundary(int cornerX,
                                      QMutex* m, QMutex *m1,
                                      std::vector<Chunk*> *chunkToAdd,
                                      Terrain* currentTerrain,
-                                     OpenGLContext *parent,
-                                     int *numOfThreads)
+                                     OpenGLContext *parent )
     :left(cornerX), bottom(cornerZ),
       chunkMutex(m),
       checkingMutex(m1),
       chunkToAdd(chunkToAdd),
       currentTerrain(currentTerrain),
-      parent(parent),
-      //isCheckingForBoundary(numOfThreads)
-      numOfThreads(numOfThreads)
+      parent(parent)
 {
 
 }
@@ -456,12 +393,6 @@ void TerrainAtBoundary::run()
         }
 //    }
 
-
-
-//      checkingMutex->lock();
-//      //isCheckingForBoundary = false;
-//      (*numOfThreads)--;
-//      checkingMutex->unlock();
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()

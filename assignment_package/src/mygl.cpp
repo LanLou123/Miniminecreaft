@@ -15,12 +15,13 @@ MyGL::MyGL(QWidget *parent)
 
       m_QuadBoard(new Quad(this)),
       mp_progLiquid(new ShaderProgram(this)),
+      mp_progLava(new ShaderProgram(this)),
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
 
       chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
-      drawWater(false),
+      drawWater(false), drawLava(false),
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
 
 {
@@ -124,6 +125,7 @@ void MyGL::initializeGL()
     // Create a new shader program, to show the water effect
 
     mp_progLiquid->create(":/glsl/water.vert.glsl", ":/glsl/water.frag.glsl");
+     mp_progLava->create(":/glsl/lava.vert.glsl", ":/glsl/lava.frag.glsl");
 
     // Set a color with which to draw geometry since you won't have one
     // defined until you implement the Node classes.
@@ -135,15 +137,6 @@ void MyGL::initializeGL()
 //    vao.bind();
     glBindVertexArray(vao);
 
-
-    //mp_terrain->CreateTestScene();
-
-
-    //mp_terrain->CreateTestScene();
-    //mp_terrain->GenerateTerrainAt(0,0,this);
-
-    //
-    //
     mp_terrain->GenerateFirstTerrain(this);
 
  
@@ -227,7 +220,7 @@ void MyGL::timerUpdate()
 
     update();
     moving();
-    std::cout<<"num"<<numOfThreads<<std::endl;
+
     checkingMutex->lock();
     //glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
     //float moveDis = glm::length(moveSinceCheck);
@@ -282,6 +275,10 @@ void MyGL::paintGL()
     if(drawWater)
     {
         mp_progLiquid->draw(*m_QuadBoard);
+    }
+    if(drawLava)
+    {
+        mp_progLava->draw(*m_QuadBoard);
     }
 }
 
@@ -381,10 +378,27 @@ void MyGL::moving()
         {
             player1.StopSwim();
         }
+        //drawWater = false;
+        //drawLava = false;
     }
 
+    if(eye)
+    {
+        if(liquid == WATER)
+        {
+            drawWater = true;
 
-    drawWater = eye;
+        }
+        if(liquid == LAVA)
+        {
+            drawLava = true;
+        }
+    }
+    else
+    {
+        drawWater = false;
+        drawLava = false;
+    }
 
     // drawLava = ?
 
@@ -1026,21 +1040,6 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 void MyGL::startThreads(int normalX, int normalZ)
 {
 
-//    std::cout<<"start threadss"<<std::endl;
-
-//    checkingMutex->lock();
-//    if(numOfThreads > 0)
-//    {
-//        checkingMutex->unlock();
-//        return;
-//    }
-//    checkingMutex->unlock();
-
-//    checkingMutex->lock();
-//    numOfThreads += 8;
-//    checkingMutex->unlock();
-//    std::cout<<"end of start"<<std::endl;
-
     terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
     terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
     terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
@@ -1050,16 +1049,6 @@ void MyGL::startThreads(int normalX, int normalZ)
     terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
     terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
 
-//    terrainGenerator9 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this, &numOfThreads);
-//    terrainGenerator10 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-//    terrainGenerator11 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-//    terrainGenerator12 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-//    terrainGenerator13 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-//    terrainGenerator14 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-//    terrainGenerator15 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-//    terrainGenerator16 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
-
-
     terrainGenerator1->setLeftBottom(normalX, normalZ);
     terrainGenerator2->setLeftBottom(normalX + 16, normalZ);
     terrainGenerator3->setLeftBottom(normalX + 32, normalZ);
@@ -1068,15 +1057,6 @@ void MyGL::startThreads(int normalX, int normalZ)
     terrainGenerator6->setLeftBottom(normalX + 16, normalZ + 32);
     terrainGenerator7->setLeftBottom(normalX + 32, normalZ + 32);
     terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);
-
-//    terrainGenerator9->setLeftBottom(normalX, normalZ + 32);
-//    terrainGenerator10->setLeftBottom(normalX + 16, normalZ + 32);
-//    terrainGenerator11->setLeftBottom(normalX + 32, normalZ + 32);
-//    terrainGenerator12->setLeftBottom(normalX + 48, normalZ + 32);
-//    terrainGenerator13->setLeftBottom(normalX, normalZ + 48);
-//    terrainGenerator14->setLeftBottom(normalX + 16, normalZ + 48);
-//    terrainGenerator15->setLeftBottom(normalX + 32, normalZ + 48);
-//    terrainGenerator16->setLeftBottom(normalX + 48, normalZ + 48);
 
 
     QThreadPool::globalInstance()->start(terrainGenerator1);
@@ -1088,23 +1068,10 @@ void MyGL::startThreads(int normalX, int normalZ)
     QThreadPool::globalInstance()->start(terrainGenerator7);
     QThreadPool::globalInstance()->start(terrainGenerator8);
 
-//    QThreadPool::globalInstance()->start(terrainGenerator9);
-//    QThreadPool::globalInstance()->start(terrainGenerator10);
-//    QThreadPool::globalInstance()->start(terrainGenerator11);
-//    QThreadPool::globalInstance()->start(terrainGenerator12);
-//    QThreadPool::globalInstance()->start(terrainGenerator13);
-//    QThreadPool::globalInstance()->start(terrainGenerator14);
-//    QThreadPool::globalInstance()->start(terrainGenerator15);
-//    QThreadPool::globalInstance()->start(terrainGenerator16);
-
 }
 
 void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
 {
-    if(numOfThreads >= 16)
-    {
-        return;
-    }
     glm::vec3 gridLoc = glm::floor(mp_camera->eye);
 
     // check if there exist a chunk at x direction and z direction
@@ -1321,35 +1288,6 @@ void MyGL::CheckforLiquid(bool &touch, bool &inside, bool &eyeGlass, BlockType &
 {
 
     glm::vec3 eyePos = mp_camera->eye;
-
-//    glm::vec3 look = glm::normalize(glm::vec3(mp_camera->look[0], 0.f, mp_camera->look[2]));
-//    glm::vec3 right = glm::normalize(glm::vec3(mp_camera->right[0], 0.f, mp_camera->right[2]));
-//    // four foot corners
-//    glm::vec3 frontleft = eyePos + glm::vec3(0.f, -1.f, 0.f) + 0.8f * look - 0.4f * right;
-//    glm::vec3 frontright = eyePos + glm::vec3(0.f, -1.f, 0.f) + 0.8f * look + 0.4f * right;
-
-//    glm::vec3 backleft = eyePos + glm::vec3(-0.5f, -1.f, -0.5f);
-//    glm::vec3 backright = eyePos + glm::vec3(-0.5f, -1.f, 0.5f);
-//    BlockType flBlock = mp_terrain->getBlockAt(frontleft[0], frontleft[1], frontleft[2]);
-//    BlockType frBlock = mp_terrain->getBlockAt(frontright[0], frontright[1], frontright[2]);
-//    BlockType blBlock = mp_terrain->getBlockAt(backleft[0], backleft[1], backleft[2]);
-//    BlockType brBlock = mp_terrain->getBlockAt(backright[0], backright[1], backright[2]);
-//    // ground under foot
-//    glm::vec3 footBottom = eyePos - glm::vec3(0.f, 1.5001f, 0.f);
-//    BlockType groundBlock = mp_terrain->getBlockAt(footBottom[0], footBottom[1], footBottom[2]);
-//    if(groundBlock == LAVA || groundBlock == WATER)
-//    {
-//        touch = true;
-//    }
-//    // front and back
-
-//    if(isLiquid(frBlock) || isLiquid(flBlock) || isLiquid(blBlock) || isLiquid(brBlock))
-//    {
-//        touch = true;
-//    }
-
-    // right and left
-
 
     // foot position
     glm::vec3 footFloat = eyePos - glm::vec3(0.f, 1.f, 0.f);

@@ -6,5 +6,7 @@
         <file>glsl/flat.vert.glsl</file>
         <file>glsl/water.vert.glsl</file>
         <file>glsl/water.frag.glsl</file>
+        <file>glsl/lava.vert.glsl</file>
+        <file>glsl/lava.frag.glsl</file>
     </qresource>
 </RCC>
