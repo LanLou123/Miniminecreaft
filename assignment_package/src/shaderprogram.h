@@ -25,6 +25,7 @@ public:
     int attrFlowVelocity; // A handle for the flowing speed
     int attrTangent;
     int attrBiTangent;
+    int attrBlockType;
 
     int unifModel; // A handle for the "uniform" mat4 representing model matrix in the vertex shader
     int unifModelInvTr; // A handle for the "uniform" mat4 representing inverse transpose of the model matrix in the vertex shader
@@ -53,6 +54,7 @@ public:
     void setGeometryColor(glm::vec4 color);
     // Draw the given object to our screen using this ShaderProgram's shaders
     void draw(Drawable &d);
+    void drawF(Drawable &d);
     // Utility function used in create()
     char* textFileRead(const char*);
     // Utility function that prints any shader compilation errors to the console

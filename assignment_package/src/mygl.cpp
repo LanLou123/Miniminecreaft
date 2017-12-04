@@ -1,7 +1,6 @@
 #include "mygl.h"
 #include <la.h>
 #include <QDateTime>
-#include <iostream>
 #include <QApplication>
 #include <QKeyEvent>
 #include <QThreadPool>
@@ -36,7 +35,7 @@ MyGL::MyGL(QWidget *parent)
     c.setPos(mapToGlobal(QPoint(width()/2 , height() / 2)));
     setCursor(c); // Make the cursor invisible
     showmouse=true;
-    speed = 8.0 / 60.0;
+    speed = 4.0 / 60.0;
     flag_moving_forward = 0;
     flag_moving_backward = 0;
     flag_moving_right = 0;
@@ -177,7 +176,7 @@ void MyGL::resizeGL(int w, int h)
 
     *mp_camera = Camera(w, h, glm::vec3((mp_terrain->dimensions.x)/2.0f, (mp_terrain->dimensions.y * 0.75)/1.2f,( mp_terrain->dimensions.z)-10.0f),
 
-                       glm::vec3(mp_terrain->dimensions.x / 2, mp_terrain->dimensions.y / 2, mp_terrain->dimensions.z / 2), glm::vec3(0,1,0));
+                       glm::vec3(mp_terrain->dimensions.x / 2, mp_terrain->dimensions.y * 0.75/1.2f, mp_terrain->dimensions.z / 2), glm::vec3(0,1,0));
 
     glm::mat4 viewproj = mp_camera->getViewProj();
 
@@ -228,9 +227,7 @@ void MyGL::timerUpdate()
     int threads = QThreadPool::globalInstance()->activeThreadCount();
     if(threads == 0)
     {
-
         checkingMutex->unlock();
-        std::cout<<"checkfor boundary?"<<std::endl;
         bool xminus = false;
         bool xplus = false;
         bool zminus = false;
@@ -238,8 +235,6 @@ void MyGL::timerUpdate()
         checkBoundBool(xminus, xplus, zminus, zplus);
         if(xminus || xplus|| zminus||zplus)
         {
-           // checkX = mp_camera->eye[0];
-           // checkZ = mp_camera->eye[2];
             ExtendBoundary(xminus, xplus, zminus, zplus);
         }
     }
@@ -289,6 +284,10 @@ void MyGL::GLDrawScene()
     {
         mp_progLambert->draw(*pair.second);
     }
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progLambert->drawF(*pair.second);
+    }
 }
 
 //press W, A, S, D to move in four traditional horizontal directions, in the meantime
@@ -302,7 +301,9 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
-        speed = 4.0/60.0;//the default speed for running
+
+        speed = 20.0/60.0;//the default speed for running
+
     }
     // http://doc.qt.io/qt-5/qt.html#Key-enum
     // This could all be much more efficient if a switch
@@ -1199,7 +1200,7 @@ void MyGL::keyReleaseEvent(QKeyEvent *e)
 {
     if(e->key() == Qt::Key_Shift)
     {
-        speed = 15.0/60.0;
+        speed = 4.0/60.0;
     }
     else if (e->key() == Qt::Key_W)
     {

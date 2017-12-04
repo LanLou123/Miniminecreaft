@@ -1,7 +1,9 @@
 
 #include "player.h"
+
 #include "iostream"
 player::player():cam(nullptr),vertical_velocity(0),DisableFlyingCollision(0),upAngle(0),grounded(false),swimming(false)
+
 {
     add_deg = 0;
 }

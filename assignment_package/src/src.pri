@@ -40,4 +40,5 @@ HEADERS += \
     $$PWD/player.h \
     $$PWD/scene/quad.h\
     $$PWD/river.h\
+    $$PWD/chunk.h\
     $$PWD/texture.h

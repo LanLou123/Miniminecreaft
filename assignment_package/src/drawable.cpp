@@ -4,6 +4,7 @@
 Drawable::Drawable(OpenGLContext* context)
     : bufIdx(), bufPos(), bufNor(), bufCol(), bufUV(), bufFlowVelocity(),
       idxBound(false), posBound(false), norBound(false), colBound(false),
+      tangentBound(false), bitangentBound(false), blockTypeBound(false),
       context(context)
 {}
 
@@ -21,6 +22,7 @@ void Drawable::destroy()
     context->glDeleteBuffers(1, &bufFlowVelocity);
     context->glDeleteBuffers(1, &bufTangent);
     context->glDeleteBuffers(1, &bufBiTangent);
+    context->glDeleteBuffers(1, &bufBlockType);
 }
 
 GLenum Drawable::drawMode()
@@ -37,6 +39,11 @@ GLenum Drawable::drawMode()
 int Drawable::elemCount()
 {
     return count;
+}
+
+int Drawable::elemCountF()
+{
+    return countF;
 }
 
 void Drawable::generateIdx()
@@ -90,6 +97,73 @@ void Drawable::generateBiTangent()
     bitangentBound = true;
     context->glGenBuffers(1, &bufBiTangent);
 }
+
+void Drawable::generateBlockType()
+{
+    blockTypeBound = true;
+    context->glGenBuffers(1, &bufBlockType);
+}
+
+
+
+void Drawable::generateIdxF()
+{
+    idxBoundF = true;
+    // Create a VBO on our GPU and store its handle in bufIdx
+    context->glGenBuffers(1, &bufIdxF);
+}
+
+void Drawable::generatePosF()
+{
+    posBoundF = true;
+    // Create a VBO on our GPU and store its handle in bufPos
+    context->glGenBuffers(1, &bufPosF);
+}
+
+void Drawable::generateNorF()
+{
+    norBoundF = true;
+    // Create a VBO on our GPU and store its handle in bufNor
+    context->glGenBuffers(1, &bufNorF);
+}
+
+void Drawable::generateColF()
+{
+    colBoundF = true;
+    // Create a VBO on our GPU and store its handle in bufCol
+    context->glGenBuffers(1, &bufColF);
+}
+
+void Drawable::generateUVF()
+{
+    uvBoundF = true;
+    context->glGenBuffers(1, &bufUVF);
+}
+
+void Drawable::generateFlowVelocityF()
+{
+    flowVelocityBoundF = true;
+    context->glGenBuffers(1, &bufFlowVelocityF);
+}
+
+void Drawable::generateTangentF()
+{
+    tangentBoundF = true;
+    context->glGenBuffers(1, &bufTangentF);
+}
+
+void Drawable::generateBiTangentF()
+{
+    bitangentBoundF = true;
+    context->glGenBuffers(1, &bufBiTangentF);
+}
+
+void Drawable::generateBlockTypeF()
+{
+    blockTypeBoundF = true;
+    context->glGenBuffers(1, &bufBlockTypeF);
+}
+
 
 bool Drawable::bindIdx()
 {
@@ -153,4 +227,86 @@ bool Drawable::bindBiTangent()
         context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangent);
     }
     return bitangentBound;
+}
+
+bool Drawable::bindBlockType()
+{
+    if(blockTypeBound){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockType);
+    }
+    return blockTypeBound;
+}
+
+
+
+bool Drawable::bindIdxF()
+{
+    if(idxBoundF) {
+        context->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufIdxF);
+    }
+    return idxBoundF;
+}
+
+bool Drawable::bindPosF()
+{
+    if(posBoundF){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufPosF);
+    }
+    return posBoundF;
+}
+
+bool Drawable::bindNorF()
+{
+    if(norBoundF){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufNorF);
+    }
+    return norBoundF;
+}
+
+bool Drawable::bindColF()
+{
+    if(colBoundF){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufColF);
+    }
+    return colBoundF;
+}
+
+bool Drawable::bindUVF()
+{
+    if(uvBoundF){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufUVF);
+    }
+    return uvBoundF;
+}
+
+bool Drawable::bindFlowVelocityF()
+{
+    if(flowVelocityBoundF){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufFlowVelocityF);
+    }
+    return flowVelocityBoundF;
+}
+
+bool Drawable::bindTangentF()
+{
+    if(tangentBoundF){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufTangentF);
+    }
+    return tangentBoundF;
+}
+
+bool Drawable::bindBiTangentF()
+{
+    if(bitangentBoundF){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangentF);
+    }
+    return bitangentBoundF;
+}
+
+bool Drawable::bindBlockTypeF()
+{
+    if(blockTypeBoundF){
+        context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockTypeF);
+    }
+    return blockTypeBoundF;
 }

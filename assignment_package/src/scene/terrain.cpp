@@ -317,6 +317,7 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
         }
     }
 
+
 }
 
 TerrainAtBoundary::TerrainAtBoundary(int cornerX,
@@ -334,6 +335,7 @@ TerrainAtBoundary::TerrainAtBoundary(int cornerX,
 {
 
 }
+
 
 void TerrainAtBoundary::setLeftBottom(int newLeft, int newBottom)
 {
@@ -391,6 +393,7 @@ void TerrainAtBoundary::run()
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
         }
+
 //    }
 
 }
@@ -464,7 +467,7 @@ void Terrain::Calculate_corner_Riverside(int x, int y, int z)//invoked when need
 
 void Terrain::create_riverside()
 {
-    std::cout<<"generating river side................"<<std::endl;
+    std::cout<<"Generating river side................"<<std::endl;
     bool coner = false ;
     int river1_minx = 0; int river2_minx = 0;
     int river1_maxx = 0; int river2_maxx = 0;
@@ -563,11 +566,13 @@ void Terrain::create_riverside()
             }
         }
     }
-      std::cout<<"riverside generation completed!!"<<std::endl;
+    std::cout<<"Riverside generation completed!!"<<std::endl;
 }
 
 void Terrain::updateFirstRiver()//called when first update river in the first default landscape
 {
+    int water_weight_count1=0;
+    int water_weight_count2=0;
     int max_bound_x = 64;
     int max_bound_z = 64;
     int min_bound_x = 0;
@@ -580,10 +585,24 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
         {
             std::tuple<int,int> pos2 = std::make_tuple(x,z);
             std::tuple<int,int,int> pos1 = std::make_tuple(x,0,z);
+
             if((river1.is_river[pos1]==true)&&
                     this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
-                for(int i = 0 ;i<river_depth ;i++)
+                water_weight_count1 = 0;
+                for(int i = x-2 ;i<=x+2;i++)
+                {
+                    for (int j = z-2;j<=z+2;j++)
+                    {
+                        std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
+                        if(river1.is_river[pos3]==true)
+                        {
+                            water_weight_count1++;
+
+                        }
+                    }
+                }
+                for(int i = 0 ;i<water_weight_count1/4 ;i++)
                 {
                     this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
@@ -591,7 +610,20 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
             if((river2.is_river[pos1]==true)&&
                     this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
-                for(int i = 0 ;i<river_depth ;i++)
+                water_weight_count2 = 0;
+                for(int i = x-2 ;i<=x+2;i++)
+                {
+                    for (int j = z-2;j<=z+2;j++)
+                    {
+                        std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
+                        if(river2.is_river[pos3]==true)
+                        {
+                            water_weight_count2++;
+
+                        }
+                    }
+                }
+                for(int i = 0 ;i<water_weight_count2/4 ;i++)
                 {
                     this->setBlockAt(x,seaLevel-i,z,WATER);
                 }
@@ -628,8 +660,12 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
 
 void Terrain::updateRiver(int origin_x, int origin_z, Chunk *locatedChunk)//called every time when it is requested to generate new terrain from a certain origin
 {
+
     int max_bound_x = origin_x + 16;
     int max_bound_z = origin_z + 16;
+
+    int water_weight_count1=0;
+    int water_weight_count2=0;
     int min_bound_x = origin_x;
     int min_bound_z = origin_z;
     int min_bound_y = 0;
@@ -645,7 +681,20 @@ void Terrain::updateRiver(int origin_x, int origin_z, Chunk *locatedChunk)//call
                     locatedChunk->accessBlockTypeGlobalCoords(x,0,z) != WATER)
                     //this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
-                for(int i = 0 ;i<river_depth ;i++)
+                water_weight_count1 = 0;
+                for(int i = x-2 ;i<=x+2;i++)
+                {
+                    for (int j = z-2;j<=z+2;j++)
+                    {
+                        std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
+                        if(river1.is_river[pos3]==true)
+                        {
+                            water_weight_count1++;
+
+                        }
+                    }
+                }
+                for(int i = 0 ;i<water_weight_count1/4 ;i++)
                 {
                     locatedChunk->accessBlockTypeGlobalCoords(x,seaLevel-i,z) = WATER;
                     //this->setBlockAt(x,seaLevel-i,z,WATER);
@@ -656,7 +705,20 @@ void Terrain::updateRiver(int origin_x, int origin_z, Chunk *locatedChunk)//call
                     locatedChunk->accessBlockTypeGlobalCoords(x,0,z) != WATER)
                     //this->getBlockAt(x,0,z)!=EMPTY&&this->getBlockAt(x,0,z)!=WATER)
             {
-                for(int i = 0 ;i<river_depth ;i++)
+                water_weight_count2 = 0;
+                for(int i = x-2 ;i<=x+2;i++)
+                {
+                    for (int j = z-2;j<=z+2;j++)
+                    {
+                        std::tuple<int,int,int> pos3 = std::make_tuple(i,0,j);
+                        if(river2.is_river[pos3]==true)
+                        {
+                            water_weight_count2++;
+
+                        }
+                    }
+                }
+                for(int i = 0 ;i<water_weight_count2/4 ;i++)
                 {
                     locatedChunk->accessBlockTypeGlobalCoords(x,seaLevel-i,z) = WATER;
                     //this->setBlockAt(x,seaLevel-i,z,WATER);
@@ -693,7 +755,6 @@ void Terrain::updateRiver(int origin_x, int origin_z, Chunk *locatedChunk)//call
                     locatedChunk->accessBlockTypeGlobalCoords(x,pos_height-1,z) = GRASS;
                 }
             }
-
         }
     }
 }
