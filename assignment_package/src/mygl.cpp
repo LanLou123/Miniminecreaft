@@ -7,6 +7,7 @@
 #include <QRunnable>
 #include <QString>
 #include <QMutex>
+#include <iostream>
 
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
@@ -210,18 +211,17 @@ void MyGL::timerUpdate()
         if(chunkMutex->tryLock())
         {
             int chunkNum = chunkToAdd->size();
+            std::cout << chunkNum << std::endl;
             if(chunkNum == 0)
             {
                 chunkMutex->unlock();
             }
             else
             {
-                for(int index = chunkNum-1; index >= 0; index--)
-                {
-                    mp_terrain->addChunk2Map((*chunkToAdd)[index]);
-                    ((*chunkToAdd)[index])->create();
-                    chunkToAdd->pop_back();
-                }
+                int index = chunkNum - 1;
+                mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+                ((*chunkToAdd)[index])->create();
+                chunkToAdd->pop_back();
                 chunkMutex->unlock();
             }
         }
