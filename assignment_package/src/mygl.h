@@ -64,7 +64,7 @@ private:
 
     bool drawWater;
 
-    int concurrentThreadNums;
+    bool lastChunkCreateCompleted;
 
     TerrainAtBoundary* terrainGenerator1;
     TerrainAtBoundary* terrainGenerator2;
