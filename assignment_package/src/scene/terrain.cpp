@@ -408,20 +408,17 @@ void TerrainAtBoundary::run()
 {
     int normalX = left;
     int normalZ = bottom;
-    if (chunkToAdd->size() >= 16)
-        return;
 
-    //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
-    // Populate this chunk
-    for (unsigned loopChunkX = 0; loopChunkX != 2; ++loopChunkX)
-    {
-        for (unsigned loopChunkZ = 0; loopChunkZ != 2; ++loopChunkZ)
+//    for(int i = 0; i < 1; i++)
+//    {
+        for(int j = 0; j < 2 ;j++)
         {
-            Chunk* newChunk = currentTerrain->newChunkAt
-                    (parent, normalX + loopChunkX * 16, normalZ + loopChunkZ * 16);
-            for(int x = left + loopChunkX * 16; x < left + 16 + loopChunkX * 16; ++x)
+            //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
+            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX, normalZ + j * 16);
+            // Populate this chunk
+            for(int x = left; x < left + 16; ++x)
             {
-                for(int z = bottom + loopChunkZ * 16 ; z < bottom + loopChunkZ * 16 + 16; ++z)
+                for(int z = bottom + j * 16 ; z < bottom + 16 + j*16; ++z)
                 {
                     float scale = 48.f;
                     glm::vec2 st = glm::vec2(x, z) / scale;
@@ -449,13 +446,20 @@ void TerrainAtBoundary::run()
                     }
                 }
             }
-            //currentTerrain->updateRiver(left, bottom + loopChunk * 16, newChunk);
+            currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
             chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
         }
 
-    }
+//    }
+
+
+
+//      checkingMutex->lock();
+//      //isCheckingForBoundary = false;
+//      (*numOfThreads)--;
+//      checkingMutex->unlock();
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()

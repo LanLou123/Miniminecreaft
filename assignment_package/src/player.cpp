@@ -63,15 +63,15 @@ bool isThroughable(BlockType b)
 
 void player::CheckTranslateAlongLook(float amt)
 {
-//    if(swimming)
-//    {
-//        std::cout<<"w";
-////        cam->TranslateAlongLook(amt);
-//        cam->Translate_X_Y(amt);
+    if(DisableFlyingCollision)
+    {
+        //std::cout<<"w";
+//        cam->TranslateAlongLook(amt);
+        cam->Translate_X_Y(amt);
 
-//        refresh(cam);
-//        return;
-//    }
+        refresh(cam);
+        return;
+    }
     refresh(cam);
     glm::vec3 character_size=glm::vec3(0.6,2,0.6);
     glm::vec3 pos1,pos2,pos3,pos4,pos5,pos6,p1,p2;
@@ -222,11 +222,11 @@ void player::get_terrain(Terrain *t)
 }
 void player::CheckTranslateAlongRight(float amt)
 {
-//    if(swimming)
-//    {
-//        cam->TranslateAlongRight(amt);
-//        refresh(cam);
-//    }
+    if(DisableFlyingCollision)
+    {
+        cam->TranslateAlongRight(amt);
+        refresh(cam);
+    }
     refresh(cam);
     glm::vec3 pos1,pos2,pos3,pos4,pos5,pos6,p1,p2;
     glm::vec3 character_size=glm::vec3(0.6,2,0.6);
@@ -356,13 +356,13 @@ void player::CheckTranslateAlongUp(float amt)
     refresh(cam);
     if(DisableFlyingCollision)
     {
-        if(bottom_test())
-        {
-        amt = amt>0?amt:0;
+//        if(bottom_test())
+//        {
+//        amt = amt>0?amt:0;
+//        cam->TranslateAlongWorldY(amt);
+//        }
+//        else
         cam->TranslateAlongWorldY(amt);
-        }
-        else
-            cam->TranslateAlongWorldY(amt);
     }
 }
 

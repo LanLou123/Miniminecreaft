@@ -22,9 +22,6 @@ MyGL::MyGL(QWidget *parent)
       chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
       drawWater(false),
 
-      //isCheckingForBoundary(false),
-      //numOfThreads(0),
-
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
 
 {
@@ -126,6 +123,7 @@ void MyGL::initializeGL()
     mp_progFlat->create(":/glsl/flat.vert.glsl", ":/glsl/flat.frag.glsl");
 
     // Create a new shader program, to show the water effect
+
     mp_progLiquid->create(":/glsl/water.vert.glsl", ":/glsl/water.frag.glsl");
 
     // Set a color with which to draw geometry since you won't have one
@@ -221,9 +219,8 @@ void MyGL::timerUpdate()
         }
         else
         {
-            //std::cout<< chunkNum <<std::endl;
 
-            int index = chunkNum - 1;
+            int index = chunkNum-1;
             mp_terrain->addChunk2Map((*chunkToAdd)[index]);
             ((*chunkToAdd)[index])->create();
             chunkToAdd->pop_back();
@@ -235,6 +232,13 @@ void MyGL::timerUpdate()
     moving();
 
     checkingMutex->lock();
+
+    //glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
+    //float moveDis = glm::length(moveSinceCheck);
+    //if(numOfThreads == 0 && moveDis >= 1.f)
+    int threads = QThreadPool::globalInstance()->activeThreadCount();
+    if(threads == 0)
+    {
 
     int threads = QThreadPool::globalInstance()->activeThreadCount();
     std::cout << threads << std::endl;
@@ -248,7 +252,8 @@ void MyGL::timerUpdate()
         checkBoundBool(xminus, xplus, zminus, zplus);
         if(xminus || xplus|| zminus||zplus)
         {
-           // isCheckingForBoundary = true;
+           // checkX = mp_camera->eye[0];
+           // checkZ = mp_camera->eye[2];
             ExtendBoundary(xminus, xplus, zminus, zplus);
         }
     }
@@ -257,6 +262,7 @@ void MyGL::timerUpdate()
         checkingMutex->unlock();
     }
     player1.Fall();
+    }
 }
 
 // This function is called whenever update() is called.
@@ -311,7 +317,8 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
-        speed = 8.0/60.0;//the default speed for running
+
+        speed = 4.0/60.0;//the default speed for running
     }
     // http://doc.qt.io/qt-5/qt.html#Key-enum
     // This could all be much more efficient if a switch
@@ -1031,59 +1038,57 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 
 void MyGL::startThreads(int normalX, int normalZ)
 {
-    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    /*terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);*/
+//    std::cout<<"start threadss"<<std::endl;
 
-    /*terrainGenerator9 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator10 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator11 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator12 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator13 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator14 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator15 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);
-    terrainGenerator16 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);//,&numOfThreads);*/
+//    checkingMutex->lock();
+//    if(numOfThreads > 0)
+//    {
+//        checkingMutex->unlock();
+//        return;
+//    }
+//    checkingMutex->unlock();
+
+//    checkingMutex->lock();
+//    numOfThreads += 8;
+//    checkingMutex->unlock();
+//    std::cout<<"end of start"<<std::endl;
+
+    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+
+//    terrainGenerator9 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this, &numOfThreads);
+//    terrainGenerator10 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+//    terrainGenerator11 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+//    terrainGenerator12 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+//    terrainGenerator13 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+//    terrainGenerator14 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+//    terrainGenerator15 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+//    terrainGenerator16 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&numOfThreads);
+
 
     terrainGenerator1->setLeftBottom(normalX, normalZ);
-    terrainGenerator2->setLeftBottom(normalX + 32, normalZ);
-    terrainGenerator3->setLeftBottom(normalX, normalZ + 32);
-    terrainGenerator4->setLeftBottom(normalX + 32, normalZ + 32);
-    /*terrainGenerator5->setLeftBottom(normalX, normalZ + 32);
+    terrainGenerator2->setLeftBottom(normalX + 16, normalZ);
+    terrainGenerator3->setLeftBottom(normalX + 32, normalZ);
+    terrainGenerator4->setLeftBottom(normalX + 48, normalZ);
+    terrainGenerator5->setLeftBottom(normalX, normalZ + 32);
     terrainGenerator6->setLeftBottom(normalX + 16, normalZ + 32);
     terrainGenerator7->setLeftBottom(normalX + 32, normalZ + 32);
-    terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);*/
+    terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);
 
-    /*terrainGenerator9->setLeftBottom(normalX, normalZ + 32);
-    terrainGenerator10->setLeftBottom(normalX + 16, normalZ + 32);
-    terrainGenerator11->setLeftBottom(normalX + 32, normalZ + 32);
-    terrainGenerator12->setLeftBottom(normalX + 48, normalZ + 32);
-    terrainGenerator13->setLeftBottom(normalX, normalZ + 48);
-    terrainGenerator14->setLeftBottom(normalX + 16, normalZ + 48);
-    terrainGenerator15->setLeftBottom(normalX + 32, normalZ + 48);
-    terrainGenerator16->setLeftBottom(normalX + 48, normalZ + 48);*/
-
-    /*terrainGenerator1->setAutoDelete(true);
-    terrainGenerator2->setAutoDelete(true);
-    terrainGenerator3->setAutoDelete(true);
-    terrainGenerator4->setAutoDelete(true);
-    terrainGenerator5->setAutoDelete(true);
-    terrainGenerator6->setAutoDelete(true);
-    terrainGenerator7->setAutoDelete(true);
-    terrainGenerator8->setAutoDelete(true);*/
-
-    /*terrainGenerator9->setAutoDelete(true);
-    terrainGenerator10->setAutoDelete(true);
-    terrainGenerator11->setAutoDelete(true);
-    terrainGenerator12->setAutoDelete(true);
-    terrainGenerator13->setAutoDelete(true);
-    terrainGenerator14->setAutoDelete(true);
-    terrainGenerator15->setAutoDelete(true);
-    terrainGenerator16->setAutoDelete(true);*/
+//    terrainGenerator9->setLeftBottom(normalX, normalZ + 32);
+//    terrainGenerator10->setLeftBottom(normalX + 16, normalZ + 32);
+//    terrainGenerator11->setLeftBottom(normalX + 32, normalZ + 32);
+//    terrainGenerator12->setLeftBottom(normalX + 48, normalZ + 32);
+//    terrainGenerator13->setLeftBottom(normalX, normalZ + 48);
+//    terrainGenerator14->setLeftBottom(normalX + 16, normalZ + 48);
+//    terrainGenerator15->setLeftBottom(normalX + 32, normalZ + 48);
+//    terrainGenerator16->setLeftBottom(normalX + 48, normalZ + 48);
 
 
     QThreadPool::globalInstance()->start(terrainGenerator1);
@@ -1095,14 +1100,15 @@ void MyGL::startThreads(int normalX, int normalZ)
     QThreadPool::globalInstance()->start(terrainGenerator7);
     QThreadPool::globalInstance()->start(terrainGenerator8);*/
 
-    /*QThreadPool::globalInstance()->start(terrainGenerator9);
-    QThreadPool::globalInstance()->start(terrainGenerator10);
-    QThreadPool::globalInstance()->start(terrainGenerator11);
-    QThreadPool::globalInstance()->start(terrainGenerator12);
-    QThreadPool::globalInstance()->start(terrainGenerator13);
-    QThreadPool::globalInstance()->start(terrainGenerator14);
-    QThreadPool::globalInstance()->start(terrainGenerator15);
-    QThreadPool::globalInstance()->start(terrainGenerator16);*/
+//    QThreadPool::globalInstance()->start(terrainGenerator9);
+//    QThreadPool::globalInstance()->start(terrainGenerator10);
+//    QThreadPool::globalInstance()->start(terrainGenerator11);
+//    QThreadPool::globalInstance()->start(terrainGenerator12);
+//    QThreadPool::globalInstance()->start(terrainGenerator13);
+//    QThreadPool::globalInstance()->start(terrainGenerator14);
+//    QThreadPool::globalInstance()->start(terrainGenerator15);
+//    QThreadPool::globalInstance()->start(terrainGenerator16);
+
 }
 
 void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
@@ -1114,31 +1120,45 @@ void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
     int z = gridLoc[2];
 
 // How to use getChunkAt
-    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5, z);
-    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5, z);
-    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5);
-    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
-    if(xDirChunk == nullptr)
-    {
-        xplus = true;
-    }
-    else if(zDirChunk == nullptr)
-    {
-        zplus = true;
-    }
-    else if(xDirChunk == nullptr && zDirChunk == nullptr)
-    {}
-    else if(xMinusDirChunk == nullptr)
-    {
-        xminus = true;
-    }
-    else if( zMinusDirChunk == nullptr)
-    {
-        zminus = true;
-    }
-    else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
-    {}
-    return;
+
+//    for(int xInd = 0; xInd < 4; xInd++)
+//    {
+//        for(int zInd = 0; zInd < 4; zInd ++)
+//        {
+//            Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 + xInd*16, z);
+//            Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 - xInd*16, z);
+//            Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 + zInd*16);
+//            Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 - zInd*16);
+    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 , z);
+    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 , z);
+    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 );
+    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 );
+            if(xDirChunk == nullptr)
+            {
+                xplus = true;
+            }
+            if(zDirChunk == nullptr)
+            {
+                zplus = true;
+            }
+
+            if(xMinusDirChunk == nullptr)
+            {
+                xminus = true;
+            }
+            if( zMinusDirChunk == nullptr)
+            {
+                zminus = true;
+            }
+//                if(xminus || xplus || zminus|| zplus)
+
+//                {
+//                    return;
+//                }
+//        }
+//    }
+
+
 }
 
 void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)

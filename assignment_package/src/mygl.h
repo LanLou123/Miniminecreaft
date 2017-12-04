@@ -64,25 +64,16 @@ private:
 
     bool drawWater;
 
-   // bool isCheckingForBoundary;
-    //int numOfThreads;
+
 
     TerrainAtBoundary* terrainGenerator1;
     TerrainAtBoundary* terrainGenerator2;
     TerrainAtBoundary* terrainGenerator3;
     TerrainAtBoundary* terrainGenerator4;
-    /*TerrainAtBoundary* terrainGenerator5;
+    TerrainAtBoundary* terrainGenerator5;
     TerrainAtBoundary* terrainGenerator6;
     TerrainAtBoundary* terrainGenerator7;
-    TerrainAtBoundary* terrainGenerator8;*/
-    /*TerrainAtBoundary* terrainGenerator9;
-    TerrainAtBoundary* terrainGenerator10;
-    TerrainAtBoundary* terrainGenerator11;
-    TerrainAtBoundary* terrainGenerator12;
-    TerrainAtBoundary* terrainGenerator13;
-    TerrainAtBoundary* terrainGenerator14;
-    TerrainAtBoundary* terrainGenerator15;
-    TerrainAtBoundary* terrainGenerator16;*/
+    TerrainAtBoundary* terrainGenerator8;
 
 public:
     explicit MyGL(QWidget *parent = 0);
