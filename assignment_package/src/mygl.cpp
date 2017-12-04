@@ -21,7 +21,7 @@ MyGL::MyGL(QWidget *parent)
 
       chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
       drawWater(false),
-      isCheckingForBoundary(false),
+      concurrentThreadNums(0),
 
 
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
@@ -221,13 +221,13 @@ void MyGL::timerUpdate()
             std::cout << chunkNum << std::endl;
             if(chunkNum == 0)
             {
-                isCheckingForBoundary = false;
+                concurrentThreadNums = 0;
                 chunkMutex->unlock();
             }
+
             else
             {
-
-               std::cout<<chunkNum <<std::endl;
+                std::cout<<chunkNum <<std::endl;
                 int index = chunkNum-1;
                 mp_terrain->addChunk2Map((*chunkToAdd)[index]);
                 ((*chunkToAdd)[index])->create();
@@ -409,7 +409,7 @@ void MyGL::moving()
         player1.CheckTranslateAlongUp(-speed);
     }
 
-    if(isCheckingForBoundary == false)
+    if(concurrentThreadNums == 0)
     {
         bool xminus = false;
         bool xplus = false;
@@ -1027,23 +1027,23 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 
 void MyGL::startThreads(int normalX, int normalZ)
 {
-    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+    terrainGenerator1 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator2 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator3 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator4 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator5 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator6 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator7 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator8 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
 
-    terrainGenerator9 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator10 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator11 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator12 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator13 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator14 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator15 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
-    terrainGenerator16 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this,&isCheckingForBoundary);
+    terrainGenerator9 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator10 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator11 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator12 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator13 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator14 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator15 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
+    terrainGenerator16 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this, &concurrentThreadNums);
 
 
 
@@ -1087,7 +1087,7 @@ void MyGL::startThreads(int normalX, int normalZ)
 
 void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
 {
-    if(isCheckingForBoundary)
+    if(concurrentThreadNums != 0)
     {
         return;
     }
@@ -1143,7 +1143,7 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
     if(xplus)
     {
         checkingMutex->lock();
-        isCheckingForBoundary = true;
+        concurrentThreadNums++;
         checkingMutex->unlock();
 
         int normalX = 0;
