@@ -71,10 +71,10 @@ private:
     TerrainAtBoundary* terrainGenerator2;
     TerrainAtBoundary* terrainGenerator3;
     TerrainAtBoundary* terrainGenerator4;
-    TerrainAtBoundary* terrainGenerator5;
+    /*TerrainAtBoundary* terrainGenerator5;
     TerrainAtBoundary* terrainGenerator6;
     TerrainAtBoundary* terrainGenerator7;
-    TerrainAtBoundary* terrainGenerator8;
+    TerrainAtBoundary* terrainGenerator8;*/
     /*TerrainAtBoundary* terrainGenerator9;
     TerrainAtBoundary* terrainGenerator10;
     TerrainAtBoundary* terrainGenerator11;
