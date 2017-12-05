@@ -199,7 +199,7 @@ void MyGL::timerUpdate()
     int64_t delta = m - msec;
     this->Time_elapsed = delta / 1000.0f;//time(sec) elapsed since last update
 
-    if(chunkMutex->tryLock())
+    if (this->m_time % 3 == 0 && chunkMutex->tryLock())
     {
         int chunkNum = chunkToAdd->size();
         if(chunkNum == 0)
