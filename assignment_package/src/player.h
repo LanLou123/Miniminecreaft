@@ -8,8 +8,8 @@
 #define BODYEDGE_ERROR 0.05f
 #define BLOCKEDGE_ERROR 0.02f
 const float G = 9.8f / 60.0f;
-const float time_step = 1.0f / 15.0f;
-const float gravity_acceleration = -10.0f;
+const float time_step = 1.0f / 45.0f;
+const float gravity_acceleration = -9.8f;
 
 class player : public Camera
 {

@@ -69,13 +69,13 @@ private:
     bool drawLava;
 
     TerrainAtBoundary* terrainGenerator1;
-    TerrainAtBoundary* terrainGenerator2;
-    TerrainAtBoundary* terrainGenerator3;
-    TerrainAtBoundary* terrainGenerator4;
-    TerrainAtBoundary* terrainGenerator5;
-    TerrainAtBoundary* terrainGenerator6;
-    TerrainAtBoundary* terrainGenerator7;
-    TerrainAtBoundary* terrainGenerator8;
+//    TerrainAtBoundary* terrainGenerator2;
+//    TerrainAtBoundary* terrainGenerator3;
+//    TerrainAtBoundary* terrainGenerator4;
+//    TerrainAtBoundary* terrainGenerator5;
+//    TerrainAtBoundary* terrainGenerator6;
+//    TerrainAtBoundary* terrainGenerator7;
+//    TerrainAtBoundary* terrainGenerator8;
 
 public:
     explicit MyGL(QWidget *parent = 0);
@@ -92,7 +92,8 @@ public:
 
     void startThreads(int normalX, int normalZ);
 
-    void checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus);
+    void checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus,
+                        bool &xpzp, bool & xpzm, bool &xmzp, bool &xmzm);
 
 protected:
     void keyPressEvent(QKeyEvent *e);
@@ -106,7 +107,8 @@ protected:
 
     glm::ivec3 CubeToAdd(bool &valid);
 
-    void ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus);
+    void ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
+                        bool xpzp, bool xpzm, bool xmzp, bool xmzm);
 
 
     bool flag_moving_forward;

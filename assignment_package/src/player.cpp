@@ -42,7 +42,7 @@ void player::ChangeMode()
 void player::Swim()
 {
     swimming = true;
-    external_force_a = - 2.0 /3.0 * gravity_acceleration;
+    external_force_a = - 1.0 /3.0 * gravity_acceleration;
 }
 
 void player::StopSwim()
@@ -149,7 +149,7 @@ bool player::roof_test()
         return false;
     }
 
-    if(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))!= EMPTY)
+    else if(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))!= EMPTY)
     {
         return true;
 
@@ -171,48 +171,48 @@ bool player::roof_test()
 bool player::bottom_test()
 {
     refresh(cam);
-       glm::vec3 character_size=glm::vec3(0.6,2,0.6);
-       if(vertical_velocity>0)
-           return false;
-       glm::vec3 forward_v=glm::normalize(glm::vec3(look[0],0,look[2]));
-       glm::vec3 pos1,pos2,pos3,pos4;
-       pos1=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)+(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
-               -(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
-       pos2=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)+(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
-               +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
-       pos3=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
-               -(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
-       pos4=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
-               +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+    glm::vec3 character_size=glm::vec3(0.6,2,0.6);
+    if(vertical_velocity>0)
+        return false;
+    glm::vec3 forward_v=glm::normalize(glm::vec3(look[0],0,look[2]));
+    glm::vec3 pos1,pos2,pos3,pos4;
+    pos1=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)+(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
+            -(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+    pos2=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)+(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
+            +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+    pos3=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
+            -(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
+    pos4=eye-glm::vec3(0,(0.75f+BODYEDGE_ERROR)*character_size[1],0)-(0.5f-BLOCKEDGE_ERROR)*character_size[2]*forward_v\
+            +(0.5f-BLOCKEDGE_ERROR)*character_size[0]*right;
 
-       if(isThroughable(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))) &&
-               isThroughable(input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))) &&
-               isThroughable(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))) &&
-               isThroughable(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))))
-       {
-           return false;
-       }
+    if(isThroughable(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))) &&
+            isThroughable(input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))) &&
+            isThroughable(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))) &&
+            isThroughable(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))))
+    {
+        return false;
+    }
 
-       if(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))!= EMPTY)
-       {
-           cam->TranslateAlongWorldY(round(pos1[1])+2 -cam->eye[1]);
-           return true;
-       }
-       else if(input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))!=EMPTY)
-       {
-              cam->TranslateAlongWorldY(round(pos2[1])+2 -cam->eye[1]);
-           return true;
-       }
-       else if(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))!= EMPTY)
-       {
-              cam->TranslateAlongWorldY(round(pos3[1])+2 -cam->eye[1]);
-           return true;
-       }
-       else if(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))!= EMPTY)
-       {
-              cam->TranslateAlongWorldY(round(pos4[1])+2 -cam->eye[1]);
-           return true;
-       }
+    if(input_terrain->getBlockAt(round(pos1[0]),round(pos1[1]),round(pos1[2]))!= EMPTY)
+    {
+        cam->TranslateAlongWorldY(round(pos1[1])+2 -cam->eye[1]);
+        return true;
+    }
+    else if(input_terrain->getBlockAt(round(pos2[0]),round(pos2[1]),round(pos2[2]))!=EMPTY)
+    {
+           cam->TranslateAlongWorldY(round(pos2[1])+2 -cam->eye[1]);
+        return true;
+    }
+    else if(input_terrain->getBlockAt(round(pos3[0]),round(pos3[1]),round(pos3[2]))!= EMPTY)
+    {
+           cam->TranslateAlongWorldY(round(pos3[1])+2 -cam->eye[1]);
+        return true;
+    }
+    else if(input_terrain->getBlockAt(round(pos4[0]),round(pos4[1]),round(pos4[2]))!= EMPTY)
+    {
+           cam->TranslateAlongWorldY(round(pos4[1])+2 -cam->eye[1]);
+        return true;
+    }
 }
 
 void player::get_terrain(Terrain *t)
@@ -260,8 +260,8 @@ void player::CheckTranslateAlongRight(float amt)
         {
             cam->TranslateAlongRight(amt);
             //        cam->TranslateAlongLook(amt);
-                    refresh(cam);
-                    return;
+            refresh(cam);
+            return;
         }
         else
         {
@@ -312,22 +312,22 @@ void player::Fall()
             if(vertical_velocity>=0)
                 vertical_velocity=0;
         }
-    float dis = vertical_velocity * time_step + 0.5 * (gravity_acceleration + external_force_a)*time_step*time_step;
-    dis = dis>1?1:dis;
-    dis = dis<-1?-1:dis;//consider wind resistance force
-    cam->TranslateAlongWorldY(dis);
+        float dis = vertical_velocity * time_step + 0.5 * (gravity_acceleration + external_force_a)*time_step*time_step;
+        dis = dis>1?1:dis;
+        dis = dis<-1?-1:dis;//consider wind resistance force
+        cam->TranslateAlongWorldY(dis);
 
         if(bottom_test())
         {
             if(vertical_velocity<=0)
             vertical_velocity=0;
-    //        external_force_a=-gravity_acceleration;
+    //      external_force_a=-gravity_acceleration;
         }
 
         else
         {
             vertical_velocity+=gravity_acceleration*time_step;
-    //        external_force_a=0;
+    //      external_force_a=0;
         }
     }
 }
@@ -361,6 +361,10 @@ void player::CheckTranslateAlongUp(float amt)
 //        cam->TranslateAlongWorldY(amt);
 //        }
 //        else
+        cam->TranslateAlongWorldY(amt);
+    }
+    if(swimming)
+    {
         cam->TranslateAlongWorldY(amt);
     }
 }

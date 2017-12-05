@@ -349,16 +349,16 @@ void TerrainAtBoundary::run()
     int normalX = left;
     int normalZ = bottom;
 
-//    for(int i = 0; i < 1; i++)
-//    {
-        for(int j = 0; j < 2 ;j++)
+    for(int i = 0; i < 4; i++)
+    {
+        for(int j = 0; j < 4; j++)
         {
             //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
-            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX, normalZ + j * 16);
+            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX + i * 16, normalZ + j * 16);
             // Populate this chunk
-            for(int x = left; x < left + 16; ++x)
+            for(int x = left + i * 16; x < left + 16 + i * 16; ++x)
             {
-                for(int z = bottom + j * 16 ; z < bottom + 16 + j*16; ++z)
+                for(int z = bottom + j * 16 ; z < bottom + 16 + j * 16; ++z)
                 {
                     float scale = 48.f;
                     glm::vec2 st = glm::vec2(x, z) / scale;
@@ -388,14 +388,15 @@ void TerrainAtBoundary::run()
                     }
                 }
             }
-            currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
+            currentTerrain->updateRiver(left + i * 16, bottom + j * 16, newChunk);
+            //currentTerrain->addChunk2Map((*chunkToAdd)[index]);
+//            currentTerrain->addChunk2Map(newChunk);
+//            newChunk->create();
             chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
         }
-
-//    }
-
+    }
 }
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()

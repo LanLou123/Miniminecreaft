@@ -8,6 +8,11 @@
 #include <QString>
 #include <QMutex>
 
+#include <iostream>
+
+#define BOUNDDIS 8
+#define DOUBLEDIS 5
+
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
@@ -220,27 +225,26 @@ void MyGL::timerUpdate()
     update();
     moving();
 
-    checkingMutex->lock();
     //glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
     //float moveDis = glm::length(moveSinceCheck);
     //if(numOfThreads == 0 && moveDis >= 1.f)
     int threads = QThreadPool::globalInstance()->activeThreadCount();
     if(threads == 0)
     {
-        checkingMutex->unlock();
+     // std::cout<<threads<<std::endl;
         bool xminus = false;
         bool xplus = false;
         bool zminus = false;
         bool zplus = false;
-        checkBoundBool(xminus, xplus, zminus, zplus);
-        if(xminus || xplus|| zminus||zplus)
+        bool xpzp = false;
+        bool xpzm = false;
+        bool xmzp = false;
+        bool xmzm = false;
+        checkBoundBool(xminus, xplus, zminus, zplus, xpzp, xpzm, xmzp, xmzm);
+        if(xminus || xplus|| zminus|| zplus || xpzp || xpzm || xmzp ||  xmzm)
         {
-            ExtendBoundary(xminus, xplus, zminus, zplus);
+            ExtendBoundary(xminus, xplus, zminus, zplus, xpzp, xpzm, xmzp, xmzm);
         }
-    }
-    else
-    {
-        checkingMutex->unlock();
     }
     player1.Fall();
 }
@@ -379,8 +383,6 @@ void MyGL::moving()
         {
             player1.StopSwim();
         }
-        //drawWater = false;
-        //drawLava = false;
     }
 
     if(eye)
@@ -401,7 +403,6 @@ void MyGL::moving()
         drawLava = false;
     }
 
-    // drawLava = ?
 
     if(flag_moving_backward&&flag_moving_forward)
     {}
@@ -1012,6 +1013,95 @@ void MyGL::mousePressEvent(QMouseEvent *me)
     }
 }
 
+
+void MyGL::startThreads(int normalX, int normalZ)
+{
+
+    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+//    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+//    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+//    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+//    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+//    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+//    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+//    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+
+    terrainGenerator1->setLeftBottom(normalX, normalZ);
+//    terrainGenerator2->setLeftBottom(normalX + 16, normalZ);
+//    terrainGenerator3->setLeftBottom(normalX + 32, normalZ);
+//    terrainGenerator4->setLeftBottom(normalX + 48, normalZ);
+//    terrainGenerator5->setLeftBottom(normalX, normalZ + 32);
+//    terrainGenerator6->setLeftBottom(normalX + 16, normalZ + 32);
+//    terrainGenerator7->setLeftBottom(normalX + 32, normalZ + 32);
+//    terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);
+
+
+    QThreadPool::globalInstance()->start(terrainGenerator1);
+//    QThreadPool::globalInstance()->start(terrainGenerator2);
+//    QThreadPool::globalInstance()->start(terrainGenerator3);
+//    QThreadPool::globalInstance()->start(terrainGenerator4);
+//    QThreadPool::globalInstance()->start(terrainGenerator5);
+//    QThreadPool::globalInstance()->start(terrainGenerator6);
+//    QThreadPool::globalInstance()->start(terrainGenerator7);
+//    QThreadPool::globalInstance()->start(terrainGenerator8);
+
+}
+
+void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus,
+                          bool &xpzp, bool &xpzm, bool &xmzp, bool &xmzm)
+{
+    glm::vec3 gridLoc = glm::floor(mp_camera->eye);
+
+    // check if there exist a chunk at x direction and z direction
+    int x = gridLoc[0];
+    int z = gridLoc[2];
+    Chunk* xDirChunk = mp_terrain->getChunkAt(x + BOUNDDIS , z);
+    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - BOUNDDIS , z);
+    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + BOUNDDIS );
+    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - BOUNDDIS );
+
+    Chunk* xPzP = mp_terrain->getChunkAt(x + DOUBLEDIS, z + DOUBLEDIS );
+    Chunk* xPzM = mp_terrain->getChunkAt(x + DOUBLEDIS, z - DOUBLEDIS );
+    Chunk* xMzP = mp_terrain->getChunkAt(x - DOUBLEDIS, z + DOUBLEDIS );
+    Chunk* xMzM = mp_terrain->getChunkAt(x - DOUBLEDIS, z - DOUBLEDIS );
+    if(xDirChunk == nullptr)
+    {
+        xplus = true;
+    }
+    if(zDirChunk == nullptr)
+    {
+        zplus = true;
+    }
+
+    if(xMinusDirChunk == nullptr)
+    {
+        xminus = true;
+    }
+    if( zMinusDirChunk == nullptr)
+    {
+        zminus = true;
+    }
+    if(xPzP == nullptr)
+    {
+        std::cout<<"xpzp"<<std::endl;
+        xpzp = true;
+    }
+    if(xPzM == nullptr)
+    {
+        std::cout<<"xpzp"<<std::endl;
+        xpzm = true;
+    }
+    if(xMzP == nullptr)
+    {
+        std::cout<<"xpzp"<<std::endl;
+        xmzp = true;
+    }
+    if(xMzM == nullptr)
+    {
+        std::cout<<"xpzp"<<std::endl;
+        xmzm = true;
+    }
+}
 void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 {
     normalX = 0;
@@ -1037,161 +1127,89 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
         normalZ *= -64;
     }
 }
-
-void MyGL::startThreads(int normalX, int normalZ)
+void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
+                          bool xpzp, bool xpzm, bool xmzp, bool xmzm)
 {
-
-    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-
-    terrainGenerator1->setLeftBottom(normalX, normalZ);
-    terrainGenerator2->setLeftBottom(normalX + 16, normalZ);
-    terrainGenerator3->setLeftBottom(normalX + 32, normalZ);
-    terrainGenerator4->setLeftBottom(normalX + 48, normalZ);
-    terrainGenerator5->setLeftBottom(normalX, normalZ + 32);
-    terrainGenerator6->setLeftBottom(normalX + 16, normalZ + 32);
-    terrainGenerator7->setLeftBottom(normalX + 32, normalZ + 32);
-    terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);
-
-
-    QThreadPool::globalInstance()->start(terrainGenerator1);
-    QThreadPool::globalInstance()->start(terrainGenerator2);
-    QThreadPool::globalInstance()->start(terrainGenerator3);
-    QThreadPool::globalInstance()->start(terrainGenerator4);
-    QThreadPool::globalInstance()->start(terrainGenerator5);
-    QThreadPool::globalInstance()->start(terrainGenerator6);
-    QThreadPool::globalInstance()->start(terrainGenerator7);
-    QThreadPool::globalInstance()->start(terrainGenerator8);
-
-}
-
-void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
-{
+    std::cout<<"extend?"<<std::endl;
     glm::vec3 gridLoc = glm::floor(mp_camera->eye);
 
     // check if there exist a chunk at x direction and z direction
     int x = gridLoc[0];
     int z = gridLoc[2];
-
-// How to use getChunkAt
-//    for(int xInd = 0; xInd < 4; xInd++)
-//    {
-//        for(int zInd = 0; zInd < 4; zInd ++)
-//        {
-//            Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 + xInd*16, z);
-//            Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 - xInd*16, z);
-//            Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 + zInd*16);
-//            Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 - zInd*16);
-    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 , z);
-    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 , z);
-    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 );
-    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 );
-            if(xDirChunk == nullptr)
-            {
-                xplus = true;
-            }
-            if(zDirChunk == nullptr)
-            {
-                zplus = true;
-            }
-
-            if(xMinusDirChunk == nullptr)
-            {
-                xminus = true;
-            }
-            if( zMinusDirChunk == nullptr)
-            {
-                zminus = true;
-            }
-//                if(xminus || xplus || zminus|| zplus)
-
-//                {
-//                    return;
-//                }
-//        }
-//    }
-
-
-}
-
-void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
-{
-    glm::vec3 gridLoc = glm::floor(mp_camera->eye);
-
-    // check if there exist a chunk at x direction and z direction
-    int x = gridLoc[0];
-    int z = gridLoc[2];
-
-//// How to use getChunkAt
-//    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5, z);
-//    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5, z);
-//    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5);
-//    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
     if(xplus)
     {
 
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x + 5, z, normalX, normalZ);
+        NormalizeXZ(x + BOUNDDIS, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
+        return;
     }
     else if(zplus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x, z + 5, normalX, normalZ);
+        NormalizeXZ(x, z + BOUNDDIS, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
+        return;
     }
-//    else if(xDirChunk == nullptr && zDirChunk == nullptr)
-//    {
-//        isCheckingForBoundary = true;
-//        int normalX = 0;
-//        int normalZ = 0;
-//        NormalizeXZ(x, z + 5, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//        NormalizeXZ(x + 5, z, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//        NormalizeXZ(x + 5, z + 5, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//    }
+    else if(xpzp)
+    {
+        std::cout<<"xpzp++"<<std::endl;
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x + DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
+        startThreads(normalX, normalZ);
+        return;
+    }
+    else if(xpzm)
+    {
+        std::cout<<"xpzm++"<<std::endl;
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x + DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
+        startThreads(normalX, normalZ);
+        return;
+    }
     // Minus situation
     else if(xminus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x - 5, z, normalX, normalZ);
+        NormalizeXZ(x - BOUNDDIS, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
+        return;
     }
     else if(zminus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x, z - 5, normalX, normalZ);
+        NormalizeXZ(x, z - BOUNDDIS, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
+        return;
     }
-//    else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
-//    {
-//        isCheckingForBoundary = true;
-//        int normalX = 0;
-//        int normalZ = 0;
-//        NormalizeXZ(x - 5, z - 5, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//        NormalizeXZ(x - 5, z - 5, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//        NormalizeXZ(x - 5, z - 5, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//    }
-    //update();
+    else if(xmzp)
+    {
+        std::cout<<"xmzp++"<<std::endl;
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x - DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
+        startThreads(normalX, normalZ);
+        return;
+    }
+    else if(xmzm)
+    {
+        std::cout<<"xmzm++"<<std::endl;
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x - DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
+        startThreads(normalX, normalZ);
+        return;
+    }
 }
 
 void MyGL::keyReleaseEvent(QKeyEvent *e)
