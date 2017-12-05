@@ -1316,7 +1316,7 @@ void MyGL::CheckforLiquid(bool &touch, bool &inside, bool &eyeGlass, BlockType &
         touch = true;
     }
 
-    glm::vec3 eyePosInt = glm::floor(eyePos);
+    glm::vec3 eyePosInt = glm::floor(eyePos + glm::vec3(0.5f, 0.5f, 0.5f));
     BlockType eyeBlock = mp_terrain->getBlockAt(eyePosInt[0], eyePosInt[1], eyePosInt[2]);
     if(eyeBlock == LAVA || eyeBlock == WATER)
     {
