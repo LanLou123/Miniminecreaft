@@ -285,6 +285,11 @@ void player::Jump()
     }
     if(swimming)
     {
+<<<<<<< HEAD
+=======
+        //std::cout<<"inside" <<std::endl;
+        //std::cout<<swimming <<std::endl;
+>>>>>>> origin/BowenYang-Chunk
         vertical_velocity = 5.0f * 2.0f / 3.0f;
         return;
     }
@@ -293,6 +298,10 @@ void player::Jump()
 //    external_force_a = 0;
     if(vertical_velocity == 0)
     {
+<<<<<<< HEAD
+=======
+        //std::cout<<"ooo"<<std::endl;
+>>>>>>> origin/BowenYang-Chunk
         vertical_velocity = 5.0f;
     }
 //    }

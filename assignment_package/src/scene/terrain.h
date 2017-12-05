@@ -118,23 +118,23 @@ private:
     int64_t xzGlobalPos;
     Terrain* terrain;
 
-    std::vector<GLfloat> pos;
-    std::vector<GLfloat> nor;
-    std::vector<GLfloat> uv;
-    std::vector<GLfloat> flowVelocity;
-    std::vector<GLuint> ele;
-    std::vector<GLfloat> tan;
-    std::vector<GLfloat> bitan;
-    std::vector<GLint> buftype;
+    static std::vector<GLfloat> pos;
+    static std::vector<GLfloat> nor;
+    static std::vector<GLfloat> uv;
+    static std::vector<GLfloat> flowVelocity;
+    static std::vector<GLuint> ele;
+    static std::vector<GLfloat> tan;
+    static std::vector<GLfloat> bitan;
+    static std::vector<GLint> buftype;
 
-    std::vector<GLfloat> posF;
-    std::vector<GLfloat> norF;
-    std::vector<GLfloat> uvF;
-    std::vector<GLfloat> flowVelocityF;
-    std::vector<GLuint> eleF;
-    std::vector<GLfloat> tanF;
-    std::vector<GLfloat> bitanF;
-    std::vector<GLint> buftypeF;
+    static std::vector<GLfloat> posF;
+    static std::vector<GLfloat> norF;
+    static std::vector<GLfloat> uvF;
+    static std::vector<GLfloat> flowVelocityF;
+    static std::vector<GLuint> eleF;
+    static std::vector<GLfloat> tanF;
+    static std::vector<GLfloat> bitanF;
+    static std::vector<GLint> buftypeF;
 
 
 

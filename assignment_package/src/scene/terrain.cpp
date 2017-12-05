@@ -18,6 +18,25 @@ const int river_depth=5;
 const int riverbank_width=10;
 const float fbm_magnitude=0.2f;
 const int step = 3;
+
+std::vector<GLfloat> Chunk::pos = std::vector<GLfloat>();
+std::vector<GLfloat> Chunk::nor = std::vector<GLfloat>();
+std::vector<GLfloat> Chunk::uv = std::vector<GLfloat>();
+std::vector<GLfloat> Chunk::flowVelocity = std::vector<GLfloat>();
+std::vector<GLuint> Chunk::ele = std::vector<GLuint>();
+std::vector<GLfloat> Chunk::tan = std::vector<GLfloat>();
+std::vector<GLfloat> Chunk::bitan = std::vector<GLfloat>();
+std::vector<GLint> Chunk::buftype = std::vector<GLint>();
+
+std::vector<GLfloat> Chunk::posF = std::vector<GLfloat>();
+std::vector<GLfloat> Chunk::norF = std::vector<GLfloat>();
+std::vector<GLfloat> Chunk::uvF = std::vector<GLfloat>();
+std::vector<GLfloat> Chunk::flowVelocityF = std::vector<GLfloat>();
+std::vector<GLuint> Chunk::eleF = std::vector<GLuint>();
+std::vector<GLfloat> Chunk::tanF = std::vector<GLfloat>();
+std::vector<GLfloat> Chunk::bitanF = std::vector<GLfloat>();
+std::vector<GLint> Chunk::buftypeF = std::vector<GLint>();
+
 Terrain::Terrain() : dimensions(64, 256, 64)
 {
       river1=River(10,25,1);
@@ -66,10 +85,16 @@ BlockType Terrain::getBlockAt(int x, int y, int z) const
     int64_t chunkX = getChunkOrigin(x);
     int64_t chunkZ = getChunkOrigin(z);
     Chunk* chunk = this->getChunkAt(chunkX, chunkZ);
-    int64_t localX = x - chunkX;
-    int64_t localZ = z - chunkZ;
-    return chunk->getBlockType(localX, y, localZ);
-
+    if (chunk == nullptr)
+    {
+        return GRASS;
+    }
+    else
+    {
+        int64_t localX = x - chunkX;
+        int64_t localZ = z - chunkZ;
+        return chunk->getBlockType(localX, y, localZ);
+    }
 }
 
 
