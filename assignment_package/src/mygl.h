@@ -12,7 +12,7 @@
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLShaderProgram>
 #include <texture.h>
-
+#include <scene/screencenter.h>
 #include <scene/quad.h>
 
 #include <QMutex>
@@ -48,7 +48,7 @@ private:
                               // your mouse stays within the screen bounds and is always read.
     int m_time;
 
-
+    Screen_Center center;
 
     Quad* m_QuadBoard;
 

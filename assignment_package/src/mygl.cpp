@@ -11,7 +11,7 @@
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
-
+      center(this),
       m_QuadBoard(new Quad(this)),
       mp_progLiquid(new ShaderProgram(this)),
       mp_progLava(new ShaderProgram(this)),
@@ -74,6 +74,7 @@ MyGL::~MyGL()
     delete greyScaleMap;
 
     delete glossPowerMap;
+    center.destroy();
 
 }
 
@@ -110,7 +111,8 @@ void MyGL::initializeGL()
     //Create the instance of Cube
 
     //
-
+    center.InitializeScreenSize(width(),height());
+    center.create();
     mp_geomCube->create();
     mp_worldAxes->create();
 
@@ -267,6 +269,7 @@ void MyGL::paintGL()
     mp_progFlat->draw(*mp_worldAxes);
     glEnable(GL_DEPTH_TEST);
 
+    mp_progFlat->draw(center);
     if(drawWater)
     {
         mp_progLiquid->draw(*m_QuadBoard);
@@ -275,6 +278,7 @@ void MyGL::paintGL()
     {
         mp_progLava->draw(*m_QuadBoard);
     }
+
 }
 
 void MyGL::GLDrawScene()
