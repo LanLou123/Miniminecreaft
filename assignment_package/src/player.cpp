@@ -118,9 +118,9 @@ void player::CheckTranslateAlongLook(float amt)
 
     else
     {
-    cam->Translate_X_Y(amt);
-    //        cam->TranslateAlongLook(amt);
-            refresh(cam);
+        cam->Translate_X_Y(amt);
+        //        cam->TranslateAlongLook(amt);
+                refresh(cam);
     }
     }
 
@@ -149,7 +149,7 @@ bool player::roof_test()
         return false;
     }
 
-    else if(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))!= EMPTY)
+    if(input_terrain->getBlockAt(round(pos5[0]),round(pos5[1]),round(pos5[2]))!= EMPTY)
     {
         return true;
 
@@ -219,6 +219,7 @@ void player::get_terrain(Terrain *t)
 {
     this->input_terrain=t;
 }
+
 void player::CheckTranslateAlongRight(float amt)
 {
     if(DisableFlyingCollision)
@@ -276,6 +277,7 @@ void player::CheckTranslateAlongRight(float amt)
 
 void player::Jump()
 {
+    std::cout<<"jump"<<std::endl;
     jump_tri = true;
     grounded = false;
     if(DisableFlyingCollision)
@@ -283,11 +285,11 @@ void player::Jump()
         CheckTranslateAlongUp(0.1);
         return;
     }
-    if(swimming)
-    {
-        vertical_velocity = 5.0f * 2.0f / 3.0f;
-        return;
-    }
+//    if(swimming)
+//    {
+//        vertical_velocity = 5.0f * 2.0f / 3.0f;
+//        return;
+//    }
 //    if(fabs(-vertical_velocity) < 1e - 7)
 //    {
 //    external_force_a = 0;
@@ -363,10 +365,10 @@ void player::CheckTranslateAlongUp(float amt)
 //        else
         cam->TranslateAlongWorldY(amt);
     }
-    if(swimming)
-    {
-        cam->TranslateAlongWorldY(amt);
-    }
+//    if(swimming)
+//    {
+//        cam->TranslateAlongWorldY(amt);
+//    }
 }
 
 void player::refresh(Camera *Maincam)

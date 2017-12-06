@@ -222,9 +222,11 @@ void MyGL::timerUpdate()
         }
     }
 
+
     update();
     moving();
 
+    std::cout<<"timer update"<<std::endl;
     //glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
     //float moveDis = glm::length(moveSinceCheck);
     //if(numOfThreads == 0 && moveDis >= 1.f)
@@ -302,6 +304,7 @@ void MyGL::GLDrawScene()
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
 
+    std::cout<<"press key"<<std::endl;
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
@@ -434,7 +437,6 @@ void MyGL::moving()
     {
         player1.CheckTranslateAlongUp(-speed);
     }
-
 }
 void MyGL::walk_begin()
 {
