@@ -48,7 +48,7 @@ private:
                               // your mouse stays within the screen bounds and is always read.
     int m_time;
 
-    Screen_Center center;
+    Screen_Center geom_Center;
 
     Quad* m_QuadBoard;
 

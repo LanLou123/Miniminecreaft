@@ -10,6 +10,7 @@ uniform sampler2D u_Greyscale;
 uniform sampler2D u_GlossPower;
 uniform sampler2D u_Duplicate;
 
+in vec4 fs_Pos;
 in vec4 fs_Nor;
 in vec4 fs_LightVec;
 in vec4 fs_Col;
@@ -18,7 +19,7 @@ in vec4 fs_Tangent;
 in vec4 fs_BiTangent;
 in vec2 flowVelocity;
 in vec4 hVector;
-
+in vec4 test;
 in float fs_Alpha;
 
 out vec4 out_Col;
@@ -60,6 +61,7 @@ void main()
     vec4 specularComponent = specularIntensity * specularColor;
 
     vec4 accumulatedResult = diffuseComponent + ambientComponent + specularComponent;
-
-    out_Col = vec4(accumulatedResult.rgb, fs_Alpha);
+//adjust the distance of the fog here...........----lan lou
+    float fog_dis = 20.0f;
+    out_Col = vec4(accumulatedResult.rgb*(1.0f/(1.0+test[2]/fog_dis))+(1-1.0f/(1.0+test[2]/fog_dis))*vec3(0.5,0.5,0.5), fs_Alpha);
 }

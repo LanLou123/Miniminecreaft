@@ -18,6 +18,7 @@ in vec4 vs_BiTangent;
 
 in int vs_BlockType;
 
+out vec4 fs_Pos;
 out vec4 fs_Nor;
 out vec4 fs_LightVec;
 out vec4 fs_Col;
@@ -25,7 +26,7 @@ out vec2 fs_UV;
 out vec4 fs_Tangent;
 out vec4 fs_BiTangent;
 out vec4 hVector;
-
+out vec4 test;
 out float fs_Alpha;
 
 out vec2 flowVelocity;
@@ -39,7 +40,7 @@ void main()
     float deltaU = ((u_Time * timeWarpFactor) % 625) * 0.0001f;
     float deltaV = ((u_Time * timeWarpFactor) % 625) * 0.0001f;
 
-    fs_Col = vs_Col;                         // Pass the vertex colors to the fragment shader for interpolation
+    fs_Col = vs_Col*(1/100.0f)*vs_Pos[3];                         // Pass the vertex colors to the fragment shader for interpolation
     fs_UV = vec2(deltaU, deltaV) * vs_FlowVelocity + vs_UV;
 
     mat3 invTranspose = mat3(u_ModelInvTr);
@@ -49,7 +50,7 @@ void main()
     fs_BiTangent = vs_BiTangent;
     fs_LightVec = lightDir;
     flowVelocity = vs_FlowVelocity;
-
+    fs_Pos = vs_Pos;
     if (vs_BlockType == 8)
         fs_Alpha = 0.6f;
     else
@@ -57,6 +58,6 @@ void main()
 
     vec4 modelposition = u_Model * vs_Pos;
     hVector = normalize(normalize(vec4(u_LookVector, 1.0f) - modelposition) + lightDir);
-
+    test =  u_ViewProj * modelposition;
     gl_Position = u_ViewProj * modelposition;
 }

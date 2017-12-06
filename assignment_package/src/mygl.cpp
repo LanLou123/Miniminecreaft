@@ -11,7 +11,7 @@
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
-      center(this),
+      geom_Center(this),
       m_QuadBoard(new Quad(this)),
       mp_progLiquid(new ShaderProgram(this)),
       mp_progLava(new ShaderProgram(this)),
@@ -74,7 +74,7 @@ MyGL::~MyGL()
     delete greyScaleMap;
 
     delete glossPowerMap;
-    center.destroy();
+
 
 }
 
@@ -111,11 +111,10 @@ void MyGL::initializeGL()
     //Create the instance of Cube
 
     //
-    center.InitializeScreenSize(width(),height());
-    center.create();
+    geom_Center.InitializeScreenSize(width(),height());
     mp_geomCube->create();
     mp_worldAxes->create();
-
+    geom_Center.create();
     m_QuadBoard->create();
 
     // Create and set up the diffuse shader
@@ -265,9 +264,10 @@ void MyGL::paintGL()
     ++m_time;
 
     glDisable(GL_DEPTH_TEST);
-    mp_progFlat->setModelMatrix(glm::mat4());
-    mp_progFlat->draw(*mp_worldAxes);
-    mp_progFlat->draw(center);
+    mp_progFlat->setModelMatrix(glm::mat4(1.0));
+    mp_progFlat->setViewProjMatrix(glm::mat4(1.0));
+//    mp_progFlat->draw(*mp_worldAxes);
+    mp_progFlat->draw(geom_Center);
     glEnable(GL_DEPTH_TEST);
 
 

@@ -1,28 +1,21 @@
+#include "screencenter.h"
 
-#include"scene/screencenter.h"
 #include<math.h>
-#define M_PI 3.1415926535
-static const int vertex_num=24;
-static const int index_num=44;
+static const int vertex_num=4;
+static const int index_num=4;
 void createScreenCenter(std::vector<glm::vec4> &pos,int width,int height )
 {
 
     pos.resize(vertex_num);
-    pos[0][0]=2*(0.5*width-5)/width-1;
+    pos[0][0]=2*(0.5*width-10)/width-1;
     pos[0][1]=0;
-    pos[1][0]=2*(0.5*width+5)/width-1;
+    pos[1][0]=2*(0.5*width+10)/width-1;
     pos[1][1]=0;
     pos[2][0]=0;
-    pos[2][1]=2*(0.5*height-5)/height-1;
+    pos[2][1]=2*(0.5*height-10)/height-1;
     pos[3][0]=0;
-    pos[3][1]=2*(0.5*height+5)/height-1;
-    float theta=0;
-    for(int i=4;i<vertex_num;i++)
-    {
-        pos[i][0]=2*(0.5*width+30*cos(theta))/width-1;
-        pos[i][1]=2*(0.5*height+30*sin(theta))/height-1;
-        theta+=M_PI/10;
-    }
+    pos[3][1]=2*(0.5*height+10)/height-1;
+
     for(int i=0;i<vertex_num;i++)
     {
         pos[i][2]=0;
@@ -34,23 +27,14 @@ void createScreenCenterColor(std::vector<glm::vec4>&color)
     color.resize(vertex_num);
     for(int i=0;i<4;i++)
         color[i]=glm::vec4(1,0,0,1);
-    for(int i=4;i<vertex_num;i++)
-        color[i]=glm::vec4(0,0,0,1);
+
 }
 void createScreenCenterIndex(std::vector<GLuint>&index)
 {
     index.resize(index_num);
     for(int i=0;i<4;i++)
         index[i]=i;
-    int j=4;
-    for(int i=4;i<vertex_num-1;i++)
-    {
-        index[j]=i;
-        index[j+1]=i+1;
-        j+=2;
-    }
-    index[j]=vertex_num-1;
-    index[j+1]=4;
+
 
 }
 

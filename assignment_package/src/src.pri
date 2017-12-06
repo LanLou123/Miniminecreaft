@@ -20,8 +20,8 @@ SOURCES += \
     $$PWD/scene/quad.cpp\
     $$PWD/river.cpp\
     $$PWD/texture.cpp \
-    $$PWD/scene/inventory.cpp \
-    $$PWD/scene/screencenter.cpp
+    $$PWD/scene/screencenter.cpp \
+    $$PWD/scene/cave.cpp
 
 
 
@@ -44,5 +44,5 @@ HEADERS += \
     $$PWD/river.h\
     $$PWD/chunk.h\
     $$PWD/texture.h \
-    $$PWD/scene/inventory.h \
-    $$PWD/scene/screencenter.h
+    $$PWD/scene/screencenter.h \
+    $$PWD/scene/cave.h
