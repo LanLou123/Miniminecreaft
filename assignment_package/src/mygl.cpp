@@ -94,8 +94,8 @@ void MyGL::initializeGL()
 
     // Set a few settings/modes in OpenGL rendering
     glEnable(GL_DEPTH_TEST);
-    glEnable(GL_LINE_SMOOTH);
-    glEnable(GL_POLYGON_SMOOTH);
+//    glEnable(GL_LINE_SMOOTH);
+//    glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     // Set the size with which points should be rendered
@@ -267,9 +267,10 @@ void MyGL::paintGL()
     glDisable(GL_DEPTH_TEST);
     mp_progFlat->setModelMatrix(glm::mat4());
     mp_progFlat->draw(*mp_worldAxes);
+    mp_progFlat->draw(center);
     glEnable(GL_DEPTH_TEST);
 
-    mp_progFlat->draw(center);
+
     if(drawWater)
     {
         mp_progLiquid->draw(*m_QuadBoard);
