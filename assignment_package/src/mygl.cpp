@@ -54,6 +54,8 @@ MyGL::MyGL(QWidget *parent)
     flag_rotate_right = 0;
     flag_walking = 0;
 
+    flag_jumping = 0;
+
     player1.SetMainCamera(mp_camera);
     player1.get_terrain(mp_terrain);
 }
@@ -356,7 +358,9 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     else if (e->key() == Qt::Key_Space)
     {
         flag_moving_up = 1;
-        player1.Jump();
+        flag_jumping = 1;
+
+        //player1.Jump();
     }
     else if (e->key() == Qt::Key_F)
     {
@@ -436,6 +440,10 @@ void MyGL::moving()
     else if (flag_moving_down)
     {
         player1.CheckTranslateAlongUp(-speed);
+    }
+    if(flag_jumping)
+    {
+        player1.Jump();
     }
 }
 void MyGL::walk_begin()
@@ -1259,6 +1267,7 @@ void MyGL::keyReleaseEvent(QKeyEvent *e)
     else if (e->key() == Qt::Key_Space)
     {
         flag_moving_up = 0;
+        flag_jumping = 0;
     }
     else if (e->key() == Qt::Key_Q)
     {

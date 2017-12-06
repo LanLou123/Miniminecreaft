@@ -122,6 +122,9 @@ protected:
     bool flag_walking;
     bool flag_moving_up;
     bool flag_moving_down;
+
+    bool flag_jumping;
+
     float speed;
     void keyReleaseEvent(QKeyEvent *e);
 
