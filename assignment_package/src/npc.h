@@ -5,10 +5,10 @@
 #include "la.h"
 #include "scene/terrain.h"
 
-class NPC : public Chunk
+class NPC : public Drawable
 {
 private:
-    glm::vec3 positionWorld;
+    glm::vec3 positionWRTChunk;
     Terrain* terrain;
 public:
     NPC(OpenGLContext* parent, Terrain* terrain);

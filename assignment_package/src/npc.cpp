@@ -1,33 +1,11 @@
 #include "npc.h"
 
-NPC::NPC(OpenGLContext *parent, Terrain *terrain) :
-    Chunk(parent), terrain(terrain), positionWorld(glm::vec3(0.0f, 0.0f, 0.0f))
+/*NPC::NPC(OpenGLContext *parent, Terrain *terrain) :
+    Drawable(parent), terrain(terrain), positionWorld(glm::vec3(0.0f, 0.0f, 0.0f))
 {}
 
 void NPC::create()
 {
-    for (size_t x = 0; x != 16; ++x)
-    {
-        for (size_t z = 0; z != 16; ++z)
-        {
-            for (size_t y = 0; y != 256; ++y)
-            {
-                BlockType currentBlock = this->getBlockType(x, y, z);
-                if (currentBlock == EMPTY)
-                {
-                    continue;
-                }
-
-                fillLeftFace(x, y, z, this->getBlockType(x, y, z));
-                fillRightFace(x, y, z, this->getBlockType(x, y, z));
-                fillBackFace(x, y, z, this->getBlockType(x, y, z));
-                fillFrontFace(x, y, z, this->getBlockType(x, y, z));
-                fillUpFace(x, y, z, this->getBlockType(x, y, z));
-                fillDownFace(x, y, z, this->getBlockType(x, y, z));
-            }
-        }
-    }
-
     this->count = ele.size();
 
     generateIdx();
@@ -112,4 +90,4 @@ void NPC::create()
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockTypeF);
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftypeF.size(),
                             reinterpret_cast<void*>(buftypeF.data()), GL_STATIC_DRAW);
-}
+}*/

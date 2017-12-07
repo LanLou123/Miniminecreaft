@@ -51,6 +51,25 @@ MyGL::MyGL(QWidget *parent)
 
     player1.SetMainCamera(mp_camera);
     player1.get_terrain(mp_terrain);
+
+    //Only half of the maximum memory is needed in the worst case.
+    Chunk::pos = new GLfloat[65536 / 2 * 6 * 4 * 4];
+    Chunk::posF = new GLfloat[65536 / 2 * 6 * 4 * 4];
+    Chunk::nor = new GLfloat[65536 / 2 * 6 * 4 * 4];
+    Chunk::norF = new GLfloat[65536 / 2 * 6 * 4 * 4];
+    Chunk::uv = new GLfloat[65536 / 2 * 6 * 4 * 2];
+    Chunk::uvF = new GLfloat[65536 / 2 * 6 * 4 * 2];
+    Chunk::flowVelocity = new GLfloat[65536 / 2 * 6 * 4 * 2];
+    Chunk::flowVelocityF = new GLfloat[65536 / 2 * 6 * 4 * 2];
+    Chunk::tan = new GLfloat[65536 / 2 * 6 * 4 * 4];
+    Chunk::tanF = new GLfloat[65536 / 2 * 6 * 4 * 4];
+    Chunk::bitan = new GLfloat[65536 / 2 * 6 * 4 * 4];
+    Chunk::bitanF = new GLfloat[65536 / 2 * 6 * 4 * 4];
+
+    Chunk::ele = new GLuint[65536 / 2 * 6 * 6];
+    Chunk::eleF = new GLuint[65536 / 2 * 6 * 6];
+    Chunk::buftype = new GLint[65536 / 2 * 6 * 4];
+    Chunk::buftypeF = new GLint[65536 / 2 * 6 * 4];
 }
 
 MyGL::~MyGL()
@@ -75,6 +94,23 @@ MyGL::~MyGL()
 
     delete glossPowerMap;
 
+
+    delete pos;
+    delete posF;
+    delete nor;
+    delete norF;
+    delete uv;
+    delete uvF;
+    delete flowVelocity;
+    delete flowVelocityF;
+    delete tan;
+    delete tanF;
+    delete bitan;
+    delete bitanF;
+    delete ele;
+    delete eleF;
+    delete buftype;
+    delete buftypeF;
 }
 
 

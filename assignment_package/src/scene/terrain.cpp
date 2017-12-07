@@ -19,23 +19,23 @@ const int riverbank_width=10;
 const float fbm_magnitude=0.2f;
 const int step = 3;
 
-std::vector<GLfloat> Chunk::pos = std::vector<GLfloat>();
-std::vector<GLfloat> Chunk::nor = std::vector<GLfloat>();
-std::vector<GLfloat> Chunk::uv = std::vector<GLfloat>();
-std::vector<GLfloat> Chunk::flowVelocity = std::vector<GLfloat>();
-std::vector<GLuint> Chunk::ele = std::vector<GLuint>();
-std::vector<GLfloat> Chunk::tan = std::vector<GLfloat>();
-std::vector<GLfloat> Chunk::bitan = std::vector<GLfloat>();
-std::vector<GLint> Chunk::buftype = std::vector<GLint>();
+GLfloat* Chunk::pos = nullptr;
+GLfloat* Chunk::nor = nullptr;
+GLfloat* Chunk::uv = nullptr;
+GLfloat* Chunk::flowVelocity = nullptr;
+GLuint* Chunk::ele = nullptr;
+GLfloat* Chunk::tan = nullptr;
+GLfloat* Chunk::bitan = nullptr;
+GLint* Chunk::buftype = nullptr;
 
-std::vector<GLfloat> Chunk::posF = std::vector<GLfloat>();
-std::vector<GLfloat> Chunk::norF = std::vector<GLfloat>();
-std::vector<GLfloat> Chunk::uvF = std::vector<GLfloat>();
-std::vector<GLfloat> Chunk::flowVelocityF = std::vector<GLfloat>();
-std::vector<GLuint> Chunk::eleF = std::vector<GLuint>();
-std::vector<GLfloat> Chunk::tanF = std::vector<GLfloat>();
-std::vector<GLfloat> Chunk::bitanF = std::vector<GLfloat>();
-std::vector<GLint> Chunk::buftypeF = std::vector<GLint>();
+GLfloat* Chunk::posF = nullptr;
+GLfloat* Chunk::norF = nullptr;
+GLfloat* Chunk::uvF = nullptr;
+GLfloat* Chunk::flowVelocityF = nullptr;
+GLuint* Chunk::eleF = nullptr;
+GLfloat* Chunk::tanF = nullptr;
+GLfloat* Chunk::bitanF = nullptr;
+GLint* Chunk::buftypeF = nullptr;
 
 Terrain::Terrain() : dimensions(64, 256, 64)
 {
