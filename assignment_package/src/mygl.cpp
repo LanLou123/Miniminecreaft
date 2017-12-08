@@ -51,6 +51,9 @@ MyGL::MyGL(QWidget *parent)
 
     player1.SetMainCamera(mp_camera);
     player1.get_terrain(mp_terrain);
+
+    QThreadPool::globalInstance()->setMaxThreadCount(8);
+    QThreadPool::globalInstance()->setExpiryTimeout(20);
 }
 
 MyGL::~MyGL()
@@ -1059,6 +1062,14 @@ void MyGL::startThreads(int normalX, int normalZ)
     terrainGenerator7->setLeftBottom(normalX + 32, normalZ + 32);
     terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);
 
+    terrainGenerator1->setAutoDelete(true);
+    terrainGenerator2->setAutoDelete(true);
+    terrainGenerator3->setAutoDelete(true);
+    terrainGenerator4->setAutoDelete(true);
+    terrainGenerator5->setAutoDelete(true);
+    terrainGenerator6->setAutoDelete(true);
+    terrainGenerator7->setAutoDelete(true);
+    terrainGenerator8->setAutoDelete(true);
 
     QThreadPool::globalInstance()->start(terrainGenerator1);
     QThreadPool::globalInstance()->start(terrainGenerator2);
@@ -1068,7 +1079,6 @@ void MyGL::startThreads(int normalX, int normalZ)
     QThreadPool::globalInstance()->start(terrainGenerator6);
     QThreadPool::globalInstance()->start(terrainGenerator7);
     QThreadPool::globalInstance()->start(terrainGenerator8);
-
 }
 
 void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
