@@ -109,74 +109,134 @@ static const glm::vec2 flowU = glm::vec2(1.0f, 0.0f);
 static const glm::vec2 flowV = glm::vec2(0.0f, 1.0f);
 static const glm::vec2 flowStatic = glm::vec2(0.0f, 0.0f);
 
-void Chunk::appendUV(std::vector<GLfloat> *container, const glm::vec2 uvCoords[])
+void Chunk::appendUV(GLfloat *container, const glm::vec2 uvCoords[], bool isOpaque)
 {
-    for (unsigned i = 0; i!=4; ++i)
+    if (isOpaque)
     {
-        for (unsigned j = 0; j!=2; ++j)
+        for (unsigned i = 0; i!=4; ++i)
         {
-            container->push_back((*(uvCoords + i))[j]);
+            for (unsigned j = 0; j!=2; ++j)
+            {
+                container[uvSize] = (*(uvCoords + i))[j];
+                uvSize++;
+            }
+        }
+    }
+    else
+    {
+        for (unsigned i = 0; i!=4; ++i)
+        {
+            for (unsigned j = 0; j!=2; ++j)
+            {
+                container[uvSizeF] = (*(uvCoords + i))[j];
+                uvSizeF++;
+            }
         }
     }
 }
 
-void Chunk::appendFlow(std::vector<GLfloat> *container, glm::vec2 speed)
+void Chunk::appendFlow(GLfloat *container, glm::vec2 speed, bool isOpaque)
 {
-    for (unsigned i = 0; i!=4; ++i)
+    if (isOpaque)
     {
-        for (unsigned j = 0; j!=2; ++j)
+        for (unsigned i = 0; i!=4; ++i)
         {
-            container->push_back(speed[j]);
+            for (unsigned j = 0; j!=2; ++j)
+            {
+                container[flowVelocitySize] = speed[j];
+                flowVelocitySize++;
+            }
+        }
+    }
+    else
+    {
+        for (unsigned i = 0; i!=4; ++i)
+        {
+            for (unsigned j = 0; j!=2; ++j)
+            {
+                container[flowVelocitySizeF] = speed[j];
+                flowVelocityF++;
+            }
         }
     }
 }
 
 void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing)
 {
-    std::vector<GLfloat>* posC;
-    std::vector<GLfloat>* norC;
-    std::vector<GLfloat>* uvC;
-    std::vector<GLfloat>* flowVelocityC;
-    std::vector<GLuint>* eleC;
-    std::vector<GLfloat>* tanC;
-    std::vector<GLfloat>* bitanC;
-    std::vector<GLint>* buftypeC;
+    GLfloat* posC;
+    GLfloat* norC;
+    GLfloat* uvC;
+    GLfloat* flowVelocityC;
+    GLuint* eleC;
+    GLfloat* tanC;
+    GLfloat* bitanC;
+    GLint* buftypeC;
+
+    bool isOpaque;
 
     if (type == WATER)
     {
-        posC = &this->posF;
-        norC = &this->norF;
-        uvC = &this->uvF;
-        flowVelocityC = &this->flowVelocityF;
-        eleC = &this->eleF;
-        tanC = &this->tanF;
-        bitanC = &this->bitanF;
-        buftypeC = &this->buftypeF;
+        posC = this->posF;
+        norC = this->norF;
+        uvC = this->uvF;
+        flowVelocityC = this->flowVelocityF;
+        eleC = this->eleF;
+        tanC = this->tanF;
+        bitanC = this->bitanF;
+        buftypeC = this->buftypeF;
+
+        isOpaque = false;
     }
     else
     {
-        posC = &this->pos;
-        norC = &this->nor;
-        uvC = &this->uv;
-        flowVelocityC = &this->flowVelocity;
-        eleC = &this->ele;
-        tanC = &this->tan;
-        bitanC = &this->bitan;
-        buftypeC = &this->buftype;
+        posC = this->pos;
+        norC = this->nor;
+        uvC = this->uv;
+        flowVelocityC = this->flowVelocity;
+        eleC = this->ele;
+        tanC = this->tan;
+        bitanC = this->bitan;
+        buftypeC = this->buftype;
+
+        isOpaque = true;
     }
 
-    for (unsigned i = 0; i!=4; ++i)
+    if (isOpaque)
     {
-        for (unsigned j = 0; j!=4; ++j)
+        for (unsigned i = 0; i!=4; ++i)
         {
-            posC->push_back(positions[i][j]);
+            for (unsigned j = 0; j!=4; ++j)
+            {
+                posC[posSize] = positions[i][j];
+                ++posSize;
+            }
+        }
+        for (unsigned i = 0; i!=4; ++i)
+        {
+            for (unsigned j = 0; j!=4; ++j)
+            {
+                norC[norSize] = normal[j];
+                ++norSize;
+            }
         }
     }
-    for (unsigned i = 0; i!=4; ++i)
+    else
     {
-        for (unsigned j = 0; j!=4; ++j)
+        for (unsigned i = 0; i!=4; ++i)
         {
-            norC->push_back(normal[j]);
+            for (unsigned j = 0; j!=4; ++j)
+            {
+                posC[posSizeF] = positions[i][j];
+                ++posSizeF;
+            }
+        }
+        for (unsigned i = 0; i!=4; ++i)
+        {
+            for (unsigned j = 0; j!=4; ++j)
+            {
+                norC[norSizeF] = normal[j];
+                ++norSizeF;
+            }
         }
     }
 
@@ -188,51 +248,51 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
     case GRASS:
         if (facing == UP)
         {
-            appendUV(uvC, grassTop);
+            appendUV(uvC, grassTop, isOpaque);
             deltaUV1 = grassTop[1] - grassTop[0];
             deltaUV2 = grassTop[3] - grassTop[0];
         }
         else if (facing == DOWN)
         {
-            appendUV(uvC, dirt);
+            appendUV(uvC, dirt, isOpaque);
             deltaUV1 = dirt[1] - dirt[0];
             deltaUV2 = dirt[3] - dirt[0];
         }
         else
         {
-            appendUV(uvC, grassSide);
+            appendUV(uvC, grassSide, isOpaque);
             deltaUV1 = grassSide[1] - grassSide[0];
             deltaUV2 = grassSide[3] - grassSide[0];
         }
-        appendFlow(flowVelocityC, flowStatic);
+        appendFlow(flowVelocityC, flowStatic, isOpaque);
         break;
     case DIRT:
-        appendUV(uvC, dirt);
-        appendFlow(flowVelocityC, flowStatic);
+        appendUV(uvC, dirt, isOpaque);
+        appendFlow(flowVelocityC, flowStatic, isOpaque);
         deltaUV1 = dirt[1] - dirt[0];
         deltaUV2 = dirt[3] - dirt[0];
         break;
     case STONE:
-        appendUV(uvC, stone);
-        appendFlow(flowVelocityC, flowStatic);
+        appendUV(uvC, stone, isOpaque);
+        appendFlow(flowVelocityC, flowStatic, isOpaque);
         deltaUV1 = stone[1] - stone[0];
         deltaUV2 = stone[3] - stone[0];
         break;
     case LAVA:
-        appendUV(uvC, lava);
-        appendFlow(flowVelocityC, flowU);
+        appendUV(uvC, lava, isOpaque);
+        appendFlow(flowVelocityC, flowU, isOpaque);
         deltaUV1 = lava[1] - lava[0];
         deltaUV2 = lava[3] - lava[0];
         break;
     case WATER:
-        appendUV(uvC, water);
-        appendFlow(flowVelocityC, flowU);
+        appendUV(uvC, water, isOpaque);
+        appendFlow(flowVelocityC, flowU, isOpaque);
         deltaUV1 = water[1] - water[0];
         deltaUV2 = water[3] - water[0];
         break;
     default:
-        appendUV(uvC, stone);
-        appendFlow(flowVelocityC, flowStatic);
+        appendUV(uvC, stone, isOpaque);
+        appendFlow(flowVelocityC, flowStatic, isOpaque);
         deltaUV1 = stone[1] - stone[0];
         deltaUV2 = stone[3] - stone[0];
         break;
@@ -245,27 +305,72 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
     glm::vec4 B = (deltaUV2.x*deltaPos1 - deltaUV1.x*deltaPos2) /
             (deltaUV1.y*deltaUV2.x - deltaUV2.y*deltaUV1.x);
 
-    for (unsigned i = 0; i!=4; ++i)
+    if (isOpaque)
     {
-        for (unsigned j = 0; j!=4; ++j)
+        for (unsigned i = 0; i!=4; ++i)
         {
-            tanC->push_back(T[j]);
-            bitanC->push_back(B[j]);
+            for (unsigned j = 0; j!=4; ++j)
+            {
+                tanC[tanSize] = T[j];
+                bitanC[bitanSize] = B[j];
+                tanSize++;
+                bitanSize++;
+            }
         }
-    }
 
-    for (unsigned i = 0; i!=4; ++i)
+        for (unsigned i = 0; i!=4; ++i)
+        {
+            buftypeC[buftypeSize] = type;
+            ++buftypeSize;
+        }
+
+        size_t indexoffset = eleSize / 3 * 2;
+        eleC[eleSize] = (indexoffset);
+        eleSize++;
+        eleC[eleSize] = indexoffset + 1;
+        eleSize++;
+        eleC[eleSize] = indexoffset + 2;
+        eleSize++;
+        eleC[eleSize] = indexoffset;
+        eleSize++;
+        eleC[eleSize] = indexoffset + 2;
+        eleSize++;
+        eleC[eleSize] = indexoffset + 3;
+        eleSize++;
+    }
+    else
     {
-        buftypeC->push_back(type);
-    }
+        for (unsigned i = 0; i!=4; ++i)
+        {
+            for (unsigned j = 0; j!=4; ++j)
+            {
+                tanC[tanSizeF] = T[j];
+                bitanC[bitanSizeF] = B[j];
+                tanSizeF++;
+                bitanSizeF++;
+            }
+        }
 
-    size_t indexoffset = eleC->size() / 3 * 2;
-    eleC->push_back(indexoffset);
-    eleC->push_back(indexoffset + 1);
-    eleC->push_back(indexoffset + 2);
-    eleC->push_back(indexoffset);
-    eleC->push_back(indexoffset + 2);
-    eleC->push_back(indexoffset + 3);
+        for (unsigned i = 0; i!=4; ++i)
+        {
+            buftypeC[buftypeSizeF] = type;
+            ++buftypeSizeF;
+        }
+
+        size_t indexoffset = eleSizeF / 3 * 2;
+        eleC[eleSizeF] = (indexoffset);
+        eleSizeF++;
+        eleC[eleSizeF] = indexoffset + 1;
+        eleSizeF++;
+        eleC[eleSizeF] = indexoffset + 2;
+        eleSizeF++;
+        eleC[eleSizeF] = indexoffset;
+        eleSizeF++;
+        eleC[eleSizeF] = indexoffset + 2;
+        eleSizeF++;
+        eleC[eleSizeF] = indexoffset + 3;
+        eleSizeF++;
+    }
 }
 
 void Chunk::fillLeftFace(size_t x, size_t y, size_t z, BlockType type)
@@ -503,23 +608,9 @@ size_t size2ReserveElement = 65536 / 2 * 6 * 6;
 
 void Chunk::create()
 {
-    this->pos.clear();
-    this->nor.clear();
-    this->uv.clear();
-    this->flowVelocity.clear();
-    this->ele.clear();
-    this->tan.clear();
-    this->bitan.clear();
-    this->buftype.clear();
-
-    this->posF.clear();
-    this->norF.clear();
-    this->uvF.clear();
-    this->flowVelocityF.clear();
-    this->eleF.clear();
-    this->tanF.clear();
-    this->bitanF.clear();
-    this->buftypeF.clear();
+    posSize = posSizeF = norSize = norSizeF = uvSize = uvSizeF =
+    flowVelocitySize = flowVelocitySizeF = eleSize = eleSizeF = tanSize =
+    tanSizeF = bitanSize = bitanSizeF = buftypeSize = buftypeSizeF = 0;
 
 
     this->pos.reserve(size2Reserve4components);
@@ -562,88 +653,88 @@ void Chunk::create()
         }
     }
 
-    this->count = ele.size();
+    this->count = eleSize;
 
     generateIdx();
     context->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufIdx);
-    context->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * ele.size(),
-                             reinterpret_cast<void*>(ele.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * eleSize,
+                             reinterpret_cast<void*>(ele), GL_STATIC_DRAW);
 
     generatePos();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufPos);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * pos.size(),
-                             reinterpret_cast<void*>(pos.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * posSize,
+                             reinterpret_cast<void*>(pos), GL_STATIC_DRAW);
 
     generateNor();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufNor);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * nor.size(),
-                             reinterpret_cast<void*>(nor.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * norSize,
+                             reinterpret_cast<void*>(nor), GL_STATIC_DRAW);
 
     generateUV();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufUV);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * uv.size(),
-                            reinterpret_cast<void*>(uv.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * uvSize,
+                            reinterpret_cast<void*>(uv), GL_STATIC_DRAW);
 
     generateFlowVelocity();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufFlowVelocity);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * flowVelocity.size(),
-                            reinterpret_cast<void*>(flowVelocity.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * flowVelocitySize,
+                            reinterpret_cast<void*>(flowVelocity), GL_STATIC_DRAW);
 
     generateTangent();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufTangent);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * tan.size(),
-                            reinterpret_cast<void*>(tan.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * tanSize,
+                            reinterpret_cast<void*>(tan), GL_STATIC_DRAW);
 
     generateBiTangent();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangent);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * bitan.size(),
-                            reinterpret_cast<void*>(bitan.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * bitanSize,
+                            reinterpret_cast<void*>(bitan), GL_STATIC_DRAW);
 
     generateBlockType();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockType);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftype.size(),
-                            reinterpret_cast<void*>(buftype.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftypeSize,
+                            reinterpret_cast<void*>(buftype), GL_STATIC_DRAW);
 
 
-    this->countF = eleF.size();
+    this->countF = eleSizeF;
 
     generateIdxF();
     context->glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, bufIdxF);
-    context->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * eleF.size(),
-                             reinterpret_cast<void*>(eleF.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(GLuint) * eleSizeF,
+                             reinterpret_cast<void*>(eleF), GL_STATIC_DRAW);
 
     generatePosF();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufPosF);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * posF.size(),
-                             reinterpret_cast<void*>(posF.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * posSizeF,
+                             reinterpret_cast<void*>(posF), GL_STATIC_DRAW);
 
     generateNorF();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufNorF);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * norF.size(),
-                             reinterpret_cast<void*>(norF.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * norSizeF,
+                             reinterpret_cast<void*>(norF), GL_STATIC_DRAW);
 
     generateUVF();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufUVF);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * uvF.size(),
-                            reinterpret_cast<void*>(uvF.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * uvSizeF,
+                            reinterpret_cast<void*>(uvF), GL_STATIC_DRAW);
 
     generateFlowVelocityF();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufFlowVelocityF);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * flowVelocityF.size(),
-                            reinterpret_cast<void*>(flowVelocityF.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * flowVelocitySizeF,
+                            reinterpret_cast<void*>(flowVelocityF), GL_STATIC_DRAW);
 
     generateTangentF();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufTangentF);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * tanF.size(),
-                            reinterpret_cast<void*>(tanF.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * tanSizeF,
+                            reinterpret_cast<void*>(tanF), GL_STATIC_DRAW);
 
     generateBiTangentF();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBiTangentF);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * bitanF.size(),
-                            reinterpret_cast<void*>(bitanF.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLfloat) * bitanSizeF,
+                            reinterpret_cast<void*>(bitanF), GL_STATIC_DRAW);
 
     generateBlockTypeF();
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockTypeF);
-    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftypeF.size(),
-                            reinterpret_cast<void*>(buftypeF.data()), GL_STATIC_DRAW);
+    context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftypeSizeF,
+                            reinterpret_cast<void*>(buftypeF), GL_STATIC_DRAW);
 }

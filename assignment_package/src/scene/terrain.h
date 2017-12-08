@@ -10,6 +10,7 @@
 #include "drawable.h"
 #include <stdint.h>
 #include <unordered_map>
+#include <array>
 #include "drawable.h"
 
 #include <stdint.h>
@@ -106,7 +107,6 @@ struct xzCoords
     xzCoords(int32_t x, int32_t z);
 };
 
-
 class Chunk : public Drawable
 {
 
@@ -118,30 +118,17 @@ private:
     int64_t xzGlobalPos;
     Terrain* terrain;
 
-    static std::vector<GLfloat> pos;
-    static std::vector<GLfloat> nor;
-    static std::vector<GLfloat> uv;
-    static std::vector<GLfloat> flowVelocity;
-    static std::vector<GLuint> ele;
-    static std::vector<GLfloat> tan;
-    static std::vector<GLfloat> bitan;
-    static std::vector<GLint> buftype;
-
-    static std::vector<GLfloat> posF;
-    static std::vector<GLfloat> norF;
-    static std::vector<GLfloat> uvF;
-    static std::vector<GLfloat> flowVelocityF;
-    static std::vector<GLuint> eleF;
-    static std::vector<GLfloat> tanF;
-    static std::vector<GLfloat> bitanF;
-    static std::vector<GLint> buftypeF;
-
-
+    size_t posSize, posSizeF, norSize, norSizeF, uvSize, uvSizeF,
+    flowVelocitySize, flowVelocitySizeF, eleSize, eleSizeF, tanSize,
+    tanSizeF, bitanSize, bitanSizeF, buftypeSize, buftypeSizeF;
 
     Chunk* getLeftAdjacent();
     Chunk* getRightAdjacent();
     Chunk* getBackAdjacent();
     Chunk* getFrontAdjacent();
+
+    void appendUV(GLfloat *container, const glm::vec2 uvCoords[], bool isOpaque);
+    void appendFlow(GLfloat *container, glm::vec2 speed, bool isOpaque);
 
     void fillLeftFace(size_t x, size_t y, size_t z, BlockType type);
     void fillRightFace(size_t x, size_t y, size_t z, BlockType type);
@@ -153,10 +140,6 @@ private:
 
     void fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, FaceFacing facing);
 
-    void appendUV(std::vector<GLfloat>* container, const glm::vec2 uvCoords[]);
-
-    void appendFlow(std::vector<GLfloat>* container, glm::vec2 speed);
-
     BlockType getBlockType(size_t x, size_t y, size_t z) const;
 
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
@@ -164,6 +147,11 @@ private:
     bool shouldFill(size_t x, size_t y, size_t z, BlockType currentBlock);
 
 public:
+
+    static GLfloat* pos, *posF, *nor, *norF, *uv, *uvF, *flowVelocity,
+    *flowVelocityF, *tan, *tanF, *bitan, *bitanF;
+    static GLuint* ele, *eleF;
+    static GLint* buftype, *buftypeF;
 
     Chunk(OpenGLContext* parent, Terrain *terrain, int64_t xz);
 
