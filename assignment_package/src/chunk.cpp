@@ -104,6 +104,9 @@ static const glm::vec2 sandBottom[4] = uvGrid(2, 14).squareUV;
 static const glm::vec2 ice[4] = uvGrid(3, 11).squareUV;
 static const glm::vec2 water[4] = uvGrid(14, 3).squareUV;
 static const glm::vec2 lava[4] = uvGrid(14, 1).squareUV;
+static const glm::vec2 gold[4] = uvGrid(0, 13).squareUV;
+static const glm::vec2 ironore[4] = uvGrid(1, 13).squareUV;
+static const glm::vec2 coal[4] = uvGrid(2, 13).squareUV;
 
 static const glm::vec2 flowU = glm::vec2(1.0f, 0.0f);
 static const glm::vec2 flowV = glm::vec2(0.0f, 1.0f);
@@ -229,6 +232,24 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
         appendFlow(flowVelocityC, flowU);
         deltaUV1 = water[1] - water[0];
         deltaUV2 = water[3] - water[0];
+        break;
+    case GOLD:
+        appendUV(uvC, gold);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = gold[1] - gold[0];
+        deltaUV2 = gold[3] - gold[0];
+        break;
+    case IRONORE:
+        appendUV(uvC, ironore);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = ironore[1] - ironore[0];
+        deltaUV2 = ironore[3] - ironore[0];
+        break;
+    case COAL:
+        appendUV(uvC, coal);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = coal[1] - coal[0];
+        deltaUV2 = coal[3] - coal[0];
         break;
     default:
         appendUV(uvC, stone);
