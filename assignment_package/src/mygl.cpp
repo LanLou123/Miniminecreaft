@@ -93,24 +93,6 @@ MyGL::~MyGL()
     delete greyScaleMap;
 
     delete glossPowerMap;
-
-
-    delete pos;
-    delete posF;
-    delete nor;
-    delete norF;
-    delete uv;
-    delete uvF;
-    delete flowVelocity;
-    delete flowVelocityF;
-    delete tan;
-    delete tanF;
-    delete bitan;
-    delete bitanF;
-    delete ele;
-    delete eleF;
-    delete buftype;
-    delete buftypeF;
 }
 
 
