@@ -601,35 +601,11 @@ bool Chunk::shouldFill(size_t x, size_t y, size_t z, BlockType currentBlock)
     }
 }
 
-size_t size2Reserve4components = 65536 / 2 * 6 * 4 * 4;
-size_t size2Reserve2components = 65536 / 2 * 6 * 4 * 2;
-size_t size2Reserve1component = 65536 / 2 * 6 * 4 * 1;
-size_t size2ReserveElement = 65536 / 2 * 6 * 6;
-
 void Chunk::create()
 {
     posSize = posSizeF = norSize = norSizeF = uvSize = uvSizeF =
     flowVelocitySize = flowVelocitySizeF = eleSize = eleSizeF = tanSize =
     tanSizeF = bitanSize = bitanSizeF = buftypeSize = buftypeSizeF = 0;
-
-
-    this->pos.reserve(size2Reserve4components);
-    this->nor.reserve(size2Reserve4components);
-    this->uv.reserve(size2Reserve2components);
-    this->flowVelocity.reserve(size2Reserve2components);
-    this->ele.reserve(size2ReserveElement);
-    this->tan.reserve(size2Reserve4components);
-    this->bitan.reserve(size2Reserve4components);
-    this->buftype.reserve(size2Reserve1component);
-
-    this->posF.reserve(size2Reserve4components);
-    this->norF.reserve(size2Reserve4components);
-    this->uvF.reserve(size2Reserve2components);
-    this->flowVelocityF.reserve(size2Reserve2components);
-    this->eleF.reserve(size2ReserveElement);
-    this->tanF.reserve(size2Reserve4components);
-    this->bitanF.reserve(size2Reserve4components);
-    this->buftypeF.reserve(size2Reserve1component);
 
     for (size_t x = 0; x != 16; ++x)
     {
