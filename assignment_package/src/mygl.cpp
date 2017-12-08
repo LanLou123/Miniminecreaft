@@ -1098,36 +1098,29 @@ void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
 //            Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 - xInd*16, z);
 //            Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 + zInd*16);
 //            Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 - zInd*16);
-    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 , z);
-    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 , z);
-    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 );
-    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 );
-            if(xDirChunk == nullptr)
-            {
-                xplus = true;
-            }
-            if(zDirChunk == nullptr)
-            {
-                zplus = true;
-            }
+    const int probeDistance = 5;
 
-            if(xMinusDirChunk == nullptr)
-            {
-                xminus = true;
-            }
-            if( zMinusDirChunk == nullptr)
-            {
-                zminus = true;
-            }
-//                if(xminus || xplus || zminus|| zplus)
+    Chunk* xDirChunk = mp_terrain->getChunkAt(x + probeDistance , z);
+    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - probeDistance, z);
+    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + probeDistance);
+    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - probeDistance);
+    if(xDirChunk == nullptr)
+    {
+        xplus = true;
+    }
+    if(zDirChunk == nullptr)
+    {
+        zplus = true;
+    }
 
-//                {
-//                    return;
-//                }
-//        }
-//    }
-
-
+    if(xMinusDirChunk == nullptr)
+    {
+        xminus = true;
+    }
+    if( zMinusDirChunk == nullptr)
+    {
+        zminus = true;
+    }
 }
 
 void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
