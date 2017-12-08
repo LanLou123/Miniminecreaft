@@ -391,26 +391,7 @@ void TerrainAtBoundary::run()
 
                 int heightInt = (int) (height * 128.f);
 
-                for(int y = 0; y < 256; ++y)
-                {
-                    if(y < 129)
-                    {
-                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
-                    }
-                    else if(y < 129 + heightInt - 1 && y >= 129)
-                    {
-                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
-                    }
-                    else if(y == 129 + heightInt - 1 && y >= 129)
-                    {
-                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
-                    }
-                    else
-                    {
-                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
-                    }
-
-                }
+                newChunk->accessHeightAtGlobal(x, z) = heightInt;
             }
         }
         currentTerrain->updateRiver(left, bottom + j * 16, newChunk);

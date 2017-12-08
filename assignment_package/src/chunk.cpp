@@ -3,6 +3,8 @@
 const float gridOffset = 1.0f / 16.0f;
 const float epsilonPadding = 1e-4f;
 
+const BlockType invalidBlockType = (BlockType)0xFF;
+
 struct uvGrid
 {
     glm::vec2 squareUV[4];
@@ -56,20 +58,27 @@ Chunk* Chunk::getFrontAdjacent()
 Chunk::Chunk(OpenGLContext *parent, Terrain *terrain, int64_t xz) : Drawable(parent),
     xzGlobalPos(xz), terrain(terrain)
 {
+    memset(this->blocks, invalidBlockType, 65536);
 }
 
-#define BOUNDRYCHECK
-
-BlockType Chunk::getBlockType(size_t x, size_t y, size_t z) const
+int& Chunk::accessHeightAtGlobal(int x, int z)
 {
-    size_t index = 4096*x + 256*z + y;
-#ifdef BOUNDRYCHECK
-    if (index > 65535)
-    {
-        qWarning("Chunk access overflow");
-    }
-#endif
-    return this->blocks[index];
+    xzCoords coord = Chunk::getXZCoordUnpacked(this->xzGlobalPos);
+    x -= coord.x;
+    z -= coord.z;
+    return this->accessHeightAt(x, z);
+}
+
+int& Chunk::accessHeightAt(size_t x, size_t z)
+{
+    return this->heightField[16 * x + z];
+}
+
+//#define BOUNDRYCHECK
+
+BlockType Chunk::getBlockType(size_t x, size_t y, size_t z)
+{
+    return accessBlockType(x, y, z);
 }
 
 BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
@@ -81,7 +90,27 @@ BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
         qWarning("Chunk access overflow");
     }
 #endif
-    return this->blocks[4096*x + 256*z + y];
+    if (blocks[index] == invalidBlockType)
+    {
+        int heightInt = this->accessHeightAt(x, z) - 1;
+        if(y < 129)
+        {
+            blocks[index] = STONE;
+        }
+        else if(y < 129 + heightInt)
+        {
+            blocks[index] = DIRT;
+        }
+        else if(y == 129 + heightInt)
+        {
+            blocks[index] = GRASS;
+        }
+        else
+        {
+            blocks[index] = EMPTY;
+        }
+    }
+    return blocks[index];
 }
 
 BlockType& Chunk::accessBlockTypeGlobalCoords(int x, int y, int z)
