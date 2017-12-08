@@ -13,9 +13,10 @@ MyGL::MyGL(QWidget *parent)
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
 
       m_QuadBoard(new Quad(this)),
+      mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_progLiquid(new ShaderProgram(this)),
       mp_progLava(new ShaderProgram(this)),
-      mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
+      mp_progSkybox(new ShaderProgram(this)),
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
 
@@ -66,6 +67,9 @@ MyGL::~MyGL()
     delete mp_worldAxes;
     delete mp_progLambert;
     delete mp_progFlat;
+    delete mp_progLiquid;
+    delete mp_progLava;
+    delete mp_progSkybox;
     delete mp_camera;
     delete mp_terrain;
 
@@ -127,7 +131,9 @@ void MyGL::initializeGL()
     // Create a new shader program, to show the water effect
 
     mp_progLiquid->create(":/glsl/water.vert.glsl", ":/glsl/water.frag.glsl");
-     mp_progLava->create(":/glsl/lava.vert.glsl", ":/glsl/lava.frag.glsl");
+    mp_progLava->create(":/glsl/lava.vert.glsl", ":/glsl/lava.frag.glsl");
+
+    mp_progSkybox->create(":/glsl/sky.vert.glsl", ":/glsl/sky.frag.glsl");
 
     // Set a color with which to draw geometry since you won't have one
     // defined until you implement the Node classes.
@@ -187,6 +193,10 @@ void MyGL::resizeGL(int w, int h)
 
     mp_progLambert->setViewProjMatrix(viewproj);
     mp_progFlat->setViewProjMatrix(viewproj);
+
+    mp_progSkybox->useMe();
+    this->glUniform2i(mp_progSkybox->unifDimensions, width(), height());
+    this->glUniform3f(mp_progSkybox->unifEye, mp_camera->eye.x, mp_camera->eye.y, mp_camera->eye.z);
 
     printGLErrorLog();
 }
@@ -256,8 +266,16 @@ void MyGL::paintGL()
     // Clear the screen so that we only see newly drawn images
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
-    mp_progLambert->setViewProjMatrix(mp_camera->getViewProj() );
+    glm::mat4 viewproj = mp_camera->getViewProj();
+
+    mp_progSkybox->setViewProjMatrix(glm::inverse(viewproj));
+    mp_progSkybox->useMe();
+    this->glUniform3f(mp_progSkybox->unifEye, mp_camera->eye.x, mp_camera->eye.y, mp_camera->eye.z);
+    this->glUniform1f(mp_progSkybox->unifTime, (float)m_time);
+    mp_progSkybox->draw(*m_QuadBoard);
+
+    mp_progFlat->setViewProjMatrix(viewproj);
+    mp_progLambert->setViewProjMatrix(viewproj);
     mp_progLambert->setTimeCount(m_time);
     mp_progLambert->setLookVector(mp_camera->eye);
 

@@ -8,5 +8,7 @@
         <file>glsl/water.frag.glsl</file>
         <file>glsl/lava.vert.glsl</file>
         <file>glsl/lava.frag.glsl</file>
+        <file>glsl/sky.frag.glsl</file>
+        <file>glsl/sky.vert.glsl</file>
     </qresource>
 </RCC>
