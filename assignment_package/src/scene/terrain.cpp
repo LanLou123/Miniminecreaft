@@ -42,6 +42,12 @@ Terrain::Terrain() : dimensions(64, 256, 64)
       river1=River(10,25,1);
       river2=River(10,210,2);
       create_riverside();
+      cave1 = Cave(20,120,20,60);
+      cave2 = Cave(40,120,40,120);
+      cave3 = Cave(50,130,30,10);
+      cav_lst.push_back(cave1);
+      cav_lst.push_back(cave2);
+      cav_lst.push_back(cave3);
 }
 
 
@@ -253,6 +259,7 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
        }
    }
     updateFirstRiver();
+    UpdateFirstCave();
     for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
     {
         pair.second->create();
@@ -336,6 +343,7 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
 //            {
 
 //            }
+            UpdateCave(left + i*16, bottom+j*16, newChunk);
             updateRiver(left + i* 16 , bottom + j*16, newChunk);
             this->addChunk2Map(newChunk);
             newChunk->create();
@@ -414,6 +422,7 @@ void TerrainAtBoundary::run()
                 }
             }
             currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
+            currentTerrain->UpdateCave(left,bottom+j*16, newChunk);
             chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
@@ -679,6 +688,71 @@ void Terrain::updateFirstRiver()//called when first update river in the first de
                 }
             }
 
+        }
+    }
+}
+
+void Terrain::UpdateFirstCave()
+{
+    std::cout<<"updating first cave"<<std::endl;
+    int max_bound_x = 64;
+    int max_bound_z = 64;
+    int min_bound_x = 0;
+    int min_bound_z = 0;
+    int min_bound_y = 0;
+    int max_bound_y = 140;
+    for (int x = min_bound_x ;x< max_bound_x ;x++)
+    {
+        for(int y = min_bound_y; y <max_bound_y ; y++ )
+        {
+            for (int z = min_bound_z ; z < max_bound_z ; z++)
+            {
+                std::tuple<int,int,int> pos = std::make_tuple(x,y,z);
+                for(int i = 0;i<cav_lst.size();i++)
+                {
+                if(cav_lst[i].is_cave[pos]==true)
+                {
+                    this->setBlockAt(x,y,z,EMPTY);
+                }
+                if(cav_lst[i].is_lavapool[pos]==true)
+                {
+                    this->setBlockAt(x,y,z,LAVA);
+                }
+                }
+            }
+        }
+    }
+    std::cout<<"update finished"<<std::endl;
+}
+
+
+void Terrain::UpdateCave(int origin_x, int origin_z, Chunk *locatedChunk)
+{
+    int max_bound_x = origin_x + 16;
+    int max_bound_z = origin_z + 16;
+    int min_bound_x = origin_x;
+    int min_bound_z = origin_z;
+    int min_bound_y = 0;
+    int max_bound_y = 140;
+    for (int x = min_bound_x ;x< max_bound_x ;x++)
+    {
+        for(int y = min_bound_y; y <max_bound_y ; y++ )
+        {
+            for (int z = min_bound_z ; z < max_bound_z ; z++)
+            {
+                for(int i = 0;i < cav_lst.size();i++)
+                {
+                std::tuple<int,int,int> pos = std::make_tuple(x,y,z);
+                if(cav_lst[i].is_cave[pos]==true)
+                {
+                   locatedChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
+                }
+                if(cav_lst[i].is_lavapool[pos]==true)
+                {
+                    locatedChunk->accessBlockTypeGlobalCoords(x,y,z) = LAVA;
+                }
+                }
+            }
         }
     }
 }

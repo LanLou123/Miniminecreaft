@@ -62,6 +62,6 @@ void main()
 
     vec4 accumulatedResult = diffuseComponent + ambientComponent + specularComponent;
 //adjust the distance of the fog here...........----lan lou
-    float fog_dis = 20.0f;
+    float fog_dis = 40.0f;
     out_Col = vec4(accumulatedResult.rgb*(1.0f/(1.0+test[2]/fog_dis))+(1-1.0f/(1.0+test[2]/fog_dis))*vec3(0.5,0.5,0.5), fs_Alpha);
 }
