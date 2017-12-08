@@ -16,6 +16,8 @@ public :
     void generate_cave();
     std::map<std::tuple<int,int,int>,bool> is_cave;
     std::map<std::tuple<int,int,int>,bool> is_lavapool;
+    std::map<std::tuple<int,int,int>,bool> is_iron_ore;
+    std::map<std::tuple<int,int,int>,bool> is_coal;
     void createLavaPool(glm::vec3 final_pos);
 //    float random(glm::vec3 st);
     float noise(glm::vec3 st);

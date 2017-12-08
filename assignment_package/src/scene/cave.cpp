@@ -134,8 +134,28 @@ void Cave::generate_cave()
                 }
             }
         }
+        float rd_factor=fbm(glm::vec3(current_pos[0],current_pos[1],current_pos[2]));
         current_pos = move_cave(current_pos);
-
+        if(rd_factor>0.6&&rd_factor<0.8)
+        {
+            for(int i =-1;i<=2;i++)
+            {
+                for(int j = -1; j<=2;j++)
+                {
+                    is_coal[std::make_tuple(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j)] =true;
+                }
+            }
+        }
+        if(rd_factor>0.5&&rd_factor<0.55)
+        {
+            for(int i =-1;i<=2;i++)
+            {
+                for(int j = -1; j<=2;j++)
+                {
+                    is_iron_ore[std::make_tuple(temp[0]-cave_radius+i,temp[1],temp[2]+cave_radius+j)] =true;
+                }
+            }
+        }
         for(int i = temp[1];i>=current_pos[1];i--)
         {
             float ratio = (i-temp[1])/(current_pos[1]-temp[1]);

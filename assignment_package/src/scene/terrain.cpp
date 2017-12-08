@@ -43,8 +43,8 @@ Terrain::Terrain() : dimensions(64, 256, 64)
       river2=River(10,210,2);
       create_riverside();
       cave1 = Cave(20,120,20,60);
-      cave2 = Cave(40,120,40,120);
-      cave3 = Cave(50,130,30,10);
+      cave2 = Cave(10,120,40,120);
+      cave3 = Cave(50,130,30,0);
       cav_lst.push_back(cave1);
       cav_lst.push_back(cave2);
       cav_lst.push_back(cave3);
@@ -378,59 +378,59 @@ void TerrainAtBoundary::setLeftBottom(int newLeft, int newBottom)
 
 void TerrainAtBoundary::run()
 {
+    if (this->chunkToAdd->size() >= 16)
+        return;
 //    // normalize x and z coord
     int normalX = left;
     int normalZ = bottom;
 
-//    for(int i = 0; i < 1; i++)
-//    {
-        for(int j = 0; j < 2 ;j++)
+    for(int j = 0; j < 2 ;j++)
+    {
+        //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
+        Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX, normalZ + j * 16);
+        // Populate this chunk
+        for(int x = left; x < left + 16; ++x)
         {
-            //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
-            Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX, normalZ + j * 16);
-            // Populate this chunk
-            for(int x = left; x < left + 16; ++x)
+            for(int z = bottom + j * 16 ; z < bottom + 16 + j*16; ++z)
             {
-                for(int z = bottom + j * 16 ; z < bottom + 16 + j*16; ++z)
+                float scale = 48.f;
+                glm::vec2 st = glm::vec2(x, z) / scale;
+                float height = 0.2f * fbm(st);
+
+                int heightInt = (int) (height * 128.f);
+
+                for(int y = 0; y < 256; ++y)
                 {
-                    float scale = 48.f;
-                    glm::vec2 st = glm::vec2(x, z) / scale;
-                    float height = 0.2f * fbm(st);
-
-                    int heightInt = (int) (height * 128.f);
-
-                    for(int y = 0; y < 256; ++y)
+                    if(y < 129)
                     {
-                        if(y < 129)
-                        {
-                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
-                        }
-                        else if(y < 129 + heightInt - 1 && y >= 129)
-                        {
-                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
-                        }
-                        else if(y == 129 + heightInt - 1 && y >= 129)
-                        {
-                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
-                        }
-                        else
-                        {
-                            newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
-                        }
-
+                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
                     }
+                    else if(y < 129 + heightInt - 1 && y >= 129)
+                    {
+                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
+                    }
+                    else if(y == 129 + heightInt - 1 && y >= 129)
+                    {
+                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
+                    }
+                    else
+                    {
+                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
+                    }
+
                 }
             }
+            }
+
             currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
             currentTerrain->UpdateCave(left,bottom+j*16, newChunk);
             chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
             chunkMutex->unlock();
-        }
 
-//    }
-
+    }
 }
+
 //*******************************L-river part implemented by lan lou
 void Terrain::update_riverbank()
 {
@@ -718,6 +718,14 @@ void Terrain::UpdateFirstCave()
                 {
                     this->setBlockAt(x,y,z,LAVA);
                 }
+                if(cav_lst[i].is_coal[pos]==true&&cav_lst[i].is_cave[pos]==false)
+                {
+                    this->setBlockAt(x,y,z,COAL);
+                }
+                if(cav_lst[i].is_iron_ore[pos]==true&&cav_lst[i].is_cave[pos]==false)
+                {
+                    this->setBlockAt(x,y,z,IRONORE);
+                }
                 }
             }
         }
@@ -750,6 +758,14 @@ void Terrain::UpdateCave(int origin_x, int origin_z, Chunk *locatedChunk)
                 if(cav_lst[i].is_lavapool[pos]==true)
                 {
                     locatedChunk->accessBlockTypeGlobalCoords(x,y,z) = LAVA;
+                }
+                if(cav_lst[i].is_coal[pos]==true&&cav_lst[i].is_cave[pos]==false)
+                {
+                    locatedChunk->accessBlockTypeGlobalCoords(x,y,z) = COAL;
+                }
+                if(cav_lst[i].is_iron_ore[pos]==true&&cav_lst[i].is_cave[pos]==false)
+                {
+                    locatedChunk->accessBlockTypeGlobalCoords(x,y,z) = IRONORE;
                 }
                 }
             }
