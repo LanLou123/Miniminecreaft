@@ -264,35 +264,7 @@ void MyGL::timerUpdate()
 // so paintGL() called at a rate of 60 frames per second.
 void MyGL::paintGL()
 {
-
-    // shadow mapping test
-// **************starting shadow mapping setup*****************
-
-    GLint defaultFBOid = 0;
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBOid);
-
-
-
-    float phase = m_time * 0.001f;
-//    glm::vec3 lightOrigin = glm::vec3(25.f,150.f,30.f);
-    glm::vec3 lightRef = mp_camera->eye - glm::vec3(0.f, 2.f, 0.f);
-    glm::vec3 lightDir = glm::vec3(0.2f, sin(phase), cos(phase));
-    glm::vec3 lightOrigin = lightRef + 15.f * glm::normalize(lightDir);
-//    glm::vec3 lightOrigin = glm::vec3(25.f,150.f,30.f);
-//    glm::vec3 lightRef = glm::vec3(20.f,140.f,20.f);
-    glm::vec3 lightUP = glm::vec3(0.f, 1.f, 0.f);
-    glm::mat4 lightDirView = glm::ortho(-60.f, 60.f, -60.f, 60.f, 0.1f, 1000.f)
-            * glm::lookAt(lightOrigin, lightRef, lightUP);
-
-    // activate offset for polygons
-    glEnable(GL_POLYGON_OFFSET_FILL);
-    glPolygonOffset(2.0f, 2.0f);
-
-//***************first render pass**************************
-    m_shadowMapFBO->BindForWriting();
-
-    glViewport(0,0, 2048, 2048);
-
+    // Clear the screen so that we only see newly drawn images
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
     glm::mat4 viewproj = mp_camera->getViewProj();
