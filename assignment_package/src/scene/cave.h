@@ -16,8 +16,7 @@ public :
     void generate_cave();
     std::map<std::tuple<int,int,int>,bool> is_cave;
     std::map<std::tuple<int,int,int>,bool> is_lavapool;
-    std::map<std::tuple<int,int,int>,bool> is_iron_ore;
-    std::map<std::tuple<int,int,int>,bool> is_coal;
+    std::map<std::tuple<int,int,int>,int> is_ore_type;
     void createLavaPool(glm::vec3 final_pos);
 //    float random(glm::vec3 st);
     float noise(glm::vec3 st);
@@ -27,15 +26,16 @@ public :
     int moved_length;
     float min_rand;
     float max_rand;
+    int minX;
+    int maxX;
+    int minZ;
+    int maxZ;
+
 private:
     float Hori_degree;
     int origin_pos_x;
     int origin_pos_y;
     int origin_pos_z;
-    int minX;
-    int maxX;
-    int minZ;
-    int maxZ;
 
 };
 #endif // CAVE

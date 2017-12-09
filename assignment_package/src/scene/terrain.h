@@ -91,9 +91,10 @@ public:
     void create_riverside();
 //**********************end
     void UpdateFirstCave();
-    void UpdateCave(int origin_x, int origin_z, Chunk* locatedChunk);
-
-
+    void UpdateCave(int origin_x, int origin_z, Chunk *locatedChunk);
+    std::map<std::tuple<int,int,int>,bool> OverallIsCave;
+    std::map<std::tuple<int,int,int>,int> OverallIsOreType;
+    std::map<std::tuple<int,int,int>,bool> OverallIsLavaPool;
     ~Terrain();
 
     // friend class TerrainAtBoundary;

@@ -10,7 +10,7 @@ const float step = 3;
 Cave::Cave()
 {}
 Cave::Cave(int x, int y, int z, float initial_h_degree):
-        minX(0),maxX(0),minZ(0),maxZ(0),cave_radius(3),cave_length(50),moved_length(0)
+        minX(200),maxX(-200),minZ(200),maxZ(-200),cave_radius(3),cave_length(50),moved_length(0)
 {
     Hori_degree = initial_h_degree;
     min_rand = 1;
@@ -126,7 +126,7 @@ void Cave::generate_cave()
                 for(int k =-cave_radius; k<= cave_radius;k++)
                 {
                 int length1= (i*i+j*j+k*k);
-                if(length1<=cave_radius*cave_radius)
+                if(length1<cave_radius*cave_radius)
                 {
                     is_cave[std::make_tuple(current_pos[0]+ i,current_pos[1]+k,current_pos[2]+ j)] = true;
                 }
@@ -142,7 +142,7 @@ void Cave::generate_cave()
             {
                 for(int j = -1; j<=2;j++)
                 {
-                    is_coal[std::make_tuple(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j)] =true;
+                    is_ore_type[std::make_tuple(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j)] = 2  ;
                 }
             }
         }
@@ -152,7 +152,7 @@ void Cave::generate_cave()
             {
                 for(int j = -1; j<=2;j++)
                 {
-                    is_iron_ore[std::make_tuple(temp[0]-cave_radius+i,temp[1],temp[2]+cave_radius+j)] =true;
+                    is_ore_type[std::make_tuple(temp[0]-cave_radius+i,temp[1],temp[2]+cave_radius+j)] = 1;
                 }
             }
         }
@@ -168,14 +168,19 @@ void Cave::generate_cave()
                     for(int p = -cave_radius;p<=cave_radius;p++)
                     {
                     int length2 = j*j+k*k+p*p;
-                    if(length2<=cave_radius*cave_radius)
+                    if(length2<cave_radius*cave_radius)
                     {
                         is_cave[std::make_tuple(curr_x+j,i+p,curr_z+k)]=true;
                     }
+//                    is_cave[std::make_tuple(curr_x+j,i+p,curr_z+k)]=true;
                     }
                 }
             }
         }
+        maxX = maxX<temp[0]?temp[0]:maxX;
+        minX = minX>temp[0]?temp[0]:minX;
+        maxZ = maxZ<temp[2]?temp[2]:maxX;
+        minZ = minZ>temp[2]?temp[2]:minZ;
     }
     createLavaPool(current_pos);
 }
