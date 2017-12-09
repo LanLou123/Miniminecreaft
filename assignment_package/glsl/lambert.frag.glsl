@@ -4,6 +4,8 @@ uniform vec4 u_Color;
 
 //uniform vec4 u_LookVector;
 
+uniform int u_Time;
+
 uniform sampler2D u_Surface;
 uniform sampler2D u_Normal;
 uniform sampler2D u_Greyscale;
@@ -18,6 +20,7 @@ in vec4 fs_Tangent;
 in vec4 fs_BiTangent;
 in vec2 flowVelocity;
 in vec4 hVector;
+in vec4 ambientColor;
 
 in float fs_Alpha;
 
@@ -46,9 +49,12 @@ void main()
     diffuseIntensity = clamp(diffuseIntensity, 0, 1);
     vec4 diffuseComponent = diffuseIntensity * diffuseColor;
 
-    vec4 ambientColor = diffuseColor;
-    float ambientIntensity = 0.2f;
+    //vec4 ambientColor = diffuseColor;
+    float ambientIntensity = 0.1f;
     vec4 ambientComponent = ambientIntensity * ambientColor;
+
+    float backGroundIntensity = 0.1f;
+    vec4 backGroundComponent = diffuseColor * backGroundIntensity;
 
     vec4 specularColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);
     float specularBase = max(0.0f, dot(hVector, normal));
@@ -59,7 +65,7 @@ void main()
     float specularIntensity = max(0.0f, pow(specularBase, specularPower));
     vec4 specularComponent = specularIntensity * specularColor;
 
-    vec4 accumulatedResult = diffuseComponent + ambientComponent + specularComponent;
+    vec4 accumulatedResult = diffuseComponent + ambientComponent + specularComponent + backGroundComponent;
 
     out_Col = vec4(accumulatedResult.rgb, fs_Alpha);
 }

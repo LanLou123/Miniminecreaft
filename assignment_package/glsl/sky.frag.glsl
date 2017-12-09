@@ -33,11 +33,11 @@ const vec3 dusk[5] = vec3[](vec3(144, 96, 144) / 255.0f,
 // Day time sky tone
 const vec3 dayLight = vec3(0, 165, 255) / 255.0f;
 // Night time sky tone
-const vec3 nightLight = vec3(0, 4, 16) / 255.0f;
+const vec3 nightLight = vec3(0, 4, 20) / 255.0f;
 // Day time cloud
 const vec3 dayTimeCloud = vec3(255, 255, 255) / 255.0f;
 // Night time cloud
-const vec3 nightTimeCloud = vec3(128, 128, 128) / 255.0f;
+const vec3 nightTimeCloud = vec3(64, 64, 64) / 255.0f;
 
 const vec3 sunColor = vec3(255, 255, 190) / 255.0;
 const vec3 cloudColor = sunset[3];
@@ -64,8 +64,8 @@ void main()
     //Vector from Camera position 2 fragment position
     vec3 rayDir = normalize(p.xyz - u_Eye);
     //Sun direction changes periodically over time
-    float phase = u_Time * 0.01f;
-    vec3 sunDir = normalize(vec3(cos(phase), sin(phase), 0.0f));
+    float phase = u_Time * 0.001f;
+    vec3 sunDir = normalize(vec3(0.0f, sin(phase), cos(phase)));
 
     //Map this vector to the uv using spherical coordinates
     vec2 uv = sphereToUV(rayDir);
@@ -115,7 +115,7 @@ void main()
     vec3 nightTimeColor = mix(nightLight, nightTimeCloud, heightField * 0.75f);
 
     vec3 dayNightColor = mix(nightTimeColor, dayTimeColor, reScaledY);
-    vec3 skyColor = mix(sunsetColor, dayNightColor, sqrt(abs(sunDir.y)));
+    vec3 skyColor = mix(sunsetColor, dayNightColor, abs(sunDir.y));
 
     // Draw the sun
     if (angle < sunSize)

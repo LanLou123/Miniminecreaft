@@ -25,15 +25,32 @@ out vec2 fs_UV;
 out vec4 fs_Tangent;
 out vec4 fs_BiTangent;
 out vec4 hVector;
+out vec4 ambientColor;
 
 out float fs_Alpha;
 
 out vec2 flowVelocity;
 
-const vec4 lightDir = normalize(vec4(0.0f, 0.0f, 1.0f, 0.0f));
+// Day time ambient tone
+const vec3 dayLight = vec3(255, 255, 255) / 255.0f;
+// Night time ambient tone
+const vec3 nightLight = vec3(0, 4, 20) / 255.0f;
+// Sunset average
+const vec3 sunsetLight = vec3(253, 96, 81) / 255.0f;
+
+//const vec4 lightDir = normalize(vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
 void main()
 {
+    //Sun direction changes periodically over time
+    float phase = u_Time * 0.001f;
+    vec3 sunDir = normalize(vec3(0.0f, sin(phase), cos(phase)));
+    vec4 lightDir = vec4(sunDir, 0.0f);
+
+    float reScaledY = 0.5f * (sunDir.y + 1.0f);
+    vec3 dayNightColor = mix(nightLight, dayLight, reScaledY);
+    ambientColor = vec4(mix(sunsetLight, dayNightColor, abs(sunDir.y)), 1.0f);
+
     int timeWarpFactor = 10;
 
     float deltaU = ((u_Time * timeWarpFactor) % 625) * 0.0001f;
