@@ -279,7 +279,7 @@ void MyGL::paintGL()
     mp_progLambert->setTimeCount(m_time);
     mp_progLambert->setLookVector(mp_camera->eye);
 
-    GLDrawScene();
+    //GLDrawScene();
 
     ++m_time;
 

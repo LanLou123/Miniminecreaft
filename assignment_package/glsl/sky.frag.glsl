@@ -42,36 +42,39 @@ vec2 smoothF(vec2 uv);
 
 void main()
 {
-    vec2 ndc = (gl_FragCoord.xy / vec2(u_Dimensions)) * 2.0 - 1.0; // -1 to 1 NDC
+    //Fragment coords 2 NDC coords
+    vec2 ndc = (gl_FragCoord.xy / vec2(u_Dimensions)) * 2.0f - 1.0f;
 
-//    outColor = vec3(ndc * 0.5 + 0.5, 1);
+    //Project the fragment to the far clip plane
+    vec4 p = vec4(ndc.xy, 1.0f, 1.0f);
+    p *= 1000.0f;
+    //Fragment position in the world
+    p = /*Inverse of*/ u_ViewProj * p;
 
-    vec4 p = vec4(ndc.xy, 1, 1); // Pixel at the far clip plane
-    p *= 1000.0; // Times far clip plane value
-    p = /*Inverse of*/ u_ViewProj * p; // Convert from unhomogenized screen to world
-
+    //Vector from Camera position 2 fragment position
     vec3 rayDir = normalize(p.xyz - u_Eye);
+    //Sun direction changes periodically over time
+    float phase = u_Time * 0.01f;
+    vec3 sunDir = normalize(vec3(cos(phase), sin(phase), 0.0f));
 
+    //Map this vector to the uv using spherical coordinates
     vec2 uv = sphereToUV(rayDir);
 
-    vec3 skyHue = uvToSunset(uv);
+    //Generate heightfield using fbm noise
+    vec2 uvT1 = uv + vec2(u_Time * 0.00005, -u_Time * 0.0002f);
+    float heightField = fbm(uv + vec2(u_Time * 0.001f));
+    //Calculate the derivative as an offset to the uv
+    vec2 slope = vec2(fbm(uvT1 + vec2(1.0f / u_Dimensions.x, 0.0f)) - fbm(uvT1 - vec2(1.0f / u_Dimensions.x, 0.0f)),
+                      fbm(uvT1 + vec2(0.0f, 1.0f / u_Dimensions.y)) - fbm(uvT1 - vec2(0.0f, 1.0f / u_Dimensions.y)));
 
-    vec2 uvT1 = uv + vec2(u_Time * 0.001);
-    vec2 uvT2 = uv + vec2(u_Time * 0.00005, -u_Time * 0.0002);
-
-    float heightField = fbm(uv + vec2(u_Time * 0.001));
-
-    vec2 slope = vec2(fbm(uvT2 + vec2(1.0/u_Dimensions.x, 0)) - fbm(uvT2 - vec2(1.0/u_Dimensions.x, 0)),
-                      fbm(uvT2 + vec2(0, 1.0/u_Dimensions.y)) - fbm(uvT2 - vec2(0, 1.0/u_Dimensions.y)));
-
+    //Sample from sky color using this uv
     vec3 distortedSkyHue = uvToSunset(uv + slope);
 
+    //Sample from dusk color using this uv
     vec3 distortedDuskHue = uvToDusk(uv + slope);
 
-    vec3 sunDir = normalize(vec3(0, 0.1, 1.0));
-
-    float sunSize = 30; // Sun can exist b/t 0 and 30 degrees from sunDir
-    float angle = acos(dot(rayDir, sunDir)) * 360.0 / PI;
+    float sunSize = 30.0f; // Sun can exist b/t 0 and 30 degrees from sunDir
+    float angle = acos(dot(rayDir, sunDir)) * 360.0f / PI;
     // Draw the sun
     if(angle < sunSize)
     {
