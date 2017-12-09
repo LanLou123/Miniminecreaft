@@ -84,9 +84,19 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
     unifSamplerGloss = context->glGetUniformLocation(prog, "u_GlossPower");
     unifSamplerDuplicate = context->glGetUniformLocation(prog, "u_Duplicate");
 
+
     unifDimensions = context->glGetUniformLocation(prog, "u_Dimensions");
     unifEye = context->glGetUniformLocation(prog, "u_Eye");
     unifTime = context->glGetUniformLocation(prog, "u_Time");
+
+    // for shadow map
+    unifShadowViewProjMat = context->glGetUniformLocation(prog,"u_ShadowViewProjMat");
+    //m_textureLocation = context->glGetUniformLocation(prog, "gShadowMap");
+    unifShadowMat = context->glGetUniformLocation(prog, "u_shadowMat");
+    //m_samplerLocation = context->glGetUniformLocation(prog, "gSampler");
+    m_shadowMapLocation = context->glGetUniformLocation(prog, "u_shadowMap");
+    // end
+
 }
 
 void ShaderProgram::useMe()
@@ -189,11 +199,11 @@ void ShaderProgram::draw(Drawable &d)
         context->glEnableVertexAttribArray(attrBlockType);
         context->glVertexAttribIPointer(attrBlockType, 1, GL_INT, 0, NULL);
     }
-    if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
-    if (unifSamplerNormal != -1) context->glUniform1i(unifSamplerNormal, NORMAL);
-    if (unifSamplerGreyscale != -1) context->glUniform1i(unifSamplerGreyscale, GREYSCALE);
-    if (unifSamplerGloss != -1) context->glUniform1i(unifSamplerGloss, GLOSSINESS);
-    if (unifSamplerDuplicate != -1) context->glUniform1i(unifSamplerDuplicate, DUPL);
+//    if (unifSamplerSurface != -1) context->glUniform1i(unifSamplerSurface, SURFACE);
+//    if (unifSamplerNormal != -1) context->glUniform1i(unifSamplerNormal, NORMAL);
+//    if (unifSamplerGreyscale != -1) context->glUniform1i(unifSamplerGreyscale, GREYSCALE);
+//    if (unifSamplerGloss != -1) context->glUniform1i(unifSamplerGloss, GLOSSINESS);
+//    if (unifSamplerDuplicate != -1) context->glUniform1i(unifSamplerDuplicate, DUPL);
 
     d.bindIdx();
     context->glDrawElements(d.drawMode(), d.elemCount(), GL_UNSIGNED_INT, 0);
@@ -357,5 +367,64 @@ void ShaderProgram::setLookVector(glm::vec3 look)
     if(unifLookVector != -1)
     {
         context->glUniform3fv(unifLookVector, 1, &look[0]);
+    }
+}
+
+// For shadow mapping
+
+void ShaderProgram::SetShadowMapView(const glm::mat4 & WVP)
+{
+    // Tell OpenGL to use this shader program for subsequent function calls
+    useMe();
+
+    if(unifShadowViewProjMat != -1) {
+    // Pass a 4x4 matrix into a uniform variable in our shader
+                    // Handle to the matrix variable on the GPU
+        context->glUniformMatrix4fv(unifShadowViewProjMat,
+                                    1,
+                                    GL_FALSE,
+                                    &WVP[0][0]);
+    }
+}
+
+//void ShaderProgram::SetTextureUnit(unsigned int TextureUnit)
+//{
+//    useMe();
+//    if(m_textureLocation != -1)
+//    {
+//        context->glUniform1i(m_textureLocation, TextureUnit);
+//    }
+//}
+
+void ShaderProgram::SetShadowMat(const glm::mat4 &ShadowMat)
+{
+    useMe();
+    if(unifShadowMat != -1){
+        context->glUniformMatrix4fv(unifShadowMat,
+                                    1,
+                                    GL_FALSE,
+                                    &ShadowMat[0][0]);
+
+    }
+}
+
+
+void ShaderProgram::SetTextureUnit(uint TextureUnit)
+{
+    useMe();
+    if(m_samplerLocation != -1)
+    {
+        context->glUniform1i(m_samplerLocation, TextureUnit);
+    }
+
+}
+
+
+void ShaderProgram::SetShadowMapTextureUnit(uint TextureUnit)
+{
+    useMe();
+    if(m_shadowMapLocation != -1)
+    {
+        context->glUniform1i(m_shadowMapLocation, TextureUnit);
     }
 }
