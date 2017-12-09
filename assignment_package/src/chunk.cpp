@@ -3,6 +3,8 @@
 const float gridOffset = 1.0f / 16.0f;
 const float epsilonPadding = 1e-4f;
 
+const BlockType invalidBlockType = (BlockType)0xFF;
+
 struct uvGrid
 {
     glm::vec2 squareUV[4];
@@ -56,20 +58,27 @@ Chunk* Chunk::getFrontAdjacent()
 Chunk::Chunk(OpenGLContext *parent, Terrain *terrain, int64_t xz) : Drawable(parent),
     xzGlobalPos(xz), terrain(terrain)
 {
+    memset(this->blocks, invalidBlockType, 65536);
 }
 
-#define BOUNDRYCHECK
-
-BlockType Chunk::getBlockType(size_t x, size_t y, size_t z) const
+int& Chunk::accessHeightAtGlobal(int x, int z)
 {
-    size_t index = 4096*x + 256*z + y;
-#ifdef BOUNDRYCHECK
-    if (index > 65535)
-    {
-        qWarning("Chunk access overflow");
-    }
-#endif
-    return this->blocks[index];
+    xzCoords coord = Chunk::getXZCoordUnpacked(this->xzGlobalPos);
+    x -= coord.x;
+    z -= coord.z;
+    return this->accessHeightAt(x, z);
+}
+
+int& Chunk::accessHeightAt(size_t x, size_t z)
+{
+    return this->heightField[16 * x + z];
+}
+
+//#define BOUNDRYCHECK
+
+BlockType Chunk::getBlockType(size_t x, size_t y, size_t z)
+{
+    return accessBlockType(x, y, z);
 }
 
 BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
@@ -81,7 +90,50 @@ BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
         qWarning("Chunk access overflow");
     }
 #endif
-    return this->blocks[4096*x + 256*z + y];
+    int snowPeak = 12;
+    if (blocks[index] == invalidBlockType)
+    {
+        int heightInt = this->accessHeightAt(x, z) - 1;
+        if (heightInt > snowPeak)
+        {
+            if(y < 129)
+            {
+                blocks[index] = STONE;
+            }
+            else if(y < 129 + snowPeak)
+            {
+                blocks[index] = DIRT;
+            }
+            else if(y <= 129 + heightInt)
+            {
+                blocks[index] = SNOW;
+            }
+            else
+            {
+                blocks[index] = EMPTY;
+            }
+        }
+        else
+        {
+            if(y < 129)
+            {
+                blocks[index] = STONE;
+            }
+            else if(y < 129 + heightInt)
+            {
+                blocks[index] = DIRT;
+            }
+            else if(y == 129 + heightInt)
+            {
+                blocks[index] = GRASS;
+            }
+            else
+            {
+                blocks[index] = EMPTY;
+            }
+        }
+    }
+    return blocks[index];
 }
 
 BlockType& Chunk::accessBlockTypeGlobalCoords(int x, int y, int z)
@@ -104,6 +156,10 @@ static const glm::vec2 sandBottom[4] = uvGrid(2, 14).squareUV;
 static const glm::vec2 ice[4] = uvGrid(3, 11).squareUV;
 static const glm::vec2 water[4] = uvGrid(14, 3).squareUV;
 static const glm::vec2 lava[4] = uvGrid(14, 1).squareUV;
+static const glm::vec2 gold[4] = uvGrid(0, 13).squareUV;
+static const glm::vec2 ironore[4] = uvGrid(1, 13).squareUV;
+static const glm::vec2 coal[4] = uvGrid(2, 13).squareUV;
+static const glm::vec2 snow[4] = uvGrid(2, 11).squareUV;
 
 static const glm::vec2 flowU = glm::vec2(1.0f, 0.0f);
 static const glm::vec2 flowV = glm::vec2(0.0f, 1.0f);
@@ -229,6 +285,36 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
         appendFlow(flowVelocityC, flowU);
         deltaUV1 = water[1] - water[0];
         deltaUV2 = water[3] - water[0];
+        break;
+    case GOLD:
+        appendUV(uvC, gold);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = gold[1] - gold[0];
+        deltaUV2 = gold[3] - gold[0];
+        break;
+    case IRONORE:
+        appendUV(uvC, ironore);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = ironore[1] - ironore[0];
+        deltaUV2 = ironore[3] - ironore[0];
+        break;
+    case COAL:
+        appendUV(uvC, coal);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = coal[1] - coal[0];
+        deltaUV2 = coal[3] - coal[0];
+        break;
+    case SNOW:
+        appendUV(uvC, snow);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = snow[1] - snow[0];
+        deltaUV2 = snow[3] - snow[0];
+        break;
+    case ICE:
+        appendUV(uvC, ice);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = ice[1] - ice[0];
+        deltaUV2 = ice[3] - ice[0];
         break;
     default:
         appendUV(uvC, stone);
@@ -496,6 +582,11 @@ bool Chunk::shouldFill(size_t x, size_t y, size_t z, BlockType currentBlock)
     }
 }
 
+size_t size2Reserve4components = 65536 / 2 * 6 * 4 * 4;
+size_t size2Reserve2components = 65536 / 2 * 6 * 4 * 2;
+size_t size2Reserve1component = 65536 / 2 * 6 * 4 * 1;
+size_t size2ReserveElement = 65536 / 2 * 6 * 6;
+
 void Chunk::create()
 {
     this->pos.clear();
@@ -515,6 +606,25 @@ void Chunk::create()
     this->tanF.clear();
     this->bitanF.clear();
     this->buftypeF.clear();
+
+
+    this->pos.reserve(size2Reserve4components);
+    this->nor.reserve(size2Reserve4components);
+    this->uv.reserve(size2Reserve2components);
+    this->flowVelocity.reserve(size2Reserve2components);
+    this->ele.reserve(size2ReserveElement);
+    this->tan.reserve(size2Reserve4components);
+    this->bitan.reserve(size2Reserve4components);
+    this->buftype.reserve(size2Reserve1component);
+
+    this->posF.reserve(size2Reserve4components);
+    this->norF.reserve(size2Reserve4components);
+    this->uvF.reserve(size2Reserve2components);
+    this->flowVelocityF.reserve(size2Reserve2components);
+    this->eleF.reserve(size2ReserveElement);
+    this->tanF.reserve(size2Reserve4components);
+    this->bitanF.reserve(size2Reserve4components);
+    this->buftypeF.reserve(size2Reserve1component);
 
     for (size_t x = 0; x != 16; ++x)
     {

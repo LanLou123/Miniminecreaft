@@ -30,7 +30,7 @@
 enum BlockType : unsigned char
 {
 
-    EMPTY, GRASS, DIRT, STONE, LAVA, WOOD, LEAF, BEDROCK, WATER, ICE
+    EMPTY, GRASS, DIRT, STONE, LAVA, WOOD, LEAF, BEDROCK, WATER, ICE, GOLD, IRONORE, COAL, SNOW
 
 };
 
@@ -115,6 +115,7 @@ friend class Terrain;
 private:
 
     BlockType blocks[65536];
+    int heightField[256];
     int64_t xzGlobalPos;
     Terrain* terrain;
 
@@ -136,7 +137,7 @@ private:
     static std::vector<GLfloat> bitanF;
     static std::vector<GLint> buftypeF;
 
-
+    int& accessHeightAt(size_t x, size_t z);
 
     Chunk* getLeftAdjacent();
     Chunk* getRightAdjacent();
@@ -157,7 +158,7 @@ private:
 
     void appendFlow(std::vector<GLfloat>* container, glm::vec2 speed);
 
-    BlockType getBlockType(size_t x, size_t y, size_t z) const;
+    BlockType getBlockType(size_t x, size_t y, size_t z);
 
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
 
@@ -167,6 +168,7 @@ public:
 
     Chunk(OpenGLContext* parent, Terrain *terrain, int64_t xz);
 
+    int& accessHeightAtGlobal(int x, int z);
 
     int64_t getXZGlobalPositions();
 

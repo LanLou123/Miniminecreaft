@@ -83,6 +83,10 @@ void ShaderProgram::create(const char *vertfile, const char *fragfile)
     unifSamplerGreyscale = context->glGetUniformLocation(prog, "u_Greyscale");
     unifSamplerGloss = context->glGetUniformLocation(prog, "u_GlossPower");
     unifSamplerDuplicate = context->glGetUniformLocation(prog, "u_Duplicate");
+
+    unifDimensions = context->glGetUniformLocation(prog, "u_Dimensions");
+    unifEye = context->glGetUniformLocation(prog, "u_Eye");
+    unifTime = context->glGetUniformLocation(prog, "u_Time");
 }
 
 void ShaderProgram::useMe()

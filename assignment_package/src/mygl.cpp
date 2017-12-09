@@ -13,9 +13,10 @@ MyGL::MyGL(QWidget *parent)
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
       geom_Center(this),
       m_QuadBoard(new Quad(this)),
+      mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_progLiquid(new ShaderProgram(this)),
       mp_progLava(new ShaderProgram(this)),
-      mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
+      mp_progSkybox(new ShaderProgram(this)),
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
 
@@ -51,6 +52,9 @@ MyGL::MyGL(QWidget *parent)
 
     player1.SetMainCamera(mp_camera);
     player1.get_terrain(mp_terrain);
+
+    QThreadPool::globalInstance()->setMaxThreadCount(8);
+    QThreadPool::globalInstance()->setExpiryTimeout(20);
 }
 
 MyGL::~MyGL()
@@ -63,6 +67,9 @@ MyGL::~MyGL()
     delete mp_worldAxes;
     delete mp_progLambert;
     delete mp_progFlat;
+    delete mp_progLiquid;
+    delete mp_progLava;
+    delete mp_progSkybox;
     delete mp_camera;
     delete mp_terrain;
 
@@ -94,8 +101,8 @@ void MyGL::initializeGL()
 
     // Set a few settings/modes in OpenGL rendering
     glEnable(GL_DEPTH_TEST);
-//    glEnable(GL_LINE_SMOOTH);
-//    glEnable(GL_POLYGON_SMOOTH);
+    //glEnable(GL_LINE_SMOOTH);
+    //glEnable(GL_POLYGON_SMOOTH);
     glHint(GL_LINE_SMOOTH_HINT, GL_NICEST);
     glHint(GL_POLYGON_SMOOTH_HINT, GL_NICEST);
     // Set the size with which points should be rendered
@@ -125,7 +132,9 @@ void MyGL::initializeGL()
     // Create a new shader program, to show the water effect
 
     mp_progLiquid->create(":/glsl/water.vert.glsl", ":/glsl/water.frag.glsl");
-     mp_progLava->create(":/glsl/lava.vert.glsl", ":/glsl/lava.frag.glsl");
+    mp_progLava->create(":/glsl/lava.vert.glsl", ":/glsl/lava.frag.glsl");
+
+    mp_progSkybox->create(":/glsl/sky.vert.glsl", ":/glsl/sky.frag.glsl");
 
     // Set a color with which to draw geometry since you won't have one
     // defined until you implement the Node classes.
@@ -185,6 +194,10 @@ void MyGL::resizeGL(int w, int h)
 
     mp_progLambert->setViewProjMatrix(viewproj);
     mp_progFlat->setViewProjMatrix(viewproj);
+
+    mp_progSkybox->useMe();
+    this->glUniform2i(mp_progSkybox->unifDimensions, width(), height());
+    this->glUniform3f(mp_progSkybox->unifEye, mp_camera->eye.x, mp_camera->eye.y, mp_camera->eye.z);
 
     printGLErrorLog();
 }
@@ -254,8 +267,16 @@ void MyGL::paintGL()
     // Clear the screen so that we only see newly drawn images
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
-    mp_progLambert->setViewProjMatrix(mp_camera->getViewProj() );
+    glm::mat4 viewproj = mp_camera->getViewProj();
+
+    mp_progSkybox->setViewProjMatrix(glm::inverse(viewproj));
+    mp_progSkybox->useMe();
+    this->glUniform3f(mp_progSkybox->unifEye, mp_camera->eye.x, mp_camera->eye.y, mp_camera->eye.z);
+    this->glUniform1f(mp_progSkybox->unifTime, (float)m_time);
+    mp_progSkybox->draw(*m_QuadBoard);
+
+    mp_progFlat->setViewProjMatrix(viewproj);
+    mp_progLambert->setViewProjMatrix(viewproj);
     mp_progLambert->setTimeCount(m_time);
     mp_progLambert->setLookVector(mp_camera->eye);
 
@@ -266,10 +287,10 @@ void MyGL::paintGL()
     glDisable(GL_DEPTH_TEST);
     mp_progFlat->setModelMatrix(glm::mat4(1.0));
     mp_progFlat->setViewProjMatrix(glm::mat4(1.0));
-//    mp_progFlat->draw(*mp_worldAxes);
     mp_progFlat->draw(geom_Center);
-    glEnable(GL_DEPTH_TEST);
 
+    mp_progFlat->setModelMatrix(glm::mat4());
+    mp_progFlat->draw(*mp_worldAxes);
 
     if(drawWater)
     {
@@ -280,6 +301,7 @@ void MyGL::paintGL()
         mp_progLava->draw(*m_QuadBoard);
     }
 
+    glEnable(GL_DEPTH_TEST);
 }
 
 void MyGL::GLDrawScene()
@@ -1064,6 +1086,14 @@ void MyGL::startThreads(int normalX, int normalZ)
     terrainGenerator7->setLeftBottom(normalX + 32, normalZ + 32);
     terrainGenerator8->setLeftBottom(normalX + 48, normalZ + 32);
 
+    terrainGenerator1->setAutoDelete(true);
+    terrainGenerator2->setAutoDelete(true);
+    terrainGenerator3->setAutoDelete(true);
+    terrainGenerator4->setAutoDelete(true);
+    terrainGenerator5->setAutoDelete(true);
+    terrainGenerator6->setAutoDelete(true);
+    terrainGenerator7->setAutoDelete(true);
+    terrainGenerator8->setAutoDelete(true);
 
     QThreadPool::globalInstance()->start(terrainGenerator1);
     QThreadPool::globalInstance()->start(terrainGenerator2);
@@ -1073,7 +1103,6 @@ void MyGL::startThreads(int normalX, int normalZ)
     QThreadPool::globalInstance()->start(terrainGenerator6);
     QThreadPool::globalInstance()->start(terrainGenerator7);
     QThreadPool::globalInstance()->start(terrainGenerator8);
-
 }
 
 void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
@@ -1093,36 +1122,29 @@ void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
 //            Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 - xInd*16, z);
 //            Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 + zInd*16);
 //            Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 - zInd*16);
-    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 , z);
-    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 , z);
-    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 );
-    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 );
-            if(xDirChunk == nullptr)
-            {
-                xplus = true;
-            }
-            if(zDirChunk == nullptr)
-            {
-                zplus = true;
-            }
+    const int probeDistance = 5;
 
-            if(xMinusDirChunk == nullptr)
-            {
-                xminus = true;
-            }
-            if( zMinusDirChunk == nullptr)
-            {
-                zminus = true;
-            }
-//                if(xminus || xplus || zminus|| zplus)
+    Chunk* xDirChunk = mp_terrain->getChunkAt(x + probeDistance , z);
+    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - probeDistance, z);
+    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + probeDistance);
+    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - probeDistance);
+    if(xDirChunk == nullptr)
+    {
+        xplus = true;
+    }
+    if(zDirChunk == nullptr)
+    {
+        zplus = true;
+    }
 
-//                {
-//                    return;
-//                }
-//        }
-//    }
-
-
+    if(xMinusDirChunk == nullptr)
+    {
+        xminus = true;
+    }
+    if( zMinusDirChunk == nullptr)
+    {
+        zminus = true;
+    }
 }
 
 void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
