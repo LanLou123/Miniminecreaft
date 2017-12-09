@@ -18,23 +18,31 @@ const float PI = 3.14159265359;
 const float TWO_PI = 6.28318530718;
 
 // Sunset palette
-const vec3 sunset[5] = vec3[](vec3(255, 229, 119) / 255.0,
-                               vec3(254, 192, 81) / 255.0,
-                               vec3(255, 137, 103) / 255.0,
-                               vec3(253, 96, 81) / 255.0,
-                               vec3(57, 32, 51) / 255.0);
+const vec3 sunset[5] = vec3[](vec3(255, 229, 119) / 255.0f,
+                               vec3(254, 192, 81) / 255.0f,
+                               vec3(255, 137, 103) / 255.0f,
+                               vec3(253, 96, 81) / 255.0f,
+                               vec3(57, 32, 51) / 255.0f);
 // Dusk palette
-const vec3 dusk[5] = vec3[](vec3(144, 96, 144) / 255.0,
-                            vec3(96, 72, 120) / 255.0,
-                            vec3(72, 48, 120) / 255.0,
-                            vec3(48, 24, 96) / 255.0,
-                            vec3(0, 24, 72) / 255.0);
+const vec3 dusk[5] = vec3[](vec3(144, 96, 144) / 255.0f,
+                            vec3(96, 72, 120) / 255.0f,
+                            vec3(72, 48, 120) / 255.0f,
+                            vec3(48, 24, 96) / 255.0f,
+                            vec3(0, 24, 72) / 255.0f);
+// Clear day light palette
+const vec3 daylight[5] = vec3[](vec3(135, 174, 216) / 255.0f,
+                            vec3(170, 196, 251) / 255.0f,
+                            vec3(184, 220, 253) / 255.0f,
+                            vec3(209, 238, 255) / 255.0f,
+                            vec3(215, 254, 255) / 255.0f);
+
 const vec3 sunColor = vec3(255, 255, 190) / 255.0;
 const vec3 cloudColor = sunset[3];
 
 vec2 sphereToUV(vec3);
-vec3 uvToSunset(vec2);
-vec3 uvToDusk(vec2);
+vec3 uvToSunset(float y);
+vec3 uvToDusk(float y);
+vec3 uvToDaylight(float y);
 
 float fbm(const in vec2 uv);
 float noise(in vec2 uv);
@@ -68,23 +76,30 @@ void main()
                       fbm(uvT1 + vec2(0.0f, 1.0f / u_Dimensions.y)) - fbm(uvT1 - vec2(0.0f, 1.0f / u_Dimensions.y)));
 
     //Sample from sky color using this uv
-    vec3 distortedSkyHue = uvToSunset(uv + slope);
+    vec3 distortedSkyHue = uvToSunset((uv + slope).y);
 
     //Sample from dusk color using this uv
-    vec3 distortedDuskHue = uvToDusk(uv + slope);
+    vec3 distortedDuskHue = uvToDusk((uv + slope).y);
 
-    float sunSize = 30.0f; // Sun can exist b/t 0 and 30 degrees from sunDir
-    float angle = acos(dot(rayDir, sunDir)) * 360.0f / PI;
+    //Sample from day light color using this uv
+    vec3 distortedDayHue = uvToDaylight((uv + slope).y);
+
+    //Deriving the angle between the sun and the ray.
+    float raySunDot = dot(rayDir, sunDir);
+    //Cone size of the sun.
+    float sunSize = 30.0f;
+    float angle = acos(raySunDot) * 360.0f / PI;
+
     // Draw the sun
     if(angle < sunSize)
     {
-        // 0 to 5 degrees is sun itself
-        if(angle < 7.5)
+        //Sun itself
+        if(angle < 7.5f)
         {
-            //                                                        VVVVVVVVVVV reduces cloud cover over sun
-            outColor = vec4(mix(sunColor, cloudColor, heightField * 0.75 * angle / 30), 1.0f);
+            //Blend the sun color with the cloud
+            outColor = vec4(mix(sunColor, cloudColor, heightField * 0.75f * angle / 30), 1.0f);
         }
-        // 7.5 to 30 degrees is sun halo
+        //Halo of the sun
         else
         {
             vec3 sunBlur = mix(sunColor, distortedSkyHue, (angle - 7.5) / 22.5);
@@ -94,83 +109,113 @@ void main()
     // Draw the sky, blending from sunset to dusk
     else
     {
-        float raySunDot = dot(rayDir, sunDir);
         // Sunset, between 1 and 0.75 dot
-        if(raySunDot > 0.75)
+        if(raySunDot > 0.75f)
         {
             outColor = vec4(mix(distortedSkyHue, sunset[3], heightField * 0.75), 1.0f);
         }
         // LERP sunset and dusk, between 0.75 and -0.1 dot
-        else if(raySunDot > -0.1)
+        else if(raySunDot > -0.1f)
         {
-            float t = (raySunDot - 0.75) / -0.85;
+            float t = (raySunDot - 0.75f) / -0.85f;
             vec3 skyMix = mix(distortedSkyHue, distortedDuskHue, t);
-            outColor = vec4(mix(skyMix, sunset[3], heightField * 0.75), 1.0f);
+            outColor = vec4(mix(skyMix, sunset[3], heightField * 0.75f), 1.0f);
         }
         // Pure dusk, less than 0.1 dot
         else
         {
-            outColor = vec4(mix(distortedDuskHue, sunset[3], heightField * 0.75), 1.0f);
+            outColor = vec4(mix(distortedDuskHue, sunset[3], heightField * 0.75f), 1.0f);
         }
     }
 }
 
-vec3 uvToSunset(vec2 uv)
+vec3 uvToSunset(float y)
 {
+    y = abs(y);
     // Below horizon
-    if(uv.y < 0.5)
+    if(y < 0.5f)
     {
         return sunset[0];
     }
-    else if(uv.y < 0.55) // 0.5 to 0.55
+    else if(y < 0.55f) // 0.5 to 0.55
     {
-        return mix(sunset[0], sunset[1], (uv.y - 0.5) / 0.05);
+        return mix(sunset[0], sunset[1], (y - 0.5) / 0.05f);
     }
-    else if(uv.y < 0.6)// 0.55 to 0.6
+    else if(y < 0.6f)// 0.55 to 0.6
     {
-        return mix(sunset[1], sunset[2], (uv.y - 0.55) / 0.05);
+        return mix(sunset[1], sunset[2], (y - 0.55f) / 0.05f);
     }
-    else if(uv.y < 0.65) // 0.6 to 0.65
+    else if(y < 0.65f) // 0.6 to 0.65
     {
-        return mix(sunset[2], sunset[3], (uv.y - 0.6) / 0.05);
+        return mix(sunset[2], sunset[3], (y - 0.6f) / 0.05f);
     }
-    else if(uv.y < 0.75) // 0.65 to 0.75
+    else if(y < 0.75f) // 0.65 to 0.75
     {
-        return mix(sunset[3], sunset[4], (uv.y - 0.65) / 0.1);
+        return mix(sunset[3], sunset[4], (y - 0.65f) / 0.1f);
     }
     return sunset[4]; // 0.75 to 1
 }
 
-vec3 uvToDusk(vec2 uv)
+vec3 uvToDusk(float y)
 {
+    y = abs(y);
     // Below horizon
-    if(uv.y < 0.5)
+    if(y < 0.5f)
     {
         return dusk[0];
     }
-    else if(uv.y < 0.55) // 0.5 to 0.55
+    else if(y < 0.55f) // 0.5 to 0.55
     {
-        return mix(dusk[0], dusk[1], (uv.y - 0.5) / 0.05);
+        return mix(dusk[0], dusk[1], (y - 0.5) / 0.05f);
     }
-    else if(uv.y < 0.6)// 0.55 to 0.6
+    else if(y < 0.6f)// 0.55 to 0.6
     {
-        return mix(dusk[1], dusk[2], (uv.y - 0.55) / 0.05);
+        return mix(dusk[1], dusk[2], (y - 0.55f) / 0.05f);
     }
-    else if(uv.y < 0.65) // 0.6 to 0.65
+    else if(y < 0.65f) // 0.6 to 0.65
     {
-        return mix(dusk[2], dusk[3], (uv.y - 0.6) / 0.05);
+        return mix(dusk[2], dusk[3], (y - 0.6f) / 0.05f);
     }
-    else if(uv.y < 0.75) // 0.65 to 0.75
+    else if(y < 0.75f) // 0.65 to 0.75
     {
-        return mix(dusk[3], dusk[4], (uv.y - 0.65) / 0.1);
+        return mix(dusk[3], dusk[4], (y - 0.65f) / 0.1f);
     }
     return dusk[4]; // 0.75 to 1
 }
 
-// Convert a point on a sphere to a UV coordinate
+vec3 uvToDaylight(float y)
+{
+    y = abs(y);
+    // Below horizon
+    if(y < 0.5f)
+    {
+        return daylight[0];
+    }
+    else if(y < 0.55f) // 0.5 to 0.55
+    {
+        return mix(daylight[0], daylight[1], (y - 0.5) / 0.05f);
+    }
+    else if(y < 0.6f)// 0.55 to 0.6
+    {
+        return mix(daylight[1], daylight[2], (y - 0.55f) / 0.05f);
+    }
+    else if(y < 0.65f) // 0.6 to 0.65
+    {
+        return mix(daylight[2], daylight[3], (y - 0.6f) / 0.05f);
+    }
+    else if(y < 0.75f) // 0.65 to 0.75
+    {
+        return mix(daylight[3], daylight[4], (y - 0.65f) / 0.1f);
+    }
+    return daylight[4]; // 0.75 to 1
+}
+
+//Map a point in the spherical coords to a uv value
 vec2 sphereToUV(vec3 p)
 {
-    float phi = atan(p.z, p.x); // Returns atan(z/x)
+    //Fixed the singularity problem.
+    float projectXZ = sqrt(p.x*p.x + p.z*p.z);
+    float phi = acos(p.x / projectXZ);
     if(phi < 0)
     {
         phi += TWO_PI; // [0, TWO_PI] range now
