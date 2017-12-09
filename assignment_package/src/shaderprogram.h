@@ -40,9 +40,21 @@ public:
     int unifSamplerGloss;
     int unifSamplerDuplicate;
 
+
     int unifDimensions;
     int unifEye;
     //int unifTime;
+
+    // for shadow map
+    int unifShadowViewProjMat;
+    //GLuint m_textureLocation;
+    int unifShadowMat;
+
+    GLuint m_samplerLocation;
+    GLuint m_shadowMapLocation;
+
+    // end
+
 
 public:
     ShaderProgram(OpenGLContext* context);
@@ -68,6 +80,14 @@ public:
     void setTimeCount(int time);
     void setLookVector(glm::vec3 look);
     QString qTextFileRead(const char*);
+
+
+    void SetShadowMapView(const glm::mat4 &WVP);
+    //void SetTextureUnit(unsigned int TextureUnit);
+    void SetShadowMat(const glm::mat4 &ShadowMat);
+    void SetTextureUnit(uint TextureUnit);
+
+    void SetShadowMapTextureUnit(uint TextureUnit);
 
 private:
     OpenGLContext* context;   // Since Qt's OpenGL support is done through classes like QOpenGLFunctions_3_2_Core,
