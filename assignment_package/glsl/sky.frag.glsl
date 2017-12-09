@@ -38,10 +38,10 @@ const vec3 daylight[5] = vec3[](vec3(135, 174, 216) / 255.0f,
                             vec3(215, 254, 255) / 255.0f);
 
 // Night light palette
-const vec3 nightlight[5] = vec3[](vec3(81, 164, 206) / 255.0f,
-                            vec3(66, 113, 183) / 255.0f,
-                            vec3(44, 78, 152) / 255.0f,
-                            vec3(24, 46, 122) / 255.0f,
+const vec3 nightlight[5] = vec3[](vec3(51, 84, 206) / 255.0f,
+                            vec3(40, 63, 183) / 255.0f,
+                            vec3(32, 50, 152) / 255.0f,
+                            vec3(20, 36, 122) / 255.0f,
                             vec3(13, 24, 104) / 255.0f);
 
 const vec3 sunColor = vec3(255, 255, 190) / 255.0;
@@ -93,11 +93,52 @@ void main()
     //Sample from day light color using this uv
     vec3 distortedDayHue = uvToDaylight((uv + slope).y);
 
+    //Sample from night light color using this uv
+    vec3 distortedNightHue = uvToNightlight((uv + slope).y);
+
     //Deriving the angle between the sun and the ray.
     float raySunDot = dot(rayDir, sunDir);
     //Cone size of the sun.
     float sunSize = 30.0f;
     float angle = acos(raySunDot) * 360.0f / PI;
+
+    //Pre-render how the sky should be when it's sunset/dawn/day/night
+    vec3 sunsetColor = vec3(0.0f);
+    vec3 daylightColor = vec3(0.0f);
+    vec3 nightColor = vec3(0.0f);
+
+    //Ray direction's very close to sun
+    if(raySunDot > 0.75f)
+    {
+        sunsetColor = vec3(mix(distortedSunsetHue, sunset[3], heightField * 0.75f));
+        daylightColor = vec3(mix(distortedDayHue, daylight[1], heightField * 0.75f));
+        nightColor = vec3(mix(distortedNightHue, nightlight[4], heightField * 0.75f));
+    }
+    // LERP sunset and dusk, between 0.75 and -0.1 dot
+    else if(raySunDot > -0.1f)
+    {
+        float t = (raySunDot - 0.75f) / -0.85f;
+        vec3 skyMix = mix(distortedSunsetHue, distortedDuskHue, t);
+        sunsetColor = vec3(mix(skyMix, sunset[3], heightField * 0.75f));
+
+        //skyMix = mix(distortedDayHue, distortedSunsetHue, t);
+        daylightColor = vec3(mix(skyMix, daylight[1], heightField * 0.75f));
+
+        //skyMix = mix(distortedNightHue, distortedDuskHue, t);
+        nightColor = vec3(mix(skyMix, nightlight[4], heightField * 0.75f));
+    }
+    // Pure dusk, less than 0.1 dot
+    else
+    {
+        sunsetColor = vec3(mix(distortedDuskHue, sunset[3], heightField * 0.75f));
+        daylightColor = vec3(mix(distortedDayHue, daylight[1], heightField * 0.75f));
+        nightColor = vec3(mix(distortedNightHue, nightlight[4], heightField * 0.75f));
+    }
+
+    vec3 skyColor = vec3(0.0f);
+    float reScaledY = 0.5f * (sunDir.y + 1.0f);
+    skyColor = mix(skyColor, sunsetColor, cos(reScaledY));
+    skyColor = mix(nightlight[4], skyColor, reScaledY);
 
     // Draw the sun
     if(angle < sunSize)
@@ -111,33 +152,14 @@ void main()
         //Halo of the sun
         else
         {
-            vec3 sunBlur = mix(sunColor, distortedSkyHue, (angle - 7.5) / 22.5);
+            vec3 sunBlur = mix(sunColor, skyColor, (angle - 7.5) / 22.5);
             outColor = vec4(mix(sunBlur, cloudColor, heightField * 0.75 * angle / 30), 1.0f);
         }
     }
     // Draw the sky, blending from sunset to dusk
     else
     {
-        vec3 sunsetColor = vec3(0.0f);
-        vec3 daylightColor = vec3(0.0f);
-        vec3 nightColor = vec3(0.0f);
-
-        if(raySunDot > 0.75f)
-        {
-            outColor = vec4(mix(distortedSkyHue, sunset[3], heightField * 0.75), 1.0f);
-        }
-        // LERP sunset and dusk, between 0.75 and -0.1 dot
-        else if(raySunDot > -0.1f)
-        {
-            float t = (raySunDot - 0.75f) / -0.85f;
-            vec3 skyMix = mix(distortedSkyHue, distortedDuskHue, t);
-            outColor = vec4(mix(skyMix, sunset[3], heightField * 0.75f), 1.0f);
-        }
-        // Pure dusk, less than 0.1 dot
-        else
-        {
-            outColor = vec4(mix(distortedDuskHue, sunset[3], heightField * 0.75f), 1.0f);
-        }
+        outColor = vec4(skyColor, 1.0f);
     }
 }
 
