@@ -129,8 +129,9 @@ void main()
         //Halo of the sun
         else
         {
-            vec3 sunBlur = mix(sunColor, skyColor, (angle - 7.5f) / 22.5f);
-            outColor = vec4(mix(sunBlur, cloudColor, heightField * 0.75f * angle / 30.0f), 1.0f);
+            float blendFactor = (angle - 7.5f) / 22.5f;
+            vec3 sunBlur = mix(sunColor, skyColor, blendFactor);
+            outColor = vec4(sunBlur, 1.0f);
         }
     }
     // Draw the sky using previously derived sky color
