@@ -362,7 +362,7 @@ TerrainAtBoundary::TerrainAtBoundary(int cornerX,
                                      QMutex* m, QMutex *m1,
                                      std::vector<Chunk*> *chunkToAdd,
                                      Terrain* currentTerrain,
-                                     OpenGLContext *parent )
+                                     OpenGLContext *parent)
     :left(cornerX), bottom(cornerZ),
       chunkMutex(m),
       checkingMutex(m1),
@@ -391,7 +391,7 @@ void TerrainAtBoundary::run()
     for(int j = 0; j < 2 ;j++)
     {
         //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;
-        Chunk* newChunk = currentTerrain->newChunkAt(parent, normalX, normalZ + j * 16);
+        Chunk* newChunk = currentTerrain->getChunkAt(normalX, normalZ + j * 16);
         // Populate this chunk
         for(int x = left; x < left + 16; ++x)
         {
@@ -405,14 +405,12 @@ void TerrainAtBoundary::run()
 
                 newChunk->accessHeightAtGlobal(x, z) = heightInt;
             }
-            }
-
-            currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
-            currentTerrain->UpdateCave(left,bottom+j*16, newChunk);
-            chunkMutex->lock();
-            chunkToAdd->push_back(newChunk);
-            chunkMutex->unlock();
-
+        }
+        currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
+        currentTerrain->UpdateCave(left,bottom+j*16, newChunk);
+        chunkMutex->lock();
+        chunkToAdd->push_back(newChunk);
+        chunkMutex->unlock();
     }
 }
 

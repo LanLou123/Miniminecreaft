@@ -1068,14 +1068,64 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
 void MyGL::startThreads(int normalX, int normalZ)
 {
 
-    terrainGenerator1 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator2 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator3 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator4 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator5 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
-    terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator1 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator2 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator3 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator4 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator5 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator6 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator7 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this);
+    terrainGenerator8 = new TerrainAtBoundary(0, 0, chunkMutex, checkingMutex, chunkToAdd, mp_terrain, this);
+
+    Chunk* tempPtr = nullptr;
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
 
     terrainGenerator1->setLeftBottom(normalX, normalZ);
     terrainGenerator2->setLeftBottom(normalX + 16, normalZ);

@@ -77,7 +77,7 @@ void main()
     //Sun direction changes periodically over time.
     float phase = u_Time * 0.001f;
     //Sun direction changes on YZ plane.
-    vec3 sunDir = normalize(vec3(0.0f, sin(phase), cos(phase)));
+    vec3 sunDir = normalize(vec3(0.2f, sin(phase), cos(phase)));
 
     //Map this vector to the uv using spherical coordinates.
     vec2 uv = sphereToUV(rayDir);
