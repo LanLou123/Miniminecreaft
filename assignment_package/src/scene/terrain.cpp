@@ -197,20 +197,6 @@ float fbm (glm::vec2 st)
 
 void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
 {
-
-//     this->addChunkAt(parent, 0, 0);
-//     for(int x = 0; x < 16; x++)
-//     {
-//         for(int z = 0; z < 16; z++)
-//         {
-
-//             for(int y = 0; y < 256; y++)
-//             {
-//                 this->setBlockAt(x,y,z,EMPTY);
-//             }
-//         }
-//     }
-//     this->setBlockAt(0,128,0,GRASS);
    for(int i = 0; i < 4; i++)
    {
        for(int j = 0; j < 4 ;j++)
@@ -229,27 +215,8 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
            float height = fbm_magnitude * fbm(st);
            int heightInt = (int) (height * 128.f);
 
-
-           for(int y = 0; y < 256; ++y)
-           {
-               if(y < 129)
-               {
-                   this->setBlockAt(x,y,z,STONE);
-               }
-               else if(y < 129 + heightInt - 1 && y >= 129)
-               {
-                   this->setBlockAt(x,y,z,DIRT);
-               }
-               else if(y == 129 + heightInt - 1 && y >= 129)
-               {
-                   this->setBlockAt(x,y,z,GRASS);
-               }
-               else
-               {
-                   this->setBlockAt(x,y,z,EMPTY);
-               }
-
-           }
+           Chunk* currentChunk = getChunkAt(x, z);
+           currentChunk->accessHeightAtGlobal(x, z) = heightInt;
        }
    }
     updateFirstRiver();

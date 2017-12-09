@@ -90,24 +90,47 @@ BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
         qWarning("Chunk access overflow");
     }
 #endif
+    int snowPeak = 12;
     if (blocks[index] == invalidBlockType)
     {
         int heightInt = this->accessHeightAt(x, z) - 1;
-        if(y < 129)
+        if (heightInt > snowPeak)
         {
-            blocks[index] = STONE;
-        }
-        else if(y < 129 + heightInt)
-        {
-            blocks[index] = DIRT;
-        }
-        else if(y == 129 + heightInt)
-        {
-            blocks[index] = GRASS;
+            if(y < 129)
+            {
+                blocks[index] = STONE;
+            }
+            else if(y < 129 + snowPeak)
+            {
+                blocks[index] = DIRT;
+            }
+            else if(y <= 129 + heightInt)
+            {
+                blocks[index] = SNOW;
+            }
+            else
+            {
+                blocks[index] = EMPTY;
+            }
         }
         else
         {
-            blocks[index] = EMPTY;
+            if(y < 129)
+            {
+                blocks[index] = STONE;
+            }
+            else if(y < 129 + heightInt)
+            {
+                blocks[index] = DIRT;
+            }
+            else if(y == 129 + heightInt)
+            {
+                blocks[index] = GRASS;
+            }
+            else
+            {
+                blocks[index] = EMPTY;
+            }
         }
     }
     return blocks[index];
@@ -136,6 +159,7 @@ static const glm::vec2 lava[4] = uvGrid(14, 1).squareUV;
 static const glm::vec2 gold[4] = uvGrid(0, 13).squareUV;
 static const glm::vec2 ironore[4] = uvGrid(1, 13).squareUV;
 static const glm::vec2 coal[4] = uvGrid(2, 13).squareUV;
+static const glm::vec2 snow[4] = uvGrid(2, 11).squareUV;
 
 static const glm::vec2 flowU = glm::vec2(1.0f, 0.0f);
 static const glm::vec2 flowV = glm::vec2(0.0f, 1.0f);
@@ -279,6 +303,18 @@ void Chunk::fillFace(glm::vec4 positions[], glm::vec4 normal, BlockType type, Fa
         appendFlow(flowVelocityC, flowStatic);
         deltaUV1 = coal[1] - coal[0];
         deltaUV2 = coal[3] - coal[0];
+        break;
+    case SNOW:
+        appendUV(uvC, snow);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = snow[1] - snow[0];
+        deltaUV2 = snow[3] - snow[0];
+        break;
+    case ICE:
+        appendUV(uvC, ice);
+        appendFlow(flowVelocityC, flowStatic);
+        deltaUV1 = ice[1] - ice[0];
+        deltaUV2 = ice[3] - ice[0];
         break;
     default:
         appendUV(uvC, stone);
