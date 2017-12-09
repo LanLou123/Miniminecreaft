@@ -81,6 +81,8 @@ BlockType Chunk::getBlockType(size_t x, size_t y, size_t z)
     return accessBlockType(x, y, z);
 }
 
+//# define BOUNDRYCHECK
+
 BlockType& Chunk::accessBlockType(size_t x, size_t y, size_t z)
 {
     size_t index = 4096*x + 256*z + y;

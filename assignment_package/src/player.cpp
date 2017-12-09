@@ -293,7 +293,7 @@ void player::Jump()
 //    external_force_a = 0;
     if(vertical_velocity == 0)
     {
-        vertical_velocity = 5.0f;
+        vertical_velocity = 8.0f;
     }
 //    }
 }

@@ -1,5 +1,4 @@
 #include "screencenter.h"
-
 #include<math.h>
 static const int vertex_num=4;
 static const int index_num=4;
