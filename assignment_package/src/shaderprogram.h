@@ -40,6 +40,10 @@ public:
     int unifSamplerGloss;
     int unifSamplerDuplicate;
 
+    int unifDimensions;
+    int unifEye;
+    //int unifTime;
+
 public:
     ShaderProgram(OpenGLContext* context);
     // Sets up the requisite GL data and shaders from the given .glsl files

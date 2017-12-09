@@ -23,12 +23,15 @@ class MyGL : public OpenGLContext
 private:
     Cube* mp_geomCube;// The instance of a unit cube we can use to render any cube. Should NOT be used in final version of your project.
     WorldAxes* mp_worldAxes; // A wireframe representation of the world axes. It is hard-coded to sit centered at (32, 128, 32).
+
     ShaderProgram* mp_progLambert;// A shader program that uses lambertian reflection
     ShaderProgram* mp_progFlat;// A shader program that uses "flat" reflection (no shadowing at all)
 
     ShaderProgram* mp_progLiquid;
 
     ShaderProgram* mp_progLava;
+
+    ShaderProgram* mp_progSkybox;
 
     int timecount;
     GLuint vao; // A handle for our vertex array object. This will store the VBOs created in our geometry classes.

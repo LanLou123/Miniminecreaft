@@ -30,7 +30,7 @@
 enum BlockType : unsigned char
 {
 
-    EMPTY, GRASS, DIRT, STONE, LAVA, WOOD, LEAF, BEDROCK, WATER, ICE, GOLD, IRONORE, COAL
+    EMPTY, GRASS, DIRT, STONE, LAVA, WOOD, LEAF, BEDROCK, WATER, ICE, GOLD, IRONORE, COAL, SNOW
 
 };
 
@@ -39,6 +39,11 @@ enum FaceFacing : unsigned char
 {
     FRONT, BACK, LEFT, RIGHT, UP, DOWN
 };
+
+
+
+
+const BlockType invalidBlockType = (BlockType)0xFF;
 
 class Cave;
 class Chunk;
@@ -54,9 +59,9 @@ public:
     std::vector<Cave*> cav_lst;
     River river1;
     River river2;
-    Cave* cave1=new Cave(20,120,20,60,this);
-    Cave* cave2=new Cave(10,120,40,120,this);
-    Cave* cave3=new Cave(50,130,30,0,this);
+    Cave* cave1;
+    Cave* cave2;
+    Cave* cave3;
 
     std::map<std::tuple<int,int>,int> RiversideHeight;
 
@@ -64,7 +69,7 @@ public:
     BlockType getBlockAt(int x, int y, int z) const;   // Given a world-space coordinate (which may have negative
                                                            // values) return the block stored at that point in space.
     void setBlockAt(int x, int y, int z, BlockType t); // Given a world-space coordinate (which may have negative
-                                                           // values) set the block at that point in space to the
+                                                       // values) set the block at that point in space to the
                                                            // given type.
 
     Chunk* getChunkAt(int64_t x, int64_t z) const;
@@ -90,7 +95,7 @@ public:
     void Calculate_corner_Riverside(int x, int y, int z);
     void create_riverside();
 //**********************end
-
+    void updateCave();
     ~Terrain();
 
     // friend class TerrainAtBoundary;
@@ -119,6 +124,7 @@ friend class Terrain;
 private:
 
     BlockType blocks[65536];
+    int heightField[256];
     int64_t xzGlobalPos;
     Terrain* terrain;
 
@@ -140,7 +146,7 @@ private:
     static std::vector<GLfloat> bitanF;
     static std::vector<GLint> buftypeF;
 
-
+    int& accessHeightAt(size_t x, size_t z);
 
     Chunk* getLeftAdjacent();
     Chunk* getRightAdjacent();
@@ -161,7 +167,7 @@ private:
 
     void appendFlow(std::vector<GLfloat>* container, glm::vec2 speed);
 
-    BlockType getBlockType(size_t x, size_t y, size_t z) const;
+    BlockType getBlockType(size_t x, size_t y, size_t z);
 
     BlockType& accessBlockType(size_t x, size_t y, size_t z);
 
@@ -171,6 +177,7 @@ public:
 
     Chunk(OpenGLContext* parent, Terrain *terrain, int64_t xz);
 
+    int& accessHeightAtGlobal(int x, int z);
 
     int64_t getXZGlobalPositions();
 

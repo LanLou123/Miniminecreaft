@@ -46,7 +46,9 @@ Terrain::Terrain() : dimensions(64, 256, 64)
       river1=River(10,25,1);
       river2=River(10,210,2);
       create_riverside();
-
+      cave1=new Cave(20,120,20,60,this);
+      cave2=new Cave(10,120,40,120,this);
+      cave3=new Cave(50,130,30,0,this);
       cav_lst.push_back(cave1);
       cav_lst.push_back(cave2);
       cav_lst.push_back(cave3);
@@ -127,7 +129,7 @@ BlockType Terrain::getBlockAt(int x, int y, int z) const
     Chunk* chunk = this->getChunkAt(chunkX, chunkZ);
     if (chunk == nullptr)
     {
-        return GRASS;
+        return invalidBlockType;
     }
     else
     {
@@ -143,10 +145,19 @@ void Terrain::setBlockAt(int x, int y, int z, BlockType t)
 
 {
 
+    if(t == COAL)
+    {
+    std::cout<<x<<","<<y<<","<<z<<std::endl;
+    }
     // TODO: Make this work with your new block storage!
     int64_t chunkX = getChunkOrigin(x);
     int64_t chunkZ = getChunkOrigin(z);
     Chunk* chunk = this->getChunkAt(chunkX, chunkZ);
+    if (chunk == nullptr)
+    {
+
+        return;
+    }
     int64_t localX = x - chunkX;
     int64_t localZ = z - chunkZ;
     chunk->accessBlockType(localX, y, localZ) = t;
@@ -237,20 +248,6 @@ float fbm (glm::vec2 st)
 
 void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
 {
-
-//     this->addChunkAt(parent, 0, 0);
-//     for(int x = 0; x < 16; x++)
-//     {
-//         for(int z = 0; z < 16; z++)
-//         {
-
-//             for(int y = 0; y < 256; y++)
-//             {
-//                 this->setBlockAt(x,y,z,EMPTY);
-//             }
-//         }
-//     }
-//     this->setBlockAt(0,128,0,GRASS);
    for(int i = 0; i < 4; i++)
    {
        for(int j = 0; j < 4 ;j++)
@@ -269,30 +266,11 @@ void Terrain::GenerateFirstTerrain(OpenGLContext *parent)
            float height = fbm_magnitude * fbm(st);
            int heightInt = (int) (height * 128.f);
 
-
-           for(int y = 0; y < 256; ++y)
-           {
-               if(y < 129)
-               {
-                   this->setBlockAt(x,y,z,STONE);
-               }
-               else if(y < 129 + heightInt - 1 && y >= 129)
-               {
-                   this->setBlockAt(x,y,z,DIRT);
-               }
-               else if(y == 129 + heightInt - 1 && y >= 129)
-               {
-                   this->setBlockAt(x,y,z,GRASS);
-               }
-               else
-               {
-                   this->setBlockAt(x,y,z,EMPTY);
-               }
-
-           }
+           Chunk* currentChunk = getChunkAt(x, z);
+           currentChunk->accessHeightAtGlobal(x, z) = heightInt;
        }
    }
-   cave1->generate_cave();
+    updateCave();
     updateFirstRiver();
     for (std::pair<int64_t, Chunk*> pair : this->ChunkTable)
     {
@@ -377,16 +355,25 @@ void Terrain::GenerateTerrainAt(int left, int bottom,OpenGLContext *parent)
 //            {
 
 //            }
-            cave1->generate_cave();
+
+
             updateRiver(left + i* 16 , bottom + j*16, newChunk);
             this->addChunk2Map(newChunk);
             newChunk->create();
+            this->updateCave();
         }
     }
 
 
 }
 
+void Terrain::updateCave()
+{
+    for(int i =0;i<cav_lst.size();i++)
+    {
+        cav_lst[i]->generate_cave();
+    }
+}
 TerrainAtBoundary::TerrainAtBoundary(int cornerX,
                                      int cornerZ,
                                      QMutex* m, QMutex *m1,
@@ -433,29 +420,10 @@ void TerrainAtBoundary::run()
 
                 int heightInt = (int) (height * 128.f);
 
-                for(int y = 0; y < 256; ++y)
-                {
-                    if(y < 129)
-                    {
-                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = STONE;
-                    }
-                    else if(y < 129 + heightInt - 1 && y >= 129)
-                    {
-                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = DIRT;
-                    }
-                    else if(y == 129 + heightInt - 1 && y >= 129)
-                    {
-                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = GRASS;
-                    }
-                    else
-                    {
-                        newChunk->accessBlockTypeGlobalCoords(x,y,z) = EMPTY;
-                    }
-
-                }
+                newChunk->accessHeightAtGlobal(x, z) = heightInt;
             }
             }
-
+            currentTerrain->updateCave();
             currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
             chunkMutex->lock();
             chunkToAdd->push_back(newChunk);
