@@ -21,8 +21,7 @@ SOURCES += \
     $$PWD/river.cpp\
     $$PWD/texture.cpp \
     $$PWD/scene/screencenter.cpp \
-    $$PWD/scene/cave.cpp \
-    $$PWD/shadowmapfbo.cpp
+    $$PWD/scene/cave.cpp
 
 
 
@@ -46,5 +45,4 @@ HEADERS += \
     $$PWD/chunk.h\
     $$PWD/texture.h \
     $$PWD/scene/screencenter.h \
-    $$PWD/scene/cave.h \
-    $$PWD/shadowmapfbo.h
+    $$PWD/scene/cave.h

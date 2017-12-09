@@ -388,7 +388,6 @@ void TerrainAtBoundary::run()
     int normalX = left;
     int normalZ = bottom;
 
-
     for(int j = 0; j < 2 ;j++)
     {
         //std::cout<<"newChunkat"<<normalX + i * 16<<" "<<normalZ + j * 16<<" "<<std::endl;

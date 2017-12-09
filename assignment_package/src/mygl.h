@@ -16,7 +16,6 @@
 #include <scene/quad.h>
 
 #include <QMutex>
-#include <shadowmapfbo.h>
 
 class MyGL : public OpenGLContext
 {
@@ -32,13 +31,7 @@ private:
 
     ShaderProgram* mp_progLava;
 
-
     ShaderProgram* mp_progSkybox;
-
-    // shadow mapping
-    ShaderProgram* mp_progShadowPass;
-    ShaderProgram* mp_progShadowRender;
-    // shadow mapping
 
     int timecount;
     GLuint vao; // A handle for our vertex array object. This will store the VBOs created in our geometry classes.
@@ -87,8 +80,6 @@ private:
     TerrainAtBoundary* terrainGenerator7;
     TerrainAtBoundary* terrainGenerator8;
 
-
-    ShadowMapFBO* m_shadowMapFBO;
 public:
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();
@@ -104,13 +95,7 @@ public:
 
     void startThreads(int normalX, int normalZ);
 
-    void checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus,
-                        bool &xpzp, bool & xpzm, bool &xmzp, bool &xmzm);
-
-    // shadow map
-        void ShadowMapPass();
-        void RenderPass();
-    // shadow map
+    void checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus);
 
 protected:
     void keyPressEvent(QKeyEvent *e);
@@ -124,8 +109,7 @@ protected:
 
     glm::ivec3 CubeToAdd(bool &valid);
 
-    void ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
-                        bool xpzp, bool xpzm, bool xmzp, bool xmzm);
+    void ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus);
 
 
     bool flag_moving_forward;
@@ -139,9 +123,6 @@ protected:
     bool flag_walking;
     bool flag_moving_up;
     bool flag_moving_down;
-
-    bool flag_jumping;
-
     float speed;
     void keyReleaseEvent(QKeyEvent *e);
 
