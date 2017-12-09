@@ -407,7 +407,7 @@ void TerrainAtBoundary::run()
             }
         }
         currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
-        currentTerrain->UpdateCave(left,bottom+j*16, newChunk);
+        //currentTerrain->UpdateCave(left,bottom+j*16, newChunk);
         chunkMutex->lock();
         chunkToAdd->push_back(newChunk);
         chunkMutex->unlock();

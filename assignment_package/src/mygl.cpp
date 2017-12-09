@@ -309,11 +309,19 @@ void MyGL::GLDrawScene()
     mp_progLambert->setModelMatrix(glm::mat4(1.0f));
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progLambert->draw(*pair.second);
+        Chunk* ptr = pair.second;
+        if (ptr->isCreated)
+        {
+            mp_progLambert->draw(*ptr);
+        }
     }
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progLambert->drawF(*pair.second);
+        Chunk* ptr = pair.second;
+        if (ptr->isCreated)
+        {
+            mp_progLambert->drawF(*ptr);
+        }
     }
 }
 

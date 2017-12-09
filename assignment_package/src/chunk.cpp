@@ -54,7 +54,7 @@ Chunk* Chunk::getFrontAdjacent()
 }
 
 Chunk::Chunk(OpenGLContext *parent, Terrain *terrain, int64_t xz) : Drawable(parent),
-    xzGlobalPos(xz), terrain(terrain)
+    isCreated(false), xzGlobalPos(xz), terrain(terrain)
 {
     memset(this->blocks, invalidBlockType, 65536);
 }
@@ -732,4 +732,6 @@ void Chunk::create()
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockTypeF);
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftypeF.size(),
                             reinterpret_cast<void*>(buftypeF.data()), GL_STATIC_DRAW);
+
+    this->isCreated = true;
 }
