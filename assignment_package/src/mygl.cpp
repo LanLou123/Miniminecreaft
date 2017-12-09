@@ -263,9 +263,7 @@ void MyGL::paintGL()
     mp_progLambert->setLookVector(mp_camera->eye);
 
     GLDrawScene();
-
     ++m_time;
-
     glDisable(GL_DEPTH_TEST);
     mp_progFlat->setModelMatrix(glm::mat4(1.0));
     mp_progFlat->setViewProjMatrix(glm::mat4(1.0));

@@ -4,13 +4,18 @@
 #include <tuple>
 #include <map>
 #include <vector>
+#include "scene/terrain.h"
+class Terrain;
 
 class Cave
 
 {
 public :
+    Terrain* to_terrain;
     Cave();
-    Cave(int x, int y, int z,float initial_h_degree);
+
+    Cave(int x, int y, int z,float initial_h_degree,Terrain* t);
+
     glm::vec3 move_cave(glm::vec3 FormerPos);
     void Get_cave_bound(int &Xmin, int &Xmax, int &Zmin, int &Zmax);
     void generate_cave();

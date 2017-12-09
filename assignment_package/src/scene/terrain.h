@@ -40,7 +40,7 @@ enum FaceFacing : unsigned char
     FRONT, BACK, LEFT, RIGHT, UP, DOWN
 };
 
-
+class Cave;
 class Chunk;
 class TerrainAtBoundary;
 class Terrain
@@ -51,12 +51,12 @@ public:
 
     void CreateTestScene();
     glm::ivec3 dimensions;
-    std::vector<Cave> cav_lst;
+    std::vector<Cave*> cav_lst;
     River river1;
     River river2;
-    Cave cave1;
-    Cave cave2;
-    Cave cave3;
+    Cave* cave1=new Cave(20,120,20,60,this);
+    Cave* cave2=new Cave(10,120,40,120,this);
+    Cave* cave3=new Cave(50,130,30,0,this);
 
     std::map<std::tuple<int,int>,int> RiversideHeight;
 
@@ -90,11 +90,7 @@ public:
     void Calculate_corner_Riverside(int x, int y, int z);
     void create_riverside();
 //**********************end
-    void UpdateFirstCave();
-    void UpdateCave(int origin_x, int origin_z, Chunk *locatedChunk);
-    std::map<std::tuple<int,int,int>,bool> OverallIsCave;
-    std::map<std::tuple<int,int,int>,int> OverallIsOreType;
-    std::map<std::tuple<int,int,int>,bool> OverallIsLavaPool;
+
     ~Terrain();
 
     // friend class TerrainAtBoundary;
