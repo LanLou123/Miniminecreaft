@@ -790,11 +790,11 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
         cubeToAdd = glm::vec3(0.f);
 
         // iterate the surrounding blocks
-        for(int i = -1; i < 3; i++)
+        for(int i = -2; i < 4; i++)
         {
-            for(int j = -1; j < 3; j++)
+            for(int j = -2; j < 4; j++)
             {
-                for(int k = -2; k < 2; k++)
+                for(int k = -3; k < 3; k++)
                 {
                     // center blocks, ignore
                     if(i > -1 && i < 2
@@ -909,7 +909,7 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
         {
             for(int j = -2; j <= 3; j++)
             {
-                for(int k = -2; k <= 2; k++)
+                for(int k = -3; k <= 3; k++)
                 {
                     // center blocks, ignore
                         if(i == 0
