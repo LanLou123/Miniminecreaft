@@ -3,8 +3,6 @@
 const float gridOffset = 1.0f / 16.0f;
 const float epsilonPadding = 1e-4f;
 
-const BlockType invalidBlockType = (BlockType)0xFF;
-
 struct uvGrid
 {
     glm::vec2 squareUV[4];

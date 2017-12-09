@@ -125,7 +125,7 @@ BlockType Terrain::getBlockAt(int x, int y, int z) const
     Chunk* chunk = this->getChunkAt(chunkX, chunkZ);
     if (chunk == nullptr)
     {
-        return GRASS;
+        return invalidBlockType;
     }
     else
     {
@@ -145,6 +145,10 @@ void Terrain::setBlockAt(int x, int y, int z, BlockType t)
     int64_t chunkX = getChunkOrigin(x);
     int64_t chunkZ = getChunkOrigin(z);
     Chunk* chunk = this->getChunkAt(chunkX, chunkZ);
+    if (chunk == nullptr)
+    {
+        return;
+    }
     int64_t localX = x - chunkX;
     int64_t localZ = z - chunkZ;
     chunk->accessBlockType(localX, y, localZ) = t;

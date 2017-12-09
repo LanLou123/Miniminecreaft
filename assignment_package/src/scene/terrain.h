@@ -40,6 +40,7 @@ enum FaceFacing : unsigned char
     FRONT, BACK, LEFT, RIGHT, UP, DOWN
 };
 
+const BlockType invalidBlockType = (BlockType)0xFF;
 
 class Chunk;
 class TerrainAtBoundary;
