@@ -8,6 +8,11 @@
 #include <QString>
 #include <QMutex>
 
+#include <iostream>
+
+#define BOUNDDIS 8
+#define DOUBLEDIS 5
+
 MyGL::MyGL(QWidget *parent)
     : OpenGLContext(parent),
       mp_geomCube(new Cube(this)), mp_worldAxes(new WorldAxes(this)),
@@ -16,14 +21,23 @@ MyGL::MyGL(QWidget *parent)
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_progLiquid(new ShaderProgram(this)),
       mp_progLava(new ShaderProgram(this)),
+
       mp_progSkybox(new ShaderProgram(this)),
+
+      // shadow mapping
+      mp_progShadowPass(new ShaderProgram(this)),
+      mp_progShadowRender(new ShaderProgram(this)),
+      // shadow mapping
+
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
 
       chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
       drawWater(false), drawLava(false),
-      glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
-
+      glossPowerMap(new Texture(this)), duplicateMap(new Texture(this)),
+      // shadow mapping
+      m_shadowMapFBO(new ShadowMapFBO(this))
+      // shadow mapping
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -50,6 +64,8 @@ MyGL::MyGL(QWidget *parent)
     flag_rotate_right = 0;
     flag_walking = 0;
 
+    flag_jumping = 0;
+
     player1.SetMainCamera(mp_camera);
     player1.get_terrain(mp_terrain);
 
@@ -67,9 +83,16 @@ MyGL::~MyGL()
     delete mp_worldAxes;
     delete mp_progLambert;
     delete mp_progFlat;
+
     delete mp_progLiquid;
     delete mp_progLava;
     delete mp_progSkybox;
+
+
+    delete mp_progShadowPass;
+    delete mp_progShadowRender;
+
+
     delete mp_camera;
     delete mp_terrain;
 
@@ -134,23 +157,32 @@ void MyGL::initializeGL()
     mp_progLiquid->create(":/glsl/water.vert.glsl", ":/glsl/water.frag.glsl");
     mp_progLava->create(":/glsl/lava.vert.glsl", ":/glsl/lava.frag.glsl");
 
+
     mp_progSkybox->create(":/glsl/sky.vert.glsl", ":/glsl/sky.frag.glsl");
+
+    // shadow mapping
+    mp_progShadowPass->create(":/glsl/shadowmap.vert.glsl", ":/glsl/shadowmap.frag.glsl");
+    mp_progShadowRender->create(":/glsl/shadowrender.vert.glsl", ":/glsl/shadowrender.frag.glsl");
+    m_shadowMapFBO->Init(2048, 2048);
+//    m_shadowMapFBO->Init(1024, 1024);
 
     // Set a color with which to draw geometry since you won't have one
     // defined until you implement the Node classes.
     // This makes your geometry render green.
-    mp_progLambert->setGeometryColor(glm::vec4(0,1,0,1));
+    // mp_progLambert->setGeometryColor(glm::vec4(0,1,0,1));
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
 //    vao.bind();
     glBindVertexArray(vao);
 
-    mp_terrain->GenerateFirstTerrain(this);
+
 
  
     msec = QDateTime::currentMSecsSinceEpoch();
+    // shadow mapping modify
 
+    mp_terrain->GenerateFirstTerrain(this);
     surfaceMap->create(":/texture/minecraft_textures_all.png");
     surfaceMap->load(SURFACE);
     surfaceMap->bind(SURFACE);
@@ -173,6 +205,7 @@ void MyGL::initializeGL()
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // shadow mapping modify
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -184,16 +217,24 @@ void MyGL::resizeGL(int w, int h)
     //                   glm::vec3(mp_terrain->dimensions.x / 2, mp_terrain->dimensions.y / 2, mp_terrain->dimensions.z / 2), glm::vec3(0,1,0));
   
 
-    *mp_camera = Camera(w, h, glm::vec3((mp_terrain->dimensions.x)/2.0f, (mp_terrain->dimensions.y * 0.75)/1.2f,( mp_terrain->dimensions.z)-10.0f),
+//    *mp_camera = Camera(w, h, glm::vec3((mp_terrain->dimensions.x)/2.0f, (mp_terrain->dimensions.y * 0.75)/1.2f,( mp_terrain->dimensions.z)-10.0f),
 
-                       glm::vec3(mp_terrain->dimensions.x / 2, mp_terrain->dimensions.y * 0.75/1.2f, mp_terrain->dimensions.z / 2), glm::vec3(0,1,0));
+//                       glm::vec3(mp_terrain->dimensions.x / 2, mp_terrain->dimensions.y * 0.75/1.2f, mp_terrain->dimensions.z / 2), glm::vec3(0,1,0));
+
+    *mp_camera = Camera(w, h, glm::vec3(20.f , 180.f, 20.f),
+
+                       glm::vec3(0.f, 0.f, 0.f), glm::vec3(0,1,0));
 
     glm::mat4 viewproj = mp_camera->getViewProj();
 
     // Upload the view-projection matrix to our shaders (i.e. onto the graphics card)
 
-    mp_progLambert->setViewProjMatrix(viewproj);
-    mp_progFlat->setViewProjMatrix(viewproj);
+    // shadow mapping
+    mp_progLambert->setViewProjMatrix(mp_camera->getViewProj());
+    mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
+
+    mp_progShadowRender->setViewProjMatrix(mp_camera->getViewProj());
+    // shadow mapping
 
     mp_progSkybox->useMe();
     this->glUniform2i(mp_progSkybox->unifDimensions, width(), height());
@@ -231,32 +272,34 @@ void MyGL::timerUpdate()
         }
     }
 
+
     update();
     moving();
-
-    checkingMutex->lock();
-    //glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
-    //float moveDis = glm::length(moveSinceCheck);
-    //if(numOfThreads == 0 && moveDis >= 1.f)
+    // FOR SHADOW MAPPING
+    std::cout<<"timer update"<<std::endl;
     int threads = QThreadPool::globalInstance()->activeThreadCount();
     if(threads == 0)
     {
-        checkingMutex->unlock();
+     // std::cout<<threads<<std::endl;
         bool xminus = false;
         bool xplus = false;
         bool zminus = false;
         bool zplus = false;
-        checkBoundBool(xminus, xplus, zminus, zplus);
-        if(xminus || xplus|| zminus||zplus)
+        bool xpzp = false;
+        bool xpzm = false;
+        bool xmzp = false;
+        bool xmzm = false;
+        checkBoundBool(xminus, xplus, zminus, zplus, xpzp, xpzm, xmzp, xmzm);
+        if(xminus || xplus|| zminus|| zplus || xpzp || xpzm || xmzp ||  xmzm)
         {
-            ExtendBoundary(xminus, xplus, zminus, zplus);
+            ExtendBoundary(xminus, xplus, zminus, zplus, xpzp, xpzm, xmzp, xmzm);
         }
     }
-    else
-    {
-        checkingMutex->unlock();
-    }
     player1.Fall();
+
+    // For shadow mapping
+
+    std::cout<<mp_camera->eye[0] <<" " << mp_camera->eye[1] << " " << mp_camera->eye[2]<<std::endl;
 }
 
 // This function is called whenever update() is called.
@@ -264,8 +307,76 @@ void MyGL::timerUpdate()
 // so paintGL() called at a rate of 60 frames per second.
 void MyGL::paintGL()
 {
-    // Clear the screen so that we only see newly drawn images
+    // shadow mapping test
+// **************starting shadow mapping setup*****************
+
+    GLint defaultFBOid = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBOid);
+
+
+
+    float phase = m_time * 0.001f;
+//    glm::vec3 lightOrigin = glm::vec3(25.f,150.f,30.f);
+    glm::vec3 lightRef = mp_camera->eye - glm::vec3(0.f, 2.f, 0.f);
+    glm::vec3 lightDir = glm::vec3(0.2f, sin(phase), cos(phase));
+    glm::vec3 lightOrigin = lightRef + 15.f * glm::normalize(lightDir);
+//    glm::vec3 lightOrigin = glm::vec3(25.f,150.f,30.f);
+//    glm::vec3 lightRef = glm::vec3(20.f,140.f,20.f);
+    glm::vec3 lightUP = glm::vec3(0.f, 1.f, 0.f);
+    glm::mat4 lightDirView = glm::ortho(-60.f, 60.f, -60.f, 60.f, 0.1f, 1000.f)
+            * glm::lookAt(lightOrigin, lightRef, lightUP);
+
+    // activate offset for polygons
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(2.0f, 2.0f);
+
+//***************first render pass**************************
+    m_shadowMapFBO->BindForWriting();
+
+    glViewport(0,0, 2048, 2048);
+    //glViewport(0,0,width(),height());
+
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    mp_progShadowPass->SetShadowMapView(lightDirView);
+    mp_progShadowPass->setModelMatrix(glm::mat4(1.0f));
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progShadowPass->draw(*pair.second);
+    }
+
+//*************second render pass****************************
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBOid);
+
+     glViewport(0,0,width(),height() );
+////    glDisable(GL_POLYGON_OFFSET_FILL);
+
+    m_shadowMapFBO->BindForReading(GL_TEXTURE0 + 6);
+//    mp_progShadowRender->SetShadowMapTextureUnit(6);
+    mp_progLambert->SetShadowMapTextureUnit(6);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+////    glEnable(GL_CULL_FACE);
+////    glCullFace(GL_BACK);
+
+
+
+    mp_progLambert->SetShadowMat(lightDirView);
+    //mp_progShadowRender->SetShadowMat(lightDirPespec);
+    mp_progLambert->setViewProjMatrix(mp_camera->getViewProj());
+    //mp_progLambert->setViewProjMatrix(lightDirView);
+
+    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progLambert->draw(*pair.second);
+    }
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progLambert->drawF(*pair.second);
+    }
+
 
     glm::mat4 viewproj = mp_camera->getViewProj();
 
@@ -277,10 +388,14 @@ void MyGL::paintGL()
 
     mp_progFlat->setViewProjMatrix(viewproj);
     mp_progLambert->setViewProjMatrix(viewproj);
+
     mp_progLambert->setTimeCount(m_time);
     mp_progLambert->setLookVector(mp_camera->eye);
 
+
     GLDrawScene();
+
+
     ++m_time;
     glDisable(GL_DEPTH_TEST);
     mp_progFlat->setModelMatrix(glm::mat4(1.0));
@@ -301,17 +416,24 @@ void MyGL::paintGL()
 
     glEnable(GL_DEPTH_TEST);
 }
-
 void MyGL::GLDrawScene()
 {
     mp_progLambert->setModelMatrix(glm::mat4(1.0f));
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progLambert->draw(*pair.second);
+        Chunk* ptr = pair.second;
+        if (true)
+        {
+            mp_progLambert->draw(*ptr);
+        }
     }
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progLambert->drawF(*pair.second);
+        Chunk* ptr = pair.second;
+        if (true)
+        {
+            mp_progLambert->drawF(*ptr);
+        }
     }
 }
 
@@ -323,6 +445,7 @@ void MyGL::GLDrawScene()
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
 
+    std::cout<<"press key"<<std::endl;
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
@@ -374,7 +497,9 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     else if (e->key() == Qt::Key_Space)
     {
         flag_moving_up = 1;
-        player1.Jump();
+        flag_jumping = 1;
+
+        //player1.Jump();
     }
     else if (e->key() == Qt::Key_F)
     {
@@ -404,8 +529,6 @@ void MyGL::moving()
         {
             player1.StopSwim();
         }
-        //drawWater = false;
-        //drawLava = false;
     }
 
     if(eye)
@@ -426,7 +549,6 @@ void MyGL::moving()
         drawLava = false;
     }
 
-    // drawLava = ?
 
     if(flag_moving_backward&&flag_moving_forward)
     {}
@@ -458,7 +580,10 @@ void MyGL::moving()
     {
         player1.CheckTranslateAlongUp(-speed);
     }
-
+    if(flag_jumping)
+    {
+        player1.Jump();
+    }
 }
 void MyGL::walk_begin()
 {
@@ -719,11 +844,11 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
         cubeToAdd = glm::vec3(0.f);
 
         // iterate the surrounding blocks
-        for(int i = -1; i < 3; i++)
+        for(int i = -2; i < 4; i++)
         {
-            for(int j = -1; j < 3; j++)
+            for(int j = -2; j < 4; j++)
             {
-                for(int k = -2; k < 2; k++)
+                for(int k = -3; k < 3; k++)
                 {
                     // center blocks, ignore
                     if(i > -1 && i < 2
@@ -838,7 +963,7 @@ glm::ivec3 MyGL::CubeToAdd(bool &valid)
         {
             for(int j = -2; j <= 3; j++)
             {
-                for(int k = -2; k <= 2; k++)
+                for(int k = -3; k <= 3; k++)
                 {
                     // center blocks, ignore
                         if(i == 0
@@ -1063,6 +1188,57 @@ void NormalizeXZ(int x, int z, int &normalX, int &normalZ)
     }
 }
 
+
+void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus,
+                          bool &xpzp, bool &xpzm, bool &xmzp, bool &xmzm)
+{
+    glm::vec3 gridLoc = glm::floor(mp_camera->eye);
+
+    // check if there exist a chunk at x direction and z direction
+    int x = gridLoc[0];
+    int z = gridLoc[2];
+    Chunk* xDirChunk = mp_terrain->getChunkAt(x + BOUNDDIS , z);
+    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - BOUNDDIS , z);
+    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + BOUNDDIS );
+    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - BOUNDDIS );
+
+    Chunk* xPzP = mp_terrain->getChunkAt(x + DOUBLEDIS, z + DOUBLEDIS );
+    Chunk* xPzM = mp_terrain->getChunkAt(x + DOUBLEDIS, z - DOUBLEDIS );
+    Chunk* xMzP = mp_terrain->getChunkAt(x - DOUBLEDIS, z + DOUBLEDIS );
+    Chunk* xMzM = mp_terrain->getChunkAt(x - DOUBLEDIS, z - DOUBLEDIS );
+    if(xDirChunk == nullptr)
+    {
+        xplus = true;
+    }
+    if(zDirChunk == nullptr)
+    {
+        zplus = true;
+    }
+    if(xMinusDirChunk == nullptr)
+    {
+        xminus = true;
+    }
+    if( zMinusDirChunk == nullptr)
+    {
+        zminus = true;
+    }
+    if(xPzP == nullptr)
+    {
+        xpzp = true;
+    }
+    if(xPzM == nullptr)
+    {
+        xpzm = true;
+    }
+    if(xMzP == nullptr)
+    {
+        xmzp = true;
+    }
+    if(xMzM == nullptr)
+    {
+        xmzm = true;
+    }
+}
 void MyGL::startThreads(int normalX, int normalZ)
 {
 
@@ -1103,107 +1279,90 @@ void MyGL::startThreads(int normalX, int normalZ)
     QThreadPool::globalInstance()->start(terrainGenerator8);
 }
 
-void MyGL::checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus)
+
+void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
+                          bool xpzp, bool xpzm, bool xmzp, bool xmzm)
 {
     glm::vec3 gridLoc = glm::floor(mp_camera->eye);
 
-    // check if there exist a chunk at x direction and z direction
     int x = gridLoc[0];
     int z = gridLoc[2];
 
-// How to use getChunkAt
-//    for(int xInd = 0; xInd < 4; xInd++)
-//    {
-//        for(int zInd = 0; zInd < 4; zInd ++)
-//        {
-//            Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5 + xInd*16, z);
-//            Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5 - xInd*16, z);
-//            Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5 + zInd*16);
-//            Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5 - zInd*16);
-    const int probeDistance = 5;
-
-    Chunk* xDirChunk = mp_terrain->getChunkAt(x + probeDistance , z);
-    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - probeDistance, z);
-    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + probeDistance);
-    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - probeDistance);
-    if(xDirChunk == nullptr)
-    {
-        xplus = true;
-    }
-    if(zDirChunk == nullptr)
-    {
-        zplus = true;
-    }
-
-    if(xMinusDirChunk == nullptr)
-    {
-        xminus = true;
-    }
-    if( zMinusDirChunk == nullptr)
-    {
-        zminus = true;
-    }
-}
-
-void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
-{
-    glm::vec3 gridLoc = glm::floor(mp_camera->eye);
-
-    // check if there exist a chunk at x direction and z direction
-    int x = gridLoc[0];
-    int z = gridLoc[2];
-
-//// How to use getChunkAt
-//    Chunk* xDirChunk = mp_terrain->getChunkAt(x + 5, z);
-//    Chunk* xMinusDirChunk = mp_terrain->getChunkAt(x - 5, z);
-//    Chunk* zDirChunk = mp_terrain->getChunkAt(x, z + 5);
-//    Chunk* zMinusDirChunk = mp_terrain->getChunkAt(x, z - 5);
     if(xplus)
     {
 
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x + 5, z, normalX, normalZ);
+        NormalizeXZ(x + BOUNDDIS, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
+        return;
     }
     else if(zplus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x, z + 5, normalX, normalZ);
+        NormalizeXZ(x, z + BOUNDDIS, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
+        return;
     }
-//    else if(xDirChunk == nullptr && zDirChunk == nullptr)
-//    {
-//        isCheckingForBoundary = true;
-//        int normalX = 0;
-//        int normalZ = 0;
-//        NormalizeXZ(x, z + 5, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//        NormalizeXZ(x + 5, z, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//        NormalizeXZ(x + 5, z + 5, normalX, normalZ);
-//        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
-//    }
+    else if(xpzp)
+    {
+        std::cout<<"xpzp++"<<std::endl;
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x + DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
+        startThreads(normalX, normalZ);
+        return;
+    }
+    else if(xpzm)
+    {
+        std::cout<<"xpzm++"<<std::endl;
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x + DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
+        startThreads(normalX, normalZ);
+        return;
+    }
     // Minus situation
     else if(xminus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x - 5, z, normalX, normalZ);
+        NormalizeXZ(x - BOUNDDIS, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
+        return;
     }
     else if(zminus)
     {
         int normalX = 0;
         int normalZ = 0;
-        NormalizeXZ(x, z - 5, normalX, normalZ);
+        NormalizeXZ(x, z - BOUNDDIS, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
+        return;
     }
+    else if(xmzp)
+    {
+        std::cout<<"xmzp++"<<std::endl;
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x - DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
+        startThreads(normalX, normalZ);
+        return;
+    }
+    else if(xmzm)
+    {
+        std::cout<<"xmzm++"<<std::endl;
+        int normalX = 0;
+        int normalZ = 0;
+        NormalizeXZ(x - DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
+        startThreads(normalX, normalZ);
+        return;
+    }
+
 //    else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
 //    {
 //        isCheckingForBoundary = true;
@@ -1218,6 +1377,8 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus)
 //    }
     //update();
     mp_terrain->cave1->generate_cave();
+
+
 }
 
 void MyGL::keyReleaseEvent(QKeyEvent *e)
@@ -1265,6 +1426,7 @@ void MyGL::keyReleaseEvent(QKeyEvent *e)
     else if (e->key() == Qt::Key_Space)
     {
         flag_moving_up = 0;
+        flag_jumping = 0;
     }
     else if (e->key() == Qt::Key_Q)
     {
@@ -1324,7 +1486,7 @@ void MyGL::CheckforLiquid(bool &touch, bool &inside, bool &eyeGlass, BlockType &
         touch = true;
     }
 
-    glm::vec3 eyePosInt = glm::floor(eyePos);
+    glm::vec3 eyePosInt = glm::floor(eyePos + glm::vec3(0.5f, 0.5f, 0.5f));
     BlockType eyeBlock = mp_terrain->getBlockAt(eyePosInt[0], eyePosInt[1], eyePosInt[2]);
     if(eyeBlock == LAVA || eyeBlock == WATER)
     {
