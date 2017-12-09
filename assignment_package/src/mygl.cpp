@@ -20,14 +20,21 @@ MyGL::MyGL(QWidget *parent)
       m_QuadBoard(new Quad(this)),
       mp_progLiquid(new ShaderProgram(this)),
       mp_progLava(new ShaderProgram(this)),
+      // shadow mapping
+      mp_progShadowPass(new ShaderProgram(this)),
+      mp_progShadowRender(new ShaderProgram(this)),
+      // shadow mapping
+
       mp_progLambert(new ShaderProgram(this)), mp_progFlat(new ShaderProgram(this)),
       mp_camera(new Camera()), mp_terrain(new Terrain()), player1(),timecount(0), m_time(0),
       surfaceMap(new Texture(this)), normalMap(new Texture(this)), greyScaleMap(new Texture(this)),
 
       chunkToAdd(new std::vector<Chunk*>()), chunkMutex(new QMutex()), checkingMutex(new QMutex()),
       drawWater(false), drawLava(false),
-      glossPowerMap(new Texture(this)), duplicateMap(new Texture(this))
-
+      glossPowerMap(new Texture(this)), duplicateMap(new Texture(this)),
+      // shadow mapping
+      m_shadowMapFBO(new ShadowMapFBO(this))
+      // shadow mapping
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
     connect(&timer, SIGNAL(timeout()), this, SLOT(timerUpdate()));
@@ -70,6 +77,10 @@ MyGL::~MyGL()
     delete mp_worldAxes;
     delete mp_progLambert;
     delete mp_progFlat;
+
+    delete mp_progShadowPass;
+    delete mp_progShadowRender;
+
     delete mp_camera;
     delete mp_terrain;
 
@@ -114,10 +125,6 @@ void MyGL::initializeGL()
     // Create a Vertex Attribute Object
     glGenVertexArrays(1, &vao);
 
-    //Create the instance of Cube
-
-    //
-
     mp_geomCube->create();
     mp_worldAxes->create();
 
@@ -131,23 +138,31 @@ void MyGL::initializeGL()
     // Create a new shader program, to show the water effect
 
     mp_progLiquid->create(":/glsl/water.vert.glsl", ":/glsl/water.frag.glsl");
-     mp_progLava->create(":/glsl/lava.vert.glsl", ":/glsl/lava.frag.glsl");
+    mp_progLava->create(":/glsl/lava.vert.glsl", ":/glsl/lava.frag.glsl");
+
+    // shadow mapping
+    mp_progShadowPass->create(":/glsl/shadowmap.vert.glsl", ":/glsl/shadowmap.frag.glsl");
+    mp_progShadowRender->create(":/glsl/shadowrender.vert.glsl", ":/glsl/shadowrender.frag.glsl");
+    m_shadowMapFBO->Init(2048, 2048);
+//    m_shadowMapFBO->Init(1024, 1024);
 
     // Set a color with which to draw geometry since you won't have one
     // defined until you implement the Node classes.
     // This makes your geometry render green.
-    mp_progLambert->setGeometryColor(glm::vec4(0,1,0,1));
+    // mp_progLambert->setGeometryColor(glm::vec4(0,1,0,1));
 
     // We have to have a VAO bound in OpenGL 3.2 Core. But if we're not
     // using multiple VAOs, we can just bind one once.
 //    vao.bind();
     glBindVertexArray(vao);
 
-    mp_terrain->GenerateFirstTerrain(this);
+
 
  
     msec = QDateTime::currentMSecsSinceEpoch();
+    // shadow mapping modify
 
+    mp_terrain->GenerateFirstTerrain(this);
     surfaceMap->create(":/texture/minecraft_textures_all.png");
     surfaceMap->load(SURFACE);
     surfaceMap->bind(SURFACE);
@@ -170,6 +185,7 @@ void MyGL::initializeGL()
 
     glEnable(GL_BLEND);
     glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    // shadow mapping modify
 }
 
 void MyGL::resizeGL(int w, int h)
@@ -181,16 +197,24 @@ void MyGL::resizeGL(int w, int h)
     //                   glm::vec3(mp_terrain->dimensions.x / 2, mp_terrain->dimensions.y / 2, mp_terrain->dimensions.z / 2), glm::vec3(0,1,0));
   
 
-    *mp_camera = Camera(w, h, glm::vec3((mp_terrain->dimensions.x)/2.0f, (mp_terrain->dimensions.y * 0.75)/1.2f,( mp_terrain->dimensions.z)-10.0f),
+//    *mp_camera = Camera(w, h, glm::vec3((mp_terrain->dimensions.x)/2.0f, (mp_terrain->dimensions.y * 0.75)/1.2f,( mp_terrain->dimensions.z)-10.0f),
 
-                       glm::vec3(mp_terrain->dimensions.x / 2, mp_terrain->dimensions.y * 0.75/1.2f, mp_terrain->dimensions.z / 2), glm::vec3(0,1,0));
+//                       glm::vec3(mp_terrain->dimensions.x / 2, mp_terrain->dimensions.y * 0.75/1.2f, mp_terrain->dimensions.z / 2), glm::vec3(0,1,0));
+
+    *mp_camera = Camera(w, h, glm::vec3(20.f , 180.f, 20.f),
+
+                       glm::vec3(0.f, 0.f, 0.f), glm::vec3(0,1,0));
 
     glm::mat4 viewproj = mp_camera->getViewProj();
 
     // Upload the view-projection matrix to our shaders (i.e. onto the graphics card)
 
-    mp_progLambert->setViewProjMatrix(viewproj);
-    mp_progFlat->setViewProjMatrix(viewproj);
+    // shadow mapping
+    mp_progLambert->setViewProjMatrix(mp_camera->getViewProj());
+    mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
+
+    mp_progShadowRender->setViewProjMatrix(mp_camera->getViewProj());
+    // shadow mapping
 
     printGLErrorLog();
 }
@@ -227,11 +251,8 @@ void MyGL::timerUpdate()
 
     update();
     moving();
-
+    // FOR SHADOW MAPPING
     std::cout<<"timer update"<<std::endl;
-    //glm::vec3 moveSinceCheck = mp_camera->eye - glm::vec3(checkX, mp_camera->eye[1], checkZ);
-    //float moveDis = glm::length(moveSinceCheck);
-    //if(numOfThreads == 0 && moveDis >= 1.f)
     int threads = QThreadPool::globalInstance()->activeThreadCount();
     if(threads == 0)
     {
@@ -251,6 +272,10 @@ void MyGL::timerUpdate()
         }
     }
     player1.Fall();
+
+    // For shadow mapping
+
+    std::cout<<mp_camera->eye[0] <<" " << mp_camera->eye[1] << " " << mp_camera->eye[2]<<std::endl;
 }
 
 // This function is called whenever update() is called.
@@ -258,22 +283,94 @@ void MyGL::timerUpdate()
 // so paintGL() called at a rate of 60 frames per second.
 void MyGL::paintGL()
 {
-    // Clear the screen so that we only see newly drawn images
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+    // shadow mappint test
+//    // Clear the screen so that we only see newly drawn images
+//    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-    mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
-    mp_progLambert->setViewProjMatrix(mp_camera->getViewProj() );
+//    mp_progFlat->setViewProjMatrix(mp_camera->getViewProj());
     mp_progLambert->setTimeCount(m_time);
-    mp_progLambert->setLookVector(mp_camera->eye);
-
-    GLDrawScene();
+//    mp_progLambert->setLookVector(mp_camera->eye);
 
     ++m_time;
+    // shadow mapping test
 
-    glDisable(GL_DEPTH_TEST);
-    mp_progFlat->setModelMatrix(glm::mat4());
-    mp_progFlat->draw(*mp_worldAxes);
-    glEnable(GL_DEPTH_TEST);
+    GLint defaultFBOid = 0;
+    glGetIntegerv(GL_FRAMEBUFFER_BINDING, &defaultFBOid);
+
+
+    float phase = m_time * 0.001f;
+//    glm::vec3 lightOrigin = glm::vec3(25.f,150.f,30.f);
+    glm::vec3 lightRef = mp_camera->eye - glm::vec3(0.f, 2.f, 0.f);
+    glm::vec3 lightDir = glm::vec3(0.2f, sin(phase), cos(phase));
+    glm::vec3 lightOrigin = lightRef + 15.f * glm::normalize(lightDir);
+//    glm::vec3 lightOrigin = glm::vec3(25.f,150.f,30.f);
+//    glm::vec3 lightRef = glm::vec3(20.f,140.f,20.f);
+    glm::vec3 lightUP = glm::vec3(0.f, 1.f, 0.f);
+    glm::mat4 lightDirView = glm::ortho(-60.f, 60.f, -60.f, 60.f, 0.1f, 1000.f)
+            * glm::lookAt(lightOrigin, lightRef, lightUP);
+
+    // activate offset for polygons
+    glEnable(GL_POLYGON_OFFSET_FILL);
+    glPolygonOffset(2.0f, 2.0f);
+
+//***************first render pass**************************8
+    m_shadowMapFBO->BindForWriting();
+
+    glViewport(0,0, 2048, 2048);
+    //glViewport(0,0,width(),height());
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+    mp_progShadowPass->SetShadowMapView(lightDirView);
+    mp_progShadowPass->setModelMatrix(glm::mat4(1.0f));
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progShadowPass->draw(*pair.second);
+    }
+
+
+//*************second render pass****************************8
+
+    glBindFramebuffer(GL_FRAMEBUFFER, defaultFBOid);
+
+     glViewport(0,0,width(),height() );
+////    glDisable(GL_POLYGON_OFFSET_FILL);
+
+    m_shadowMapFBO->BindForReading(GL_TEXTURE0 + 6);
+//    mp_progShadowRender->SetShadowMapTextureUnit(6);
+    mp_progLambert->SetShadowMapTextureUnit(6);
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+////    glEnable(GL_CULL_FACE);
+////    glCullFace(GL_BACK);
+
+
+//    mp_progShadowRender->SetShadowMat(lightDirView);
+//    //mp_progShadowRender->SetShadowMat(lightDirPespec);
+//    mp_progShadowRender->setViewProjMatrix(mp_camera->getViewProj());
+//    //mp_progShadowRender->setViewProjMatrix(lightDirView);
+
+//    mp_progShadowRender->setModelMatrix(glm::mat4(1.0f));
+//    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+//    {
+//        mp_progShadowRender->draw(*pair.second);
+//    }
+
+
+    mp_progLambert->SetShadowMat(lightDirView);
+    //mp_progShadowRender->SetShadowMat(lightDirPespec);
+    mp_progLambert->setViewProjMatrix(mp_camera->getViewProj());
+    //mp_progLambert->setViewProjMatrix(lightDirView);
+
+    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progLambert->draw(*pair.second);
+    }
+    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+    {
+        mp_progLambert->drawF(*pair.second);
+    }
 
     if(drawWater)
     {
@@ -285,18 +382,6 @@ void MyGL::paintGL()
     }
 }
 
-void MyGL::GLDrawScene()
-{
-    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
-    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
-    {
-        mp_progLambert->draw(*pair.second);
-    }
-    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
-    {
-        mp_progLambert->drawF(*pair.second);
-    }
-}
 
 //press W, A, S, D to move in four traditional horizontal directions, in the meantime
 //, you will be able to run by holding shift, press 1, 2 to change fov,

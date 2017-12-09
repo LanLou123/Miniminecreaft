@@ -8,5 +8,9 @@
         <file>glsl/water.frag.glsl</file>
         <file>glsl/lava.vert.glsl</file>
         <file>glsl/lava.frag.glsl</file>
+        <file>glsl/shadowmap.vert.glsl</file>
+        <file>glsl/shadowmap.frag.glsl</file>
+        <file>glsl/shadowrender.vert.glsl</file>
+        <file>glsl/shadowrender.frag.glsl</file>
     </qresource>
 </RCC>

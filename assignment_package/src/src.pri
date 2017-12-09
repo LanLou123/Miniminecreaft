@@ -19,7 +19,8 @@ SOURCES += \
     $$PWD/player.cpp \
     $$PWD/scene/quad.cpp\
     $$PWD/river.cpp\
-    $$PWD/texture.cpp
+    $$PWD/texture.cpp \
+    $$PWD/shadowmapfbo.cpp
 
 
 
@@ -41,4 +42,5 @@ HEADERS += \
     $$PWD/scene/quad.h\
     $$PWD/river.h\
     $$PWD/chunk.h\
-    $$PWD/texture.h
+    $$PWD/texture.h \
+    $$PWD/shadowmapfbo.h

@@ -16,6 +16,7 @@
 #include <scene/quad.h>
 
 #include <QMutex>
+#include <shadowmapfbo.h>
 
 class MyGL : public OpenGLContext
 {
@@ -29,6 +30,11 @@ private:
     ShaderProgram* mp_progLiquid;
 
     ShaderProgram* mp_progLava;
+
+    // shadow mapping
+    ShaderProgram* mp_progShadowPass;
+    ShaderProgram* mp_progShadowRender;
+    // shadow mapping
 
     int timecount;
     GLuint vao; // A handle for our vertex array object. This will store the VBOs created in our geometry classes.
@@ -77,6 +83,8 @@ private:
 //    TerrainAtBoundary* terrainGenerator7;
 //    TerrainAtBoundary* terrainGenerator8;
 
+
+    ShadowMapFBO* m_shadowMapFBO;
 public:
     explicit MyGL(QWidget *parent = 0);
     ~MyGL();
@@ -94,6 +102,11 @@ public:
 
     void checkBoundBool(bool &xminus, bool &xplus, bool &zminus, bool &zplus,
                         bool &xpzp, bool & xpzm, bool &xmzp, bool &xmzm);
+
+    // shadow map
+        void ShadowMapPass();
+        void RenderPass();
+    // shadow map
 
 protected:
     void keyPressEvent(QKeyEvent *e);

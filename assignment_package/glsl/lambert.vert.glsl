@@ -1,5 +1,4 @@
-#version 150
-
+#version 330 core
 uniform mat4 u_Model;
 uniform mat4 u_ModelInvTr;
 uniform mat4 u_ViewProj;
@@ -7,6 +6,14 @@ uniform vec4 u_Color;
 uniform vec3 u_LookVector;
 
 uniform int u_Time;
+
+// uniform mat4 u_Model;
+// uniform mat4 u_ViewProj;
+uniform mat4 u_shadowMat;
+
+//in vec4	vs_Pos;
+//in vec4 vs_Col;
+
 
 in vec4 vs_Pos;
 in vec4 vs_Nor;
@@ -29,6 +36,8 @@ out vec4 hVector;
 out float fs_Alpha;
 
 out vec2 flowVelocity;
+
+out vec4 o_shadowCoord;
 
 const vec4 lightDir = normalize(vec4(0.0f, 0.0f, 1.0f, 0.0f));
 
@@ -58,5 +67,26 @@ void main()
     vec4 modelposition = u_Model * vs_Pos;
     hVector = normalize(normalize(vec4(u_LookVector, 1.0f) - modelposition) + lightDir);
 
+    o_shadowCoord = u_shadowMat * modelposition;
+
     gl_Position = u_ViewProj * modelposition;
 }
+
+
+//uniform mat4 u_Model;
+//uniform mat4 u_ViewProj;
+//uniform mat4 u_shadowMat;
+
+//in vec4	vs_Pos;
+//in vec4 vs_Col;
+
+//out vec4 o_shadowCoord;
+
+//void main(void)
+//{
+//   vec4 worldPos = u_Model * vs_Pos;
+
+//   o_shadowCoord = u_shadowMat * worldPos;
+
+//   gl_Position	= u_ViewProj * worldPos;
+//}
