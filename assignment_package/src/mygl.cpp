@@ -286,7 +286,6 @@ void MyGL::paintGL()
     glDisable(GL_DEPTH_TEST);
     mp_progFlat->setModelMatrix(glm::mat4());
     mp_progFlat->draw(*mp_worldAxes);
-    glEnable(GL_DEPTH_TEST);
 
     if(drawWater)
     {
@@ -296,6 +295,8 @@ void MyGL::paintGL()
     {
         mp_progLava->draw(*m_QuadBoard);
     }
+
+    glEnable(GL_DEPTH_TEST);
 }
 
 void MyGL::GLDrawScene()
