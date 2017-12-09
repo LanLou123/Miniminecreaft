@@ -54,7 +54,7 @@ Chunk* Chunk::getFrontAdjacent()
 }
 
 Chunk::Chunk(OpenGLContext *parent, Terrain *terrain, int64_t xz) : Drawable(parent),
-    isCreated(false), xzGlobalPos(xz), terrain(terrain)
+    xzGlobalPos(xz), terrain(terrain)
 {
     memset(this->blocks, invalidBlockType, 65536);
 }

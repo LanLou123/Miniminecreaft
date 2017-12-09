@@ -57,8 +57,9 @@ protected:
                           // we need to pass our OpenGL context to the Drawable in order to call GL functions
                           // from within this class.
 
-
 public:
+    bool isCreated;
+
     Drawable(OpenGLContext* context);
     virtual ~Drawable();
 
