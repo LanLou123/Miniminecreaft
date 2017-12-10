@@ -1,0 +1,18 @@
+<RCC>
+    <qresource prefix="/">
+        <file>glsl/lambert.frag.glsl</file>
+        <file>glsl/lambert.vert.glsl</file>
+        <file>glsl/flat.frag.glsl</file>
+        <file>glsl/flat.vert.glsl</file>
+        <file>glsl/water.vert.glsl</file>
+        <file>glsl/water.frag.glsl</file>
+        <file>glsl/lava.vert.glsl</file>
+        <file>glsl/lava.frag.glsl</file>
+        <file>glsl/sky.frag.glsl</file>
+        <file>glsl/sky.vert.glsl</file>
+        <file>glsl/shadowmap.vert.glsl</file>
+        <file>glsl/shadowmap.frag.glsl</file>
+        <file>glsl/shadowrender.vert.glsl</file>
+        <file>glsl/shadowrender.frag.glsl</file>
+    </qresource>
+</RCC>
