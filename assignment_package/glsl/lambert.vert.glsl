@@ -58,7 +58,7 @@ const vec4 lightDir = normalize(vec4(0.0f, 0.0f, 1.0f, 0.0f));
 void main()
 {
     //Sun direction changes periodically over time
-    float phase = u_Time * 0.001f;
+    float phase = u_Time * 0.003f;
     vec3 sunDir = normalize(vec3(0.0f, sin(phase), cos(phase)));
     vec4 lightDir = vec4(sunDir, 0.0f);
 

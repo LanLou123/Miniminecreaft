@@ -36,7 +36,8 @@ MyGL::MyGL(QWidget *parent)
       drawWater(false), drawLava(false),
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this)),
       // shadow mapping
-      m_shadowMapFBO(new ShadowMapFBO(this))
+      m_shadowMapFBO(new ShadowMapFBO(this)),
+      isCompleted(false)
       // shadow mapping
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
@@ -264,10 +265,9 @@ void MyGL::timerUpdate()
         else
         {
             int index = chunkNum-1;
-            mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+            //mp_terrain->addChunk2Map((*chunkToAdd)[index]);
             ((*chunkToAdd)[index])->create();
             chunkToAdd->pop_back();
-
             chunkMutex->unlock();
         }
     }
@@ -276,7 +276,8 @@ void MyGL::timerUpdate()
     update();
     moving();
     // FOR SHADOW MAPPING
-    std::cout<<"timer update"<<std::endl;
+    //std::cout<<"timer update"<<std::endl;
+    bool lastCompletedStatus = this->isCompleted;
     int threads = QThreadPool::globalInstance()->activeThreadCount();
     if(threads == 0)
     {
@@ -292,8 +293,17 @@ void MyGL::timerUpdate()
         checkBoundBool(xminus, xplus, zminus, zplus, xpzp, xpzm, xmzp, xmzm);
         if(xminus || xplus|| zminus|| zplus || xpzp || xpzm || xmzp ||  xmzm)
         {
+            this->isCompleted = false;
             ExtendBoundary(xminus, xplus, zminus, zplus, xpzp, xpzm, xmzp, xmzm);
         }
+        else
+        {
+            this->isCompleted = true;
+        }
+    }
+    if (lastCompletedStatus == false && this->isCompleted == true)
+    {
+        this->mp_terrain->updateCave();
     }
     player1.Fall();
 
@@ -314,7 +324,7 @@ void MyGL::paintGL()
 
 
 
-    float phase = m_time * 0.001f;
+    float phase = m_time * 0.003f;
 //    glm::vec3 lightOrigin = glm::vec3(25.f,150.f,30.f);
     glm::vec3 lightRef = mp_camera->eye - glm::vec3(0.f, 2.f, 0.f);
     glm::vec3 lightDir = glm::vec3(0.2f, sin(phase), cos(phase));
@@ -446,7 +456,7 @@ void MyGL::paintGL()
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
 
-    std::cout<<"press key"<<std::endl;
+    //std::cout<<"press key"<<std::endl;
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
@@ -1346,7 +1356,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         NormalizeXZ(x + BOUNDDIS, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(zplus)
     {
@@ -1355,25 +1364,20 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         NormalizeXZ(x, z + BOUNDDIS, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(xpzp)
     {
-        std::cout<<"xpzp++"<<std::endl;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(xpzm)
     {
-        std::cout<<"xpzm++"<<std::endl;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
         startThreads(normalX, normalZ);
-        return;
     }
     // Minus situation
     else if(xminus)
@@ -1383,7 +1387,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         NormalizeXZ(x - BOUNDDIS, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(zminus)
     {
@@ -1392,25 +1395,20 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         NormalizeXZ(x, z - BOUNDDIS, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(xmzp)
     {
-        std::cout<<"xmzp++"<<std::endl;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(xmzm)
     {
-        std::cout<<"xmzm++"<<std::endl;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
         startThreads(normalX, normalZ);
-        return;
     }
 
 //    else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
@@ -1426,9 +1424,7 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
 //        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 //    }
     //update();
-    mp_terrain->cave1->generate_cave();
-
-
+    mp_terrain->updateCave();
 }
 
 void MyGL::keyReleaseEvent(QKeyEvent *e)

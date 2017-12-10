@@ -145,17 +145,12 @@ void Terrain::setBlockAt(int x, int y, int z, BlockType t)
 
 {
 
-    if(t == COAL)
-    {
-    std::cout<<x<<","<<y<<","<<z<<std::endl;
-    }
     // TODO: Make this work with your new block storage!
     int64_t chunkX = getChunkOrigin(x);
     int64_t chunkZ = getChunkOrigin(z);
     Chunk* chunk = this->getChunkAt(chunkX, chunkZ);
     if (chunk == nullptr)
     {
-
         return;
     }
     int64_t localX = x - chunkX;
@@ -425,7 +420,7 @@ void TerrainAtBoundary::run()
             }
             }
 
-            currentTerrain->updateCave();
+            //currentTerrain->updateCave();
 
             currentTerrain->updateRiver(left, bottom + j * 16, newChunk);
             chunkMutex->lock();

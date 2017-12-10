@@ -84,7 +84,7 @@ glm::vec3 Cave::move_cave(glm::vec3 FormerPos)
         newPos[0] = FormerPos[0] + cos(RandHorizontalAngle*M_PI/180.0f) * step;
         newPos[2] = FormerPos[2] + sin(RandHorizontalAngle*M_PI/180.0f) * step;
        }
-        std::cout<<RandHorizontalAngle<<std::endl;
+        //std::cout<<RandHorizontalAngle<<std::endl;
         moved_length++;
         return newPos;
 }
@@ -114,7 +114,7 @@ void Cave::createLavaPool(glm::vec3 final_pos)
 
 void Cave::generate_cave()
 {
-
+    moved_length = 0;
     glm::vec3 current_pos(origin_pos_x , origin_pos_y, origin_pos_z);
 
     while (moved_length<cave_length)

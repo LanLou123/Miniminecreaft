@@ -84,7 +84,7 @@ void main()
     float shadow = (currentDepth < closestDepth + 0.001 ) ? 1.f: 0.3f;
     // shadow
 
-    out_Col = vec4(accumulatedResult.rgb * shadow *(1.0f/(1.0+test[2]/fog_dis))+(1-1.0f/(1.0+test[2]/fog_dis))*vec3(0.5,0.5,0.5), fs_Alpha);
+    out_Col = vec4(accumulatedResult.rgb * shadow *(1.0f/(1.0+test[2]/fog_dis))+(1-1.0f/(1.0+test[2]/fog_dis))*vec3(0.25f,0.25f,0.25f), fs_Alpha);
 
 }
 

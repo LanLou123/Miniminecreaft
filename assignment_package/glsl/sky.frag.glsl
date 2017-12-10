@@ -75,7 +75,7 @@ void main()
     //Vector from Camera position 2 fragment position.
     vec3 rayDir = normalize(p.xyz - u_Eye);
     //Sun direction changes periodically over time.
-    float phase = u_Time * 0.001f;
+    float phase = u_Time * 0.003f;
     //Sun direction changes on YZ plane.
     vec3 sunDir = normalize(vec3(0.0f, sin(phase), cos(phase)));
 

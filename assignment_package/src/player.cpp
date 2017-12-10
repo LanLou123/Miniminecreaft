@@ -277,7 +277,7 @@ void player::CheckTranslateAlongRight(float amt)
 
 void player::Jump()
 {
-    std::cout<<"jump"<<std::endl;
+    //std::cout<<"jump"<<std::endl;
     jump_tri = true;
     grounded = false;
     if(DisableFlyingCollision)

@@ -112,6 +112,7 @@ public:
         void RenderPass();
     // shadow map
 
+    bool isCompleted;
 protected:
     void keyPressEvent(QKeyEvent *e);
 
