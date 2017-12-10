@@ -82,7 +82,7 @@ glm::vec3 Cave::move_cave(glm::vec3 FormerPos)
         newPos[0] = FormerPos[0] + cos(RandHorizontalAngle*M_PI/180.0f) * step;
         newPos[2] = FormerPos[2] + sin(RandHorizontalAngle*M_PI/180.0f) * step;
        }
-        std::cout<<RandHorizontalAngle<<std::endl;
+
         moved_length++;
         return newPos;
 }
