@@ -1,4 +1,3 @@
-
 #include "cave.h"
 #include <math.h>
 #include <iostream>
@@ -9,17 +8,16 @@ const float step = 3;
 
 Cave::Cave()
 {}
-Cave::Cave(int x, int y, int z, float initial_h_degree, Terrain *t):
+Cave::Cave(int x, int y, int z, float initial_h_degree):
         minX(200),maxX(-200),minZ(200),maxZ(-200),cave_radius(3),cave_length(50),moved_length(0)
 {
-    to_terrain = t;
     Hori_degree = initial_h_degree;
     min_rand = 1;
     max_rand = 0;
     origin_pos_x = x;
     origin_pos_y = y;
     origin_pos_z = z;
-
+    generate_cave();
 }
 //float Cave::random (glm::vec2 st)
 //{
@@ -100,10 +98,10 @@ void Cave::createLavaPool(glm::vec3 final_pos)
             int length1= (i*i+j*j+k*k);
             if(length1<9*cave_radius*cave_radius)
             {
-                to_terrain->setBlockAt(final_pos[0]+ i,final_pos[1]+k,final_pos[2]+ j,EMPTY);
-
+                is_cave[std::make_tuple(final_pos[0]+ i,final_pos[1]+k,final_pos[2]+ j)] = true;
+                if(k<-1*cave_radius)
                 {
-                    to_terrain->setBlockAt(final_pos[0]+ i,final_pos[1]+k-2,final_pos[2]+ j,LAVA) ;
+                    is_lavapool[std::make_tuple(final_pos[0]+ i,final_pos[1]+k-2,final_pos[2]+ j)] = true;
                 }
             }
 
@@ -129,7 +127,7 @@ void Cave::generate_cave()
                 int length1= (i*i+j*j+k*k);
                 if(length1<cave_radius*cave_radius)
                 {
-                    to_terrain->setBlockAt(current_pos[0]+ i,current_pos[1]+k,current_pos[2]+ j,EMPTY);
+                    is_cave[std::make_tuple(current_pos[0]+ i,current_pos[1]+k,current_pos[2]+ j)] = true;
                 }
 //                is_cave[std::make_tuple(current_pos[0]+ i,current_pos[1]+k,current_pos[2]+ j)] = true;
                 }
@@ -143,8 +141,7 @@ void Cave::generate_cave()
             {
                 for(int j = -1; j<=2;j++)
                 {
-                    to_terrain->setBlockAt(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j,IRONORE);
-
+                    is_ore_type[std::make_tuple(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j)] = 2  ;
                 }
             }
         }
@@ -154,7 +151,7 @@ void Cave::generate_cave()
             {
                 for(int j = -1; j<=2;j++)
                 {
-                    to_terrain->setBlockAt(temp[0]-cave_radius+i,temp[1],temp[2]+cave_radius+j,COAL);
+                    is_ore_type[std::make_tuple(temp[0]-cave_radius+i,temp[1],temp[2]+cave_radius+j)] = 1;
                 }
             }
         }
@@ -172,8 +169,7 @@ void Cave::generate_cave()
                     int length2 = j*j+k*k+p*p;
                     if(length2<cave_radius*cave_radius)
                     {
-                        to_terrain->setBlockAt(curr_x+j,i+p,curr_z+k,EMPTY);
-
+                        is_cave[std::make_tuple(curr_x+j,i+p,curr_z+k)]=true;
                     }
 //                    is_cave[std::make_tuple(curr_x+j,i+p,curr_z+k)]=true;
                     }

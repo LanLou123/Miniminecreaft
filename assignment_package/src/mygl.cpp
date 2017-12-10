@@ -67,8 +67,7 @@ MyGL::MyGL(QWidget *parent)
     flag_jumping = 0;
 
     player1.SetMainCamera(mp_camera);
-    player1.get_terrain(mp_terrain);
-
+    player1.get_terrain(mp_terrain);\
     QThreadPool::globalInstance()->setMaxThreadCount(8);
     QThreadPool::globalInstance()->setExpiryTimeout(20);
 }
@@ -276,7 +275,7 @@ void MyGL::timerUpdate()
     update();
     moving();
     // FOR SHADOW MAPPING
-    std::cout<<"timer update"<<std::endl;
+
     int threads = QThreadPool::globalInstance()->activeThreadCount();
     if(threads == 0)
     {
@@ -299,7 +298,7 @@ void MyGL::timerUpdate()
 
     // For shadow mapping
 
-    std::cout<<mp_camera->eye[0] <<" " << mp_camera->eye[1] << " " << mp_camera->eye[2]<<std::endl;
+
 }
 
 // This function is called whenever update() is called.
@@ -393,7 +392,7 @@ void MyGL::paintGL()
     mp_progLambert->setLookVector(mp_camera->eye);
 
 
-    GLDrawScene();
+  // GLDrawScene();
 
 
     ++m_time;
@@ -449,9 +448,7 @@ void MyGL::keyPressEvent(QKeyEvent *e)
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
-
         speed = 20.0/60.0;//the default speed for running
-
     }
     // http://doc.qt.io/qt-5/qt.html#Key-enum
     // This could all be much more efficient if a switch
@@ -1296,7 +1293,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         NormalizeXZ(x + BOUNDDIS, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(zplus)
     {
@@ -1305,7 +1301,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         NormalizeXZ(x, z + BOUNDDIS, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(xpzp)
     {
@@ -1314,7 +1309,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         int normalZ = 0;
         NormalizeXZ(x + DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(xpzm)
     {
@@ -1323,7 +1317,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         int normalZ = 0;
         NormalizeXZ(x + DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
         startThreads(normalX, normalZ);
-        return;
     }
     // Minus situation
     else if(xminus)
@@ -1333,7 +1326,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         NormalizeXZ(x - BOUNDDIS, z, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(zminus)
     {
@@ -1342,7 +1334,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         NormalizeXZ(x, z - BOUNDDIS, normalX, normalZ);
         //mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(xmzp)
     {
@@ -1351,7 +1342,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         int normalZ = 0;
         NormalizeXZ(x - DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
         startThreads(normalX, normalZ);
-        return;
     }
     else if(xmzm)
     {
@@ -1360,7 +1350,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
         int normalZ = 0;
         NormalizeXZ(x - DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
         startThreads(normalX, normalZ);
-        return;
     }
 
 //    else if(xMinusDirChunk == nullptr && zMinusDirChunk == nullptr)
@@ -1376,7 +1365,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
 //        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 //    }
     //update();
-    mp_terrain->cave1->generate_cave();
 
 
 }

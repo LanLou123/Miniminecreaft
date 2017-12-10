@@ -14,7 +14,7 @@
 #include <texture.h>
 #include <scene/screencenter.h>
 #include <scene/quad.h>
-
+#include "scene/cave.h"
 #include <QMutex>
 #include <shadowmapfbo.h>
 
