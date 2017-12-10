@@ -299,7 +299,6 @@ void MyGL::timerUpdate()
 
     // For shadow mapping
 
-    std::cout<<mp_camera->eye[0] <<" " << mp_camera->eye[1] << " " << mp_camera->eye[2]<<std::endl;
 }
 
 // This function is called whenever update() is called.
@@ -393,9 +392,6 @@ void MyGL::paintGL()
     mp_progLambert->setLookVector(mp_camera->eye);
 
 
-    GLDrawScene();
-
-
     ++m_time;
     glDisable(GL_DEPTH_TEST);
     mp_progFlat->setModelMatrix(glm::mat4(1.0));
@@ -416,26 +412,27 @@ void MyGL::paintGL()
 
     glEnable(GL_DEPTH_TEST);
 }
-void MyGL::GLDrawScene()
-{
-    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
-    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
-    {
-        Chunk* ptr = pair.second;
-        if (true)
-        {
-            mp_progLambert->draw(*ptr);
-        }
-    }
-    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
-    {
-        Chunk* ptr = pair.second;
-        if (true)
-        {
-            mp_progLambert->drawF(*ptr);
-        }
-    }
-}
+//void MyGL::GLDrawScene()
+//{
+//    mp_progLambert->setModelMatrix(glm::mat4(1.0f));
+//    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+//    {
+//        Chunk* ptr = pair.second;
+//        if (true)
+//        {
+//      Mark for delete
+//            mp_progLambert->draw(*ptr);
+//        }
+//    }
+//    for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
+//    {
+//        Chunk* ptr = pair.second;
+//        if (true)
+//        {
+//            mp_progLambert->drawF(*ptr);
+//        }
+//    }
+//}
 
 //press W, A, S, D to move in four traditional horizontal directions, in the meantime
 //, you will be able to run by holding shift, press 1, 2 to change fov,
