@@ -59,6 +59,8 @@ protected:
 
 
 public:
+    bool isCreated;
+
     Drawable(OpenGLContext* context);
     virtual ~Drawable();
 

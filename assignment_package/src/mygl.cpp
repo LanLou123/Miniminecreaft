@@ -341,25 +341,23 @@ void MyGL::paintGL()
     mp_progShadowPass->setModelMatrix(glm::mat4(1.0f));
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progShadowPass->draw(*pair.second);
+        if (pair.second->isCreated)
+        {
+            mp_progShadowPass->draw(*pair.second);
+        }
     }
 
 //*************second render pass****************************
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBOid);
 
-     glViewport(0,0,width(),height() );
-////    glDisable(GL_POLYGON_OFFSET_FILL);
+    glViewport(0,0,width(),height() );
 
     m_shadowMapFBO->BindForReading(GL_TEXTURE0 + 6);
 //    mp_progShadowRender->SetShadowMapTextureUnit(6);
     mp_progLambert->SetShadowMapTextureUnit(6);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-////    glEnable(GL_CULL_FACE);
-////    glCullFace(GL_BACK);
-
-
 
     mp_progLambert->SetShadowMat(lightDirView);
     //mp_progShadowRender->SetShadowMat(lightDirPespec);
@@ -369,11 +367,17 @@ void MyGL::paintGL()
     mp_progLambert->setModelMatrix(glm::mat4(1.0f));
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progLambert->draw(*pair.second);
+        if (pair.second->isCreated)
+        {
+            mp_progLambert->draw(*pair.second);
+        }
     }
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progLambert->drawF(*pair.second);
+        if (pair.second->isCreated)
+        {
+            mp_progLambert->drawF(*pair.second);
+        }
     }
 
 
@@ -1247,6 +1251,55 @@ void MyGL::startThreads(int normalX, int normalZ)
     terrainGenerator6 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
     terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
     terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
+
+    Chunk* tempPtr = nullptr;
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
 
     terrainGenerator1->setLeftBottom(normalX, normalZ);
     terrainGenerator2->setLeftBottom(normalX + 16, normalZ);
