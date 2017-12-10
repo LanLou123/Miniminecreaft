@@ -101,7 +101,7 @@ void Cave::createLavaPool(glm::vec3 final_pos)
             if(length1<9*cave_radius*cave_radius)
             {
                 to_terrain->setBlockAt(final_pos[0]+ i,final_pos[1]+k,final_pos[2]+ j,EMPTY);
-
+                if(k<-1*cave_radius)
                 {
                     to_terrain->setBlockAt(final_pos[0]+ i,final_pos[1]+k-2,final_pos[2]+ j,LAVA) ;
                 }
@@ -143,7 +143,10 @@ void Cave::generate_cave()
             {
                 for(int j = -1; j<=2;j++)
                 {
-                    to_terrain->setBlockAt(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j,IRONORE);
+                        if(to_terrain->getBlockAt(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j)!=EMPTY)
+                        {
+                                  to_terrain->setBlockAt(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j,IRONORE);
+                        }
 
                 }
             }
@@ -154,7 +157,10 @@ void Cave::generate_cave()
             {
                 for(int j = -1; j<=2;j++)
                 {
-                    to_terrain->setBlockAt(temp[0]-cave_radius+i,temp[1],temp[2]+cave_radius+j,COAL);
+                        if(to_terrain->getBlockAt(temp[0]+cave_radius+i,temp[1],temp[2]-cave_radius+j)!=EMPTY)
+                        {
+                                   to_terrain->setBlockAt(temp[0]-cave_radius+i,temp[1],temp[2]+cave_radius+j,COAL);
+                        }
                 }
             }
         }
