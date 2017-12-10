@@ -56,12 +56,12 @@ public:
 
     void CreateTestScene();
     glm::ivec3 dimensions;
-    std::vector<Cave> cav_lst;
+    std::vector<Cave*> cav_lst;
     River river1;
     River river2;
-    Cave cave1;
-    Cave cave2;
-    Cave cave3;
+    Cave* cave1;
+    Cave* cave2;
+    Cave* cave3;
 
     std::map<std::tuple<int,int>,int> RiversideHeight;
 
@@ -95,11 +95,7 @@ public:
     void Calculate_corner_Riverside(int x, int y, int z);
     void create_riverside();
 //**********************end
-    void UpdateFirstCave();
-    void UpdateCave(int origin_x, int origin_z, Chunk *locatedChunk);
-    std::map<std::tuple<int,int,int>,bool> OverallIsCave;
-    std::map<std::tuple<int,int,int>,int> OverallIsOreType;
-    std::map<std::tuple<int,int,int>,bool> OverallIsLavaPool;
+    void updateCave();
     ~Terrain();
 
     // friend class TerrainAtBoundary;

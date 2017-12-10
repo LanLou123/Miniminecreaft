@@ -36,7 +36,8 @@ MyGL::MyGL(QWidget *parent)
       drawWater(false), drawLava(false),
       glossPowerMap(new Texture(this)), duplicateMap(new Texture(this)),
       // shadow mapping
-      m_shadowMapFBO(new ShadowMapFBO(this))
+      m_shadowMapFBO(new ShadowMapFBO(this)),
+      isCompleted(false)
       // shadow mapping
 {
     // Connect the timer to a function so that when the timer ticks the function is executed
@@ -67,7 +68,8 @@ MyGL::MyGL(QWidget *parent)
     flag_jumping = 0;
 
     player1.SetMainCamera(mp_camera);
-    player1.get_terrain(mp_terrain);\
+    player1.get_terrain(mp_terrain);
+
     QThreadPool::globalInstance()->setMaxThreadCount(8);
     QThreadPool::globalInstance()->setExpiryTimeout(20);
 }
@@ -263,10 +265,9 @@ void MyGL::timerUpdate()
         else
         {
             int index = chunkNum-1;
-            mp_terrain->addChunk2Map((*chunkToAdd)[index]);
+            //mp_terrain->addChunk2Map((*chunkToAdd)[index]);
             ((*chunkToAdd)[index])->create();
             chunkToAdd->pop_back();
-
             chunkMutex->unlock();
         }
     }
@@ -275,7 +276,8 @@ void MyGL::timerUpdate()
     update();
     moving();
     // FOR SHADOW MAPPING
-
+    //std::cout<<"timer update"<<std::endl;
+    bool lastCompletedStatus = this->isCompleted;
     int threads = QThreadPool::globalInstance()->activeThreadCount();
     if(threads == 0)
     {
@@ -291,13 +293,21 @@ void MyGL::timerUpdate()
         checkBoundBool(xminus, xplus, zminus, zplus, xpzp, xpzm, xmzp, xmzm);
         if(xminus || xplus|| zminus|| zplus || xpzp || xpzm || xmzp ||  xmzm)
         {
+            this->isCompleted = false;
             ExtendBoundary(xminus, xplus, zminus, zplus, xpzp, xpzm, xmzp, xmzm);
         }
+        else
+        {
+            this->isCompleted = true;
+        }
+    }
+    if (lastCompletedStatus == false && this->isCompleted == true)
+    {
+        this->mp_terrain->updateCave();
     }
     player1.Fall();
 
     // For shadow mapping
-
 
 }
 
@@ -314,7 +324,7 @@ void MyGL::paintGL()
 
 
 
-    float phase = m_time * 0.001f;
+    float phase = m_time * 0.003f;
 //    glm::vec3 lightOrigin = glm::vec3(25.f,150.f,30.f);
     glm::vec3 lightRef = mp_camera->eye - glm::vec3(0.f, 2.f, 0.f);
     glm::vec3 lightDir = glm::vec3(0.2f, sin(phase), cos(phase));
@@ -341,25 +351,23 @@ void MyGL::paintGL()
     mp_progShadowPass->setModelMatrix(glm::mat4(1.0f));
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progShadowPass->draw(*pair.second);
+        if (pair.second->isCreated)
+        {
+            mp_progShadowPass->draw(*pair.second);
+        }
     }
 
 //*************second render pass****************************
 
     glBindFramebuffer(GL_FRAMEBUFFER, defaultFBOid);
 
-     glViewport(0,0,width(),height() );
-////    glDisable(GL_POLYGON_OFFSET_FILL);
+    glViewport(0,0,width(),height() );
 
     m_shadowMapFBO->BindForReading(GL_TEXTURE0 + 6);
 //    mp_progShadowRender->SetShadowMapTextureUnit(6);
     mp_progLambert->SetShadowMapTextureUnit(6);
 
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-////    glEnable(GL_CULL_FACE);
-////    glCullFace(GL_BACK);
-
-
 
     mp_progLambert->SetShadowMat(lightDirView);
     //mp_progShadowRender->SetShadowMat(lightDirPespec);
@@ -369,11 +377,17 @@ void MyGL::paintGL()
     mp_progLambert->setModelMatrix(glm::mat4(1.0f));
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progLambert->draw(*pair.second);
+        if (pair.second->isCreated)
+        {
+            mp_progLambert->draw(*pair.second);
+        }
     }
     for (std::pair<int64_t, Chunk*> pair : this->mp_terrain->ChunkTable)
     {
-        mp_progLambert->drawF(*pair.second);
+        if (pair.second->isCreated)
+        {
+            mp_progLambert->drawF(*pair.second);
+        }
     }
 
 
@@ -441,10 +455,14 @@ void MyGL::paintGL()
 //and E(down)--lan lou player part in milestone 1
 void MyGL::keyPressEvent(QKeyEvent *e)
 {
+
+    //std::cout<<"press key"<<std::endl;
     float amount = 2.0f;
     if(e->modifiers() & Qt::ShiftModifier){
         amount = 10.0f;
+
         speed = 20.0/60.0;//the default speed for running
+
     }
     // http://doc.qt.io/qt-5/qt.html#Key-enum
     // This could all be much more efficient if a switch
@@ -1244,6 +1262,55 @@ void MyGL::startThreads(int normalX, int normalZ)
     terrainGenerator7 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
     terrainGenerator8 = new TerrainAtBoundary(0, 0,chunkMutex,checkingMutex, chunkToAdd, mp_terrain, this);
 
+    Chunk* tempPtr = nullptr;
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 16);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 16, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 32, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 32);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
+    tempPtr = this->mp_terrain->newChunkAt(this, normalX + 48, normalZ + 48);
+    this->mp_terrain->addChunk2Map(tempPtr);
+
     terrainGenerator1->setLeftBottom(normalX, normalZ);
     terrainGenerator2->setLeftBottom(normalX + 16, normalZ);
     terrainGenerator3->setLeftBottom(normalX + 32, normalZ);
@@ -1300,7 +1367,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
     }
     else if(xpzp)
     {
-        std::cout<<"xpzp++"<<std::endl;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
@@ -1308,7 +1374,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
     }
     else if(xpzm)
     {
-        std::cout<<"xpzm++"<<std::endl;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x + DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
@@ -1333,7 +1398,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
     }
     else if(xmzp)
     {
-        std::cout<<"xmzp++"<<std::endl;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - DOUBLEDIS, z + DOUBLEDIS, normalX, normalZ);
@@ -1341,7 +1405,6 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
     }
     else if(xmzm)
     {
-        std::cout<<"xmzm++"<<std::endl;
         int normalX = 0;
         int normalZ = 0;
         NormalizeXZ(x - DOUBLEDIS, z - DOUBLEDIS, normalX, normalZ);
@@ -1361,8 +1424,7 @@ void MyGL::ExtendBoundary(bool xminus, bool xplus, bool zminus, bool zplus,
 //        mp_terrain->GenerateTerrainAt(normalX, normalZ, this);
 //    }
     //update();
-
-
+    mp_terrain->updateCave();
 }
 
 void MyGL::keyReleaseEvent(QKeyEvent *e)

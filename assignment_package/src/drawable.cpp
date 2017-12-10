@@ -5,7 +5,7 @@ Drawable::Drawable(OpenGLContext* context)
     : bufIdx(), bufPos(), bufNor(), bufCol(), bufUV(), bufFlowVelocity(),
       idxBound(false), posBound(false), norBound(false), colBound(false),
       tangentBound(false), bitangentBound(false), blockTypeBound(false),
-      context(context)
+      context(context), isCreated(false)
 {}
 
 Drawable::~Drawable()
@@ -23,6 +23,8 @@ void Drawable::destroy()
     context->glDeleteBuffers(1, &bufTangent);
     context->glDeleteBuffers(1, &bufBiTangent);
     context->glDeleteBuffers(1, &bufBlockType);
+
+    this->isCreated = false;
 }
 
 GLenum Drawable::drawMode()

@@ -732,4 +732,6 @@ void Chunk::create()
     context->glBindBuffer(GL_ARRAY_BUFFER, bufBlockTypeF);
     context->glBufferData(GL_ARRAY_BUFFER, sizeof(GLint) * buftypeF.size(),
                             reinterpret_cast<void*>(buftypeF.data()), GL_STATIC_DRAW);
+
+    this->isCreated = true;
 }
