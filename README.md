@@ -1,5 +1,5 @@
 # Miniminecreaft
 
-river:![](https://github.com/LanLou123/Miniminecreaft/raw/master/ezgif.com-video-to-gif (2).gif)
+river:![](https://github.com/LanLou123/Miniminecreaft/raw/master/river.gif)
 
-cave:![](https://github.com/LanLou123/Miniminecreaft/raw/master/ezgif.com-video-to-gif (3).gif)
+cave:![](https://github.com/LanLou123/Miniminecreaft/raw/master/cave.gif)
