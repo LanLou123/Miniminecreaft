@@ -37,12 +37,17 @@ therefore you can treat this as a mutation of common DFS method
 - Carving out the river: by now, we just finished the basic lines of river, so how to generate the realistic scene above? what I did is doing a samping around the river boundary block after a bresham rasterization operation, and to be more specific, this is a quadratic sampling, the height of the river bank is the result of doing a square of the calculated distance.
 
 ## Cave
-Everything is simmilar to generation of the river, except that the cave is much simpler with less operations to consider. Basically, we use the perlin noise algorithm to calculate the heading of the turtle accoring to the former position of the turtle, and doing sampling as a disc around the heading direction. 
 
 ![](https://github.com/LanLou123/Miniminecreaft/raw/master/cave.gif)
 
+Everything is simmilar to generation of the river, except that the cave is much simpler with less operations to consider. Basically, we use the perlin noise algorithm to calculate the heading of the turtle accoring to the former position of the turtle, and doing sampling as a disc around the heading direction. 
+
+
 
 ## Thread mutex for gradual map generation
+
+![](https://github.com/LanLou123/Miniminecreaft/raw/master/threadmutex.gif)
+
 In the early version of our game, one major problem is the generation of the map, before we actually get to the problem, let's first take a look at the data structure of the game:
 
 ```
@@ -68,7 +73,7 @@ each chunk is consist of 64X64X256 blocks, where 64 is the width and length of t
 - use mutex to lock one thread while it's running, unlock it when finished.
 using this method, we can ensure that the entire update process are not recquired done in one frame, (which by define is 1/60s), instead, they are speperated, and this would cerntainly make map loading smoother.
 
-![](https://github.com/LanLou123/Miniminecreaft/raw/master/threadmutex.gif)
+
 
 
 ## collision and player physics
